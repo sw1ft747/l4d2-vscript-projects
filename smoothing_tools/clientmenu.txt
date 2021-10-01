@@ -1,0 +1,1071 @@
+"ClientMenu"
+{
+	"menu"
+	{
+		"Title"		"Smoothing Tools"
+
+		"1"
+		{
+			"command"	"play buttons/button14; show_menu edit"
+			"label"		" Edit keys" 
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; show_menu select"
+			"label"		" Select keys"
+		}
+		"3"
+		{
+			"command"	"play buttons/button14; show_menu process"
+			"label"		" Process"
+		}
+	    "4"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_play; show_menu menu"
+			"label"		" Play smooth"
+		}
+        "5"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_stop; show_menu menu"
+			"label"		" Stop smooth"
+		}
+        "6"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_preview; show_menu menu"
+			"label"		" Draw preview"
+		}
+        "7"
+		{
+			"command"	"play buttons/button14; show_menu options"
+			"label"		" Options"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}	
+	
+	"edit"
+	{
+		"Title"		"Edit keys"
+
+		"1"
+		{
+			"command"	"play buttons/button14; show_menu add_key"
+			"label"		" Add to end"
+		}
+        "2"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_remove; show_menu edit"
+			"label"		" Remove from end"
+		}
+        "3"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_remove_all; show_menu edit"
+			"label"		" Remove all"
+		}
+        "4"
+		{
+			"command"	"play buttons/button14; show_menu selected"
+			"label"		" Manage selected"
+		}
+        "8"
+		{
+			"command"	"play buttons/button14; show_menu menu"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"add_key"
+	{
+		"Title"			"Add to end"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add,5; show_menu add_key"
+			"label"		" 5 ticks"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add,10; show_menu add_key"
+			"label"		" 10 ticks"
+		}
+		"3"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add,25; show_menu add_key"
+			"label"		" 25 ticks"
+		}
+		"4"		
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add,50; show_menu add_key"
+			"label"		" 50 ticks"
+		}
+	    "5"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add,75; show_menu add_key"
+			"label"		" 75 ticks"
+		}
+		"6"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add,100; show_menu add_key"
+			"label"		" 100 ticks"
+		}
+		"7"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add,150; show_menu add_key"
+			"label"		" 150 ticks"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu edit"
+			"label"		" << Back"
+		}
+		"9"
+		{
+			"command"	"play buttons/button14; show_menu add_key2"
+			"label"		" >> Next"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"add_key2"
+	{
+		"Title"			"Add to end #2"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add,200; show_menu add_key2"
+			"label"		" 200 ticks"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add,250; show_menu add_key2"
+			"label"		" 250 ticks"
+		}
+		"3"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add,300; show_menu add_key2"
+			"label"		" 300 ticks"
+		}
+		"4"		
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add,400; show_menu add_key2"
+			"label"		" 400 ticks"
+		}
+	    "5"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add,500; show_menu add_key2"
+			"label"		" 500 ticks"
+		}
+		"6"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add,750; show_menu add_key2"
+			"label"		" 750 ticks"
+		}
+		"7"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add,1000; show_menu add_key2"
+			"label"		" 1000 ticks"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu add_key"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"add_before"
+	{
+		"Title"			"Add key before"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_before,5; show_menu add_before"
+			"label"		" 5 ticks"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_before,10; show_menu add_before"
+			"label"		" 10 ticks"
+		}
+		"3"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_before,25; show_menu add_before"
+			"label"		" 25 ticks"
+		}
+		"4"		
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_before,50; show_menu add_before"
+			"label"		" 50 ticks"
+		}
+	    "5"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_before,75; show_menu add_before"
+			"label"		" 75 ticks"
+		}
+		"6"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_before,100; show_menu add_before"
+			"label"		" 100 ticks"
+		}
+		"7"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_before,150; show_menu add_before"
+			"label"		" 150 ticks"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu selected"
+			"label"		" << Back"
+		}
+		"9"
+		{
+			"command"	"play buttons/button14; show_menu add_before2"
+			"label"		" >> Next"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"add_before2"
+	{
+		"Title"			"Add key before #2"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_before,200; show_menu add_before2"
+			"label"		" 200 ticks"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_before,250; show_menu add_before2"
+			"label"		" 250 ticks"
+		}
+		"3"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_before,300; show_menu add_before2"
+			"label"		" 300 ticks"
+		}
+		"4"		
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_before,400; show_menu add_before2"
+			"label"		" 400 ticks"
+		}
+	    "5"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_before,500; show_menu add_before2"
+			"label"		" 500 ticks"
+		}
+		"6"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_before,750; show_menu add_before2"
+			"label"		" 750 ticks"
+		}
+		"7"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_before,1000; show_menu add_before2"
+			"label"		" 1000 ticks"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu add_before"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"add_after"
+	{
+		"Title"			"Add key after"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_after,5; show_menu add_after"
+			"label"		" 5 ticks"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_after,10; show_menu add_after"
+			"label"		" 10 ticks"
+		}
+		"3"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_after,25; show_menu add_after"
+			"label"		" 25 ticks"
+		}
+		"4"		
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_after,50; show_menu add_after"
+			"label"		" 50 ticks"
+		}
+	    "5"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_after,75; show_menu add_after"
+			"label"		" 75 ticks"
+		}
+		"6"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_after,100; show_menu add_after"
+			"label"		" 100 ticks"
+		}
+		"7"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_after,150; show_menu add_after"
+			"label"		" 150 ticks"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu selected"
+			"label"		" << Back"
+		}
+		"9"
+		{
+			"command"	"play buttons/button14; show_menu add_after2"
+			"label"		" >> Next"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"add_after2"
+	{
+		"Title"			"Add key after #2"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_after,200; show_menu add_after2"
+			"label"		" 200 ticks"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_after,250; show_menu add_after2"
+			"label"		" 250 ticks"
+		}
+		"3"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_after,300; show_menu add_after2"
+			"label"		" 300 ticks"
+		}
+		"4"		
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_after,400; show_menu add_after2"
+			"label"		" 400 ticks"
+		}
+	    "5"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_after,500; show_menu add_after2"
+			"label"		" 500 ticks"
+		}
+		"6"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_after,750; show_menu add_after2"
+			"label"		" 750 ticks"
+		}
+		"7"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_after,1000; show_menu add_after2"
+			"label"		" 1000 ticks"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu add_before"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"add_tick"
+	{
+		"Title"			"Add ticks"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_tick,1; show_menu add_tick"
+			"label"		" 1 tick"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_tick,5; show_menu add_tick"
+			"label"		" 5 ticks"
+		}
+		"3"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_tick,10; show_menu add_tick"
+			"label"		" 10 ticks"
+		}
+		"4"		
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_tick,25; show_menu add_tick"
+			"label"		" 25 ticks"
+		}
+	    "5"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_tick,50; show_menu add_tick"
+			"label"		" 50 ticks"
+		}
+		"6"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_tick,75; show_menu add_tick"
+			"label"		" 75 ticks"
+		}
+		"7"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_tick,100; show_menu add_tick"
+			"label"		" 100 ticks"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu selected"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"sub_tick"
+	{
+		"Title"			"Subtract ticks"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_tick,-1; show_menu sub_tick"
+			"label"		" 1 tick"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_tick,-5; show_menu sub_tick"
+			"label"		" 5 ticks"
+		}
+		"3"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_tick,-10; show_menu sub_tick"
+			"label"		" 10 ticks"
+		}
+		"4"		
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_tick,-25; show_menu sub_tick"
+			"label"		" 25 ticks"
+		}
+	    "5"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_tick,-50; show_menu sub_tick"
+			"label"		" 50 ticks"
+		}
+		"6"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_tick,-75; show_menu sub_tick"
+			"label"		" 75 ticks"
+		}
+		"7"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_add_tick,-100; show_menu sub_tick"
+			"label"		" 100 ticks"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu selected"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"interp_type"
+	{
+		"Title"			"Interpolation type"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_set_interp,-1; show_menu interp_type"
+			"label"		" None"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_set_interp,0; show_menu interp_type"
+			"label"		" Linear"
+		}
+		"3"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_set_interp,1; show_menu interp_type"
+			"label"		" Catmull-Rom Spline (default)"
+		}
+		"4"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_set_interp,2; show_menu interp_type"
+			"label"		" Kochanek-Bartels Spline"
+		}
+		"5"		
+		{
+			"command"	"play buttons/button14; scripted_user_func s_set_interp,3; show_menu interp_type"
+			"label"		" Kochanek-Bartels Spl. Normalize"
+		}
+	    "6"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_set_interp,4; show_menu interp_type"
+			"label"		" Hermite Spline"
+		}
+		"7"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_set_interp,5; show_menu interp_type"
+			"label"		" Cubic Spline"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu selected"
+			"label"		" << Back"
+		}
+		"9"
+		{
+			"command"	"play buttons/button14; show_menu interp_type2"
+			"label"		" >> Next"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"interp_type2"
+	{
+		"Title"			"Interpolation type #2"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_set_interp,6; show_menu interp_type2"
+			"label"		" Cubic Spline Normalize"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_set_interp,7; show_menu interp_type2"
+			"label"		" BSpline"
+		}
+		"3"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_set_interp,8; show_menu interp_type2"
+			"label"		" Parabolic Spline"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu interp_type"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"kb_tension"
+	{
+		"Title"			"Kochanek-Bartels tension"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_kb_params,-1,n,n; show_menu kb_tension"
+			"label"		" Tension: -1.0"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_kb_params,-0.77,n,n; show_menu kb_tension"
+			"label"		" Tension: -0.77"
+		}
+		"3"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_kb_params,-0.5,n,n; show_menu kb_tension"
+			"label"		" Tension: -0.5"
+		}
+		"4"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_kb_params,0,n,n; show_menu kb_tension"
+			"label"		" Tension: 0.0"
+		}
+		"5"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_kb_params,0.5,n,n; show_menu kb_tension"
+			"label"		" Tension: 0.5"
+		}
+		"6"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_kb_params,0.77,n,n; show_menu kb_tension"
+			"label"		" Tension: 0.77"
+		}
+		"7"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_kb_params,-1,n,n; show_menu kb_tension"
+			"label"		" Tension: 1.0"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu kb_params"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"kb_bias"
+	{
+		"Title"			"Kochanek-Bartels bias"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_kb_params,n,-1,n; show_menu kb_bias"
+			"label"		" Bias: -1.0"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_kb_params,n,-0.77,n; show_menu kb_bias"
+			"label"		" Bias: -0.77"
+		}
+		"3"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_kb_params,n,-0.5,n; show_menu kb_bias"
+			"label"		" Bias: -0.5"
+		}
+		"4"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_kb_params,n,0,n; show_menu kb_bias"
+			"label"		" Bias: 0.0"
+		}
+		"5"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_kb_params,n,0.5,n; show_menu kb_bias"
+			"label"		" Bias: 0.5"
+		}
+		"6"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_kb_params,n,0.77,n; show_menu kb_bias"
+			"label"		" Bias: 0.77"
+		}
+		"7"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_kb_params,n,-1,n; show_menu kb_bias"
+			"label"		" Bias: 1.0"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu kb_params"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"kb_continuity"
+	{
+		"Title"			"Kochanek-Bartels continuity"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_kb_params,n,n,-1; show_menu kb_continuity"
+			"label"		" Continuity: -1.0"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_kb_params,n,n,-0.77; show_menu kb_continuity"
+			"label"		" Continuity: -0.77"
+		}
+		"3"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_kb_params,n,n,-0.5; show_menu kb_continuity"
+			"label"		" Continuity: -0.5"
+		}
+		"4"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_kb_params,n,n,0; show_menu kb_continuity"
+			"label"		" Continuity: 0.0"
+		}
+		"5"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_kb_params,n,n,0.5; show_menu kb_continuity"
+			"label"		" Continuity: 0.5"
+		}
+		"6"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_kb_params,n,n,0.77; show_menu kb_continuity"
+			"label"		" Continuity: 0.77"
+		}
+		"7"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_kb_params,n,n,-1; show_menu kb_continuity"
+			"label"		" Continuity: 1.0"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu kb_params"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"kb_params"
+	{
+		"Title"			"Kochanek-Bartels params"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; show_menu kb_tension"
+			"label"		" Tension"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; show_menu kb_bias"
+			"label"		" Bias"
+		}
+		"3"
+		{
+			"command"	"play buttons/button14; show_menu kb_continuity"
+			"label"		" Continuity"
+		}
+		"4"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_kb_params,0,0,0; show_menu kb_params"
+			"label"		" Reset to zero"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu selected2"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"selected"
+	{
+		"Title"			"Manage selected"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; show_menu add_before"
+			"label"		" Add key before"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; show_menu add_after"
+			"label"		" Add key after"
+		}
+		"3"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_replace; show_menu selected"
+			"label"		" Replace"
+		}
+		"4"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_sremove; show_menu selected"
+			"label"		" Remove"
+		}
+		"5"		
+		{
+			"command"	"play buttons/button14; show_menu add_tick"
+			"label"		" Add ticks"
+		}
+	    "6"
+		{
+			"command"	"play buttons/button14; show_menu sub_tick"
+			"label"		" Subtract ticks"
+		}
+		"7"
+		{
+			"command"	"play buttons/button14; show_menu interp_type"
+			"label"		" Interpolation type"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu edit"
+			"label"		" << Back"
+		}
+		"9"
+		{
+			"command"	"play buttons/button14; show_menu selected2"
+			"label"		" >> Next"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"selected2"
+	{
+		"Title"			"Manage selected #2"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_tick; show_menu selected2"
+			"label"		" Get tick"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_static; show_menu selected2"
+			"label"		" Make static"
+		}
+		"3"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_nonstatic; show_menu selected2"
+			"label"		" Make non-static"
+		}
+		"4"
+		{
+			"command"	"play buttons/button14; show_menu kb_params"
+			"label"		" Kochanek-Bartels params"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu selected"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"select"
+	{
+		"Title"			"Select keys"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_prev; show_menu select"
+			"label"		" Select previous"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_next; show_menu select"
+			"label"		" Select next"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu menu"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"process"
+	{
+		"Title"			"Process keys"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; show_menu process_origin"
+			"label"		" Origin"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; show_menu process_angles"
+			"label"		" Angles"
+		}
+		"3"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_process_origin,1; scripted_user_func s_process_angles,1; show_menu process"
+			"label"		" Spline both"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu menu"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"process_origin"
+	{
+		"Title"			"Process origin"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_process_origin,0; show_menu process_origin"
+			"label"		" Linear"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_process_origin,1; show_menu process_origin"
+			"label"		" Catmull-Rom Spline (default)"
+		}
+		"3"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_process_origin,2; show_menu process_origin"
+			"label"		" Kochanek-Bartels Spline"
+		}
+		"4"		
+		{
+			"command"	"play buttons/button14; scripted_user_func s_process_origin,3; show_menu process_origin"
+			"label"		" Kochanek-Bartels Spl. Normalize"
+		}
+	    "5"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_process_origin,4; show_menu process_origin"
+			"label"		" Hermite Spline"
+		}
+		"6"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_process_origin,5; show_menu process_origin"
+			"label"		" Cubic Spline"
+		}
+		"7"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_process_origin,6; show_menu process_origin"
+			"label"		" Cubic Spline Normalize"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu process"
+			"label"		" << Back"
+		}
+		"9"
+		{
+			"command"	"play buttons/button14; show_menu process_origin2"
+			"label"		" >> Next"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"process_origin2"
+	{
+		"Title"			"Process origin #2"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_process_origin,7; show_menu process_origin2"
+			"label"		" BSpline"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_process_origin,8; show_menu process_origin2"
+			"label"		" Parabolic Spline"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu process_origin"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"process_angles"
+	{
+		"Title"			"Process angles"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_process_angles,0; show_menu process_angles"
+			"label"		" Linear"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_process_angles,1; show_menu process_angles"
+			"label"		" Spline"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu process"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"options"
+	{
+		"Title"			"Options"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_toggle_preview; show_menu options"
+			"label"		" Toggle preview"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_toggle_process; show_menu options"
+			"label"		" Toggle auto-process"
+		}
+		"3"
+		{
+			"command"	"play buttons/button14; scripted_user_func s_toggle_unialloc; show_menu options"
+			"label"		" Toggle uniform allocation"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu menu"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+}

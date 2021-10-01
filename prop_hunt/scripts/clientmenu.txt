@@ -1,0 +1,923 @@
+"ClientMenu"
+{
+	"menu"
+	{
+		"Title"		"Prop Hunt Menu"
+
+		"1"
+		{
+			"command"	"play buttons/button14; show_menu hns_choose_prop"
+			"label"		" Choose a prop" 
+		}
+		"2"
+		{
+			"command"	"scripted_user_func hns_random; show_menu menu"
+			"label"		" Random prop"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func hns_switch; show_menu menu"
+			"label"		" Choose a prop in order"
+		}
+	    "4"
+		{
+			"command"	"scripted_user_func hns_hint; show_menu menu"
+			"label"		" Give a hint"
+		}
+        "5"
+		{
+			"command"	"scripted_user_func hns_tp; show_menu menu"
+			"label"		" Toggle third-person mode"
+		}
+        "6"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_change"
+			"label"		" Map change vote"
+		}
+        " "
+		{
+			"command"	"play buttons/button14; show_menu menu"
+			"label"		" "
+		}
+        "9"
+		{
+			"command"	"play buttons/button14; show_menu menu2"
+			"label"		" >> Next"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}	
+	
+	"menu2"
+	{
+		"Title"		"Prop Hunt #2"
+
+		"1"
+		{
+			"command"	"scripted_user_func hns_ready; show_menu menu2"
+			"label"		" Ready"
+		}
+        "2"
+		{
+			"command"	"scripted_user_func hns_unready; show_menu menu2"
+			"label"		" Unready"
+		}
+        "3"
+		{
+			"command"	"play buttons/button14; scripted_user_func hns_list; show_menu menu2"
+			"label"		" List of ready players"
+		}
+		"4"
+		{
+			"command"	"scripted_user_func hns_vote,yes; show_menu menu2"
+			"label"		" Vote yes"
+		}
+		"5"
+		{
+			"command"	"scripted_user_func hns_vote,no; show_menu menu2"
+			"label"		" Vote no"
+		}
+        "6"
+		{
+			"command"	"play buttons/button14; scripted_user_func hns_jh; show_menu menu2"
+			"label"		" Join a team of hunters"
+		}
+		"7"
+		{
+			"command"	"play buttons/button14; scripted_user_func hns_jp; show_menu menu2"
+			"label"		" Join a team of props"
+		}
+        "8"
+		{
+			"command"	"play buttons/button14; show_menu menu"
+			"label"		" << Back"
+		}
+        " "
+		{
+			"command"	"play buttons/button14; show_menu menu2"
+			"label"		" "
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"hns_map_change"
+	{
+		"Title"			"List of campaigns"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_c1"
+			"label"		" Dead Center"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_c6"
+			"label"		" The Passing (not supported)"
+		}
+		"3"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_c2"
+			"label"		" Dark Carnival"
+		}	
+		"4"		
+		{
+			"command"	"play buttons/button14; show_menu hns_map_c3"
+			"label"		" Swamp Fever"
+		}
+	    "5"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_c4"
+			"label"		" Hard Rain"
+		}		
+		"6"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_c5"
+			"label"		" The Parish"
+		}
+		"7"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_c8"
+			"label"		" No Mercy (not supported)"
+		}		
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu menu"
+			"label"		" << Back"
+		}
+		"9"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_change2"
+			"label"		" >> Next"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"hns_map_change2"
+	{
+		"Title"			"List of campaigns #2"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_c9"
+			"label"		" Crash Course (not supported)"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_c10"
+			"label"		" Death Toll (not supported)"
+		}
+		"3"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_c11"
+			"label"		" Dead Air (not supported)"
+		}	
+		"4"		
+		{
+			"command"	"play buttons/button14; show_menu hns_map_c12"
+			"label"		" Blood Harvest (not supported)"
+		}
+	    "5"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_c7"
+			"label"		" The Sacrifice (not supported)"
+		}		
+		"6"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_c13"
+			"label"		" Cold Stream (not supported)"
+		}	
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_change"
+			"label"		" << Back"
+		}
+		"9"
+		{
+			"command"	"play buttons/button14; show_menu menu"
+			"label"		" >> HnS Menu"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"hns_map_c1"
+	{
+		"Title"			"Dead Center"
+		
+		"1"
+		{
+			"command"	"scripted_user_func hns_callvote,c1m1"
+			"label"		" Map #1"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func hns_callvote,c1m2"
+			"label"		" Map #2"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func hns_callvote,c1m3"
+			"label"		" Map #3"
+		}	
+		"4"		
+		{
+			"command"	"scripted_user_func hns_callvote,c1m4"
+			"label"		" Map #4 (not supported)"
+		}
+	    "9"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_change"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"hns_map_c6"
+	{
+		"Title"			"The Passing"
+		
+		"1"
+		{
+			"command"	"scripted_user_func hns_callvote,c6m1"
+			"label"		" Map #1 (not supported)"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func hns_callvote,c6m2"
+			"label"		" Map #2 (not supported)"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func hns_callvote,c6m3"
+			"label"		" Map #3 (not supported)"
+		}	
+	    "9"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_change"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"hns_map_c2"
+	{
+		"Title"			"Dark Carnival"
+		
+		"1"
+		{
+			"command"	"scripted_user_func hns_callvote,c2m1"
+			"label"		" Map #1"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func hns_callvote,c2m2"
+			"label"		" Map #2"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func hns_callvote,c2m3"
+			"label"		" Map #3 (not supported)"
+		}	
+		"4"		
+		{
+			"command"	"scripted_user_func hns_callvote,c2m4"
+			"label"		" Map #4"
+		}
+		"5"		
+		{
+			"command"	"scripted_user_func hns_callvote,c2m5"
+			"label"		" Map #5 (not supported)"
+		}
+	    "9"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_change"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"hns_map_c3"
+	{
+		"Title"			"Swamp Fever"
+		
+		"1"
+		{
+			"command"	"scripted_user_func hns_callvote,c3m1"
+			"label"		" Map #1"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func hns_callvote,c3m2"
+			"label"		" Map #2 (not supported)"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func hns_callvote,c3m3"
+			"label"		" Map #3"
+		}	
+		"4"		
+		{
+			"command"	"scripted_user_func hns_callvote,c3m4"
+			"label"		" Map #4"
+		}
+	    "9"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_change"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"hns_map_c4"
+	{
+		"Title"			"Hard Rain"
+		
+		"1"
+		{
+			"command"	"scripted_user_func hns_callvote,c4m1"
+			"label"		" Map #1"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func hns_callvote,c4m2"
+			"label"		" Map #2 (not supported)"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func hns_callvote,c4m3"
+			"label"		" Map #3 (not supported)"
+		}	
+		"4"		
+		{
+			"command"	"scripted_user_func hns_callvote,c4m4"
+			"label"		" Map #4 (not supported)"
+		}
+		"5"		
+		{
+			"command"	"scripted_user_func hns_callvote,c4m5"
+			"label"		" Map #5 (not supported)"
+		}
+	    "9"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_change"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"hns_map_c5"
+	{
+		"Title"			"The Parish"
+		
+		"1"
+		{
+			"command"	"scripted_user_func hns_callvote,c5m1"
+			"label"		" Map #1"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func hns_callvote,c5m2"
+			"label"		" Map #2 (not supported)"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func hns_callvote,c5m3"
+			"label"		" Map #3"
+		}	
+		"4"		
+		{
+			"command"	"scripted_user_func hns_callvote,c5m4"
+			"label"		" Map #4 (not supported)"
+		}
+		"5"		
+		{
+			"command"	"scripted_user_func hns_callvote,c5m5"
+			"label"		" Map #5 (not supported)"
+		}
+	    "9"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_change"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"hns_map_c8"
+	{
+		"Title"			"No Mercy"
+		
+		"1"
+		{
+			"command"	"scripted_user_func hns_callvote,c8m1"
+			"label"		" Map #1 (not supported)"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func hns_callvote,c8m2"
+			"label"		" Map #2 (not supported)"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func hns_callvote,c8m3"
+			"label"		" Map #3 (not supported)"
+		}	
+		"4"		
+		{
+			"command"	"scripted_user_func hns_callvote,c8m4"
+			"label"		" Map #4 (not supported)"
+		}
+		"5"		
+		{
+			"command"	"scripted_user_func hns_callvote,c8m5"
+			"label"		" Map #5 (not supported)"
+		}
+	    "9"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_change"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"hns_map_c9"
+	{
+		"Title"			"Crash Course"
+		
+		"1"
+		{
+			"command"	"scripted_user_func hns_callvote,c9m1"
+			"label"		" Map #1 (not supported)"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func hns_callvote,c9m2"
+			"label"		" Map #2 (not supported)"
+		}
+	    "9"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_change2"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"hns_map_c10"
+	{
+		"Title"			"Death Toll"
+		
+		"1"
+		{
+			"command"	"scripted_user_func hns_callvote,c10m1"
+			"label"		" Map #1 (not supported)"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func hns_callvote,c10m2"
+			"label"		" Map #2 (not supported)"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func hns_callvote,c10m3"
+			"label"		" Map #3 (not supported)"
+		}
+		"4"
+		{
+			"command"	"scripted_user_func hns_callvote,c10m4"
+			"label"		" Map #4 (not supported)"
+		}
+		"5"
+		{
+			"command"	"scripted_user_func hns_callvote,c10m5"
+			"label"		" Map #5 (not supported)"
+		}
+	    "9"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_change2"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"hns_map_c11"
+	{
+		"Title"			"Dead Air"
+		
+		"1"
+		{
+			"command"	"scripted_user_func hns_callvote,c11m1"
+			"label"		" Map #1 (not supported)"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func hns_callvote,c11m2"
+			"label"		" Map #2 (not supported)"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func hns_callvote,c11m3"
+			"label"		" Map #3 (not supported)"
+		}
+		"4"
+		{
+			"command"	"scripted_user_func hns_callvote,c11m4"
+			"label"		" Map #4 (not supported)"
+		}
+		"5"
+		{
+			"command"	"scripted_user_func hns_callvote,c11m5"
+			"label"		" Map #5 (not supported)"
+		}
+	    "9"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_change2"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"hns_map_c12"
+	{
+		"Title"			"Blood Harvest"
+		
+		"1"
+		{
+			"command"	"scripted_user_func hns_callvote,c12m1"
+			"label"		" Map #1 (not supported)"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func hns_callvote,c12m2"
+			"label"		" Map #2 (not supported)"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func hns_callvote,c12m3"
+			"label"		" Map #3 (not supported)"
+		}
+		"4"
+		{
+			"command"	"scripted_user_func hns_callvote,c12m4"
+			"label"		" Map #4 (not supported)"
+		}
+		"5"
+		{
+			"command"	"scripted_user_func hns_callvote,c12m5"
+			"label"		" Map #5 (not supported)"
+		}
+	    "9"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_change2"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"hns_map_c13"
+	{
+		"Title"			"Cold Stream"
+		
+		"1"
+		{
+			"command"	"scripted_user_func hns_callvote,c13m1"
+			"label"		" Map #1 (not supported)"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func hns_callvote,c13m2"
+			"label"		" Map #2 (not supported)"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func hns_callvote,c13m3"
+			"label"		" Map #3 (not supported)"
+		}
+		"4"
+		{
+			"command"	"scripted_user_func hns_callvote,c13m4"
+			"label"		" Map #4 (not supported)"
+		}
+	    "9"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_change2"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"hns_map_c7"
+	{
+		"Title"			"The Sacrifice"
+		
+		"1"
+		{
+			"command"	"scripted_user_func hns_callvote,c7m1"
+			"label"		" Map #1 (not supported)"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func hns_callvote,c7m2"
+			"label"		" Map #2 (not supported)"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func hns_callvote,c7m3"
+			"label"		" Map #3 (not supported)"
+		}
+	    "9"
+		{
+			"command"	"play buttons/button14; show_menu hns_map_change2"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"hns_choose_prop"
+	{
+		"Title"			"List of props"
+		
+		"1"
+		{
+			"command"	"scripted_user_func hns_choose,1; show_menu hns_choose_prop"
+			"label"		" Prop #1"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func hns_choose,2; show_menu hns_choose_prop"
+			"label"		" Prop #2"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func hns_choose,3; show_menu hns_choose_prop"
+			"label"		" Prop #3"
+		}	
+		"4"		
+		{
+			"command"	"scripted_user_func hns_choose,4; show_menu hns_choose_prop"
+			"label"		" Prop #4"
+		}
+	    "5"
+		{
+			"command"	"scripted_user_func hns_choose,5; show_menu hns_choose_prop"
+			"label"		" Prop #5"
+		}		
+		"6"
+		{
+			"command"	"scripted_user_func hns_choose,6; show_menu hns_choose_prop"
+			"label"		" Prop #6"
+		}
+		"7"
+		{
+			"command"	"scripted_user_func hns_choose,7; show_menu hns_choose_prop"
+			"label"		" Prop #7"
+		}		
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu menu"
+			"label"		" << Back"
+		}
+		"9"
+		{
+			"command"	"play buttons/button14; show_menu hns_choose_prop2"
+			"label"		" >> Next"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"hns_choose_prop2"
+	{
+		"Title"			"List of props #2"
+		
+		"1"
+		{
+			"command"	"scripted_user_func hns_choose,8; show_menu hns_choose_prop2"
+			"label"		" Prop #8"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func hns_choose,9; show_menu hns_choose_prop2"
+			"label"		" Prop #9"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func hns_choose,10; show_menu hns_choose_prop2"
+			"label"		" Prop #10"
+		}	
+		"4"		
+		{
+			"command"	"scripted_user_func hns_choose,11; show_menu hns_choose_prop2"
+			"label"		" Prop #11"
+		}
+	    "5"
+		{
+			"command"	"scripted_user_func hns_choose,12; show_menu hns_choose_prop2"
+			"label"		" Prop #12"
+		}		
+		"6"
+		{
+			"command"	"scripted_user_func hns_choose,13; show_menu hns_choose_prop2"
+			"label"		" Prop #13"
+		}
+		"7"
+		{
+			"command"	"scripted_user_func hns_choose,14; show_menu hns_choose_prop2"
+			"label"		" Prop #14"
+		}		
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu hns_choose_prop"
+			"label"		" << Back"
+		}
+		"9"
+		{
+			"command"	"play buttons/button14; show_menu hns_choose_prop3"
+			"label"		" >> Next"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"hns_choose_prop3"
+	{
+		"Title"			"List of props #3"
+		
+		"1"
+		{
+			"command"	"scripted_user_func hns_choose,15; show_menu hns_choose_prop3"
+			"label"		" Prop #15"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func hns_choose,16; show_menu hns_choose_prop3"
+			"label"		" Prop #16"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func hns_choose,17; show_menu hns_choose_prop3"
+			"label"		" Prop #17"
+		}	
+		"4"		
+		{
+			"command"	"scripted_user_func hns_choose,18; show_menu hns_choose_prop3"
+			"label"		" Prop #18"
+		}
+	    "5"
+		{
+			"command"	"scripted_user_func hns_choose,19; show_menu hns_choose_prop3"
+			"label"		" Prop #19"
+		}		
+		"6"
+		{
+			"command"	"scripted_user_func hns_choose,20; show_menu hns_choose_prop3"
+			"label"		" Prop #20"
+		}
+		"7"
+		{
+			"command"	"scripted_user_func hns_choose,21; show_menu hns_choose_prop3"
+			"label"		" Prop #21"
+		}		
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu hns_choose_prop2"
+			"label"		" << Back"
+		}
+		"9"
+		{
+			"command"	"play buttons/button14; show_menu hns_choose_prop4"
+			"label"		" >> Next"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"hns_choose_prop4"
+	{
+		"Title"			"List of props #4"
+		
+		"1"
+		{
+			"command"	"scripted_user_func hns_choose,22; show_menu hns_choose_prop4"
+			"label"		" Prop #22"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func hns_choose,23; show_menu hns_choose_prop4"
+			"label"		" Prop #23"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func hns_choose,24; show_menu hns_choose_prop4"
+			"label"		" Prop #24"
+		}	
+		"4"		
+		{
+			"command"	"scripted_user_func hns_choose,25; show_menu hns_choose_prop4"
+			"label"		" Prop #25"
+		}
+	    "5"
+		{
+			"command"	"scripted_user_func hns_choose,26; show_menu hns_choose_prop4"
+			"label"		" Prop #26"
+		}		
+		"6"
+		{
+			"command"	"scripted_user_func hns_choose,27; show_menu hns_choose_prop4"
+			"label"		" Prop #27"
+		}
+		"7"
+		{
+			"command"	"scripted_user_func hns_choose,28; show_menu hns_choose_prop4"
+			"label"		" Prop #28"
+		}		
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu hns_choose_prop3"
+			"label"		" << Back"
+		}
+		"9"
+		{
+			"command"	"play buttons/button14; show_menu menu"
+			"label"		" >> HnS Menu"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+}

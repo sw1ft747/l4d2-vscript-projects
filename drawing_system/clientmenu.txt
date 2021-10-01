@@ -1,0 +1,610 @@
+"ClientMenu"
+{
+	"menu"
+	{
+		"Title"		"Drawing System Menu"
+
+		"1"
+		{
+			"command"	"scripted_user_func point; show_menu menu"
+			"label"		" Create point" 
+		}
+		"2"
+		{
+			"command"	"scripted_user_func lremove; show_menu menu"
+			"label"		" Remove previous line"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func prst; show_menu menu"
+			"label"		" Reset previous point"
+		}
+	    "4"
+		{
+			"command"	"play buttons/button14; show_menu params"
+			"label"		" Line parameters"
+		}
+        "5"
+		{
+			"command"	"play buttons/button14; show_menu remove"
+			"label"		" Remove manager"
+		}
+        "6"
+		{
+			"command"	"play buttons/button14; show_menu figures"
+			"label"		" Figures"
+		}
+        "7"
+		{
+			"command"	"play buttons/button14; show_menu host"
+			"label"		" Host-Only"
+		}
+	    "8"
+		{
+			"command"	"scripted_user_func autostart; show_menu menu"
+			"label"		" Auto-Line Start"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}	
+	
+	"params"
+	{
+		"Title"		"Line Parameters"
+
+		"1"
+		{
+			"command"	"play buttons/button14; show_menu color"
+			"label"		" Color"
+		}
+        "2"
+		{
+			"command"	"play buttons/button14; show_menu width"
+			"label"		" Width"
+		}
+        "3"
+		{
+			"command"	"play buttons/button14; show_menu scroll"
+			"label"		" Scroll"
+		}
+        "4"
+		{
+			"command"	"play buttons/button14; show_menu amplitude"
+			"label"		" Amplitude"
+		}
+        "8"
+		{
+			"command"	"play buttons/button14; show_menu menu"
+			"label"		" << Back"
+		}
+        " "
+		{
+			"command"	"play buttons/button14; show_menu params"
+			"label"		" "
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"color"
+	{
+		"Title"			"Line Color"
+		
+		"1"
+		{
+			"command"	"scripted_user_func color,white; show_menu color"
+			"label"		" White"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func color,red; show_menu color"
+			"label"		" Red"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func color,orange; show_menu color"
+			"label"		" Orange"
+		}	
+		"4"		
+		{
+			"command"	"scripted_user_func color,green; show_menu color"
+			"label"		" Green"
+		}
+	    "5"
+		{
+			"command"	"scripted_user_func color,azure; show_menu color"
+			"label"		" Azure"
+		}		
+		"6"
+		{
+			"command"	"scripted_user_func color,blue; show_menu color"
+			"label"		" Blue"
+		}
+		"7"
+		{
+			"command"	"scripted_user_func color,purple; show_menu color"
+			"label"		" Purple"
+		}		
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu params"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"width"
+	{
+		"Title"			"Line Width"
+		
+		"1"
+		{
+			"command"	"scripted_user_func width,0; show_menu width"
+			"label"		" Width: 0"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func width,1; show_menu width"
+			"label"		" Width: 1"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func width,2; show_menu width"
+			"label"		" Width: 2"
+		}	
+		"4"		
+		{
+			"command"	"scripted_user_func width,4; show_menu width"
+			"label"		" Width: 4"
+		}
+	    "5"
+		{
+			"command"	"scripted_user_func width,8; show_menu width"
+			"label"		" Width: 8"
+		}		
+		"6"
+		{
+			"command"	"scripted_user_func width,16; show_menu width"
+			"label"		" Width: 16"
+		}
+		"7"
+		{
+			"command"	"scripted_user_func width,32; show_menu width"
+			"label"		" Width: 32"
+		}		
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu params"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"scroll"
+	{
+		"Title"			"Line Scroll"
+		
+		"1"
+		{
+			"command"	"scripted_user_func scroll,0; show_menu scroll"
+			"label"		" Scroll: 0"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func scroll,20; show_menu scroll"
+			"label"		" Scroll: 20"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func scroll,30; show_menu scroll"
+			"label"		" Scroll: 30"
+		}	
+		"4"		
+		{
+			"command"	"scripted_user_func scroll,50; show_menu scroll"
+			"label"		" Scroll: 50"
+		}
+	    "5"
+		{
+			"command"	"scripted_user_func scroll,70; show_menu scroll"
+			"label"		" Scroll: 70"
+		}		
+		"6"
+		{
+			"command"	"scripted_user_func scroll,80; show_menu scroll"
+			"label"		" Scroll: 80"
+		}
+		"7"
+		{
+			"command"	"scripted_user_func scroll,100; show_menu scroll"
+			"label"		" Scroll: 100"
+		}		
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu params"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"amplitude"
+	{
+		"Title"			"Line Amplitude"
+		
+		"1"
+		{
+			"command"	"scripted_user_func amplitude,0; show_menu amplitude"
+			"label"		" Amplitude: 0"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func amplitude,1; show_menu amplitude"
+			"label"		" Amplitude: 1"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func amplitude,2; show_menu amplitude"
+			"label"		" Amplitude: 2"
+		}	
+		"4"		
+		{
+			"command"	"scripted_user_func amplitude,3; show_menu amplitude"
+			"label"		" Amplitude: 3"
+		}
+	    "5"
+		{
+			"command"	"scripted_user_func amplitude,5; show_menu amplitude"
+			"label"		" Amplitude: 5"
+		}		
+		"6"
+		{
+			"command"	"scripted_user_func amplitude,10; show_menu amplitude"
+			"label"		" Amplitude: 10"
+		}
+		"7"
+		{
+			"command"	"scripted_user_func amplitude,15; show_menu amplitude"
+			"label"		" Amplitude: 15"
+		}		
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu params"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"remove"
+	{
+		"Title"			"Remove Manager"
+		
+		"1"
+		{
+			"command"	"scripted_user_func remove; show_menu remove"
+			"label"		" Remove line within 10 units"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; show_menu radius"
+			"label"		" Remove line within radius.."
+		}
+		"3"
+		{
+			"command"	"scripted_user_func clr; show_menu remove"
+			"label"		" Remove all own lines"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu menu"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+	
+	"radius"
+	{
+		"Title"			"Remove Manager #2"
+		
+		"1"
+		{
+			"command"	"scripted_user_func remove,20; show_menu radius"
+			"label"		" Radius: 20"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func remove,30; show_menu radius"
+			"label"		" Radius: 30"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func remove,40; show_menu radius"
+			"label"		" Radius: 40"
+		}
+		"4"
+		{
+			"command"	"scripted_user_func remove,50; show_menu radius"
+			"label"		" Radius: 50"
+		}
+		"5"
+		{
+			"command"	"scripted_user_func remove,100; show_menu radius"
+			"label"		" Radius: 100"
+		}
+		"6"
+		{
+			"command"	"scripted_user_func remove,200; show_menu radius"
+			"label"		" Radius: 200"
+		}
+		"7"
+		{
+			"command"	"scripted_user_func remove,500; show_menu radius"
+			"label"		" Radius: 500"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu remove"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"figures"
+	{
+		"Title"			"Figures"
+		
+		"1"
+		{
+			"command"	"play buttons/button14; show_menu figures_list"
+			"label"		" List"
+		}
+		"2"
+		{
+			"command"	"play buttons/button14; show_menu figures_radius"
+			"label"		" Choose radius"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu menu"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"figures_list"
+	{
+		"Title"			"Figures List"
+		
+		"1"
+		{
+			"command"	"scripted_user_func figure,null,3; show_menu figures_list"
+			"label"		" Create triangle"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func figure,null,4; show_menu figures_list"
+			"label"		" Create square"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func figure,null,5; show_menu figures_list"
+			"label"		" Create pentagon"
+		}
+		"4"
+		{
+			"command"	"scripted_user_func figure,null,6; show_menu figures_list"
+			"label"		" Create hexagon"
+		}
+		"5"
+		{
+			"command"	"scripted_user_func figure,null,7; show_menu figures_list"
+			"label"		" Create heptagon"
+		}
+		"6"
+		{
+			"command"	"scripted_user_func figure,null,8; show_menu figures_list"
+			"label"		" Create octagon"
+		}
+		"7"
+		{
+			"command"	"scripted_user_func figure,null,9; show_menu figures_list"
+			"label"		" Create enneagon"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu figures"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"figures_radius"
+	{
+		"Title"			"Figures Radius"
+		
+		"1"
+		{
+			"command"	"scripted_user_func figure_radius,25; show_menu figures_radius"
+			"label"		" Radius: 25"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func figure_radius,50; show_menu figures_radius"
+			"label"		" Radius: 50"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func figure_radius,75; show_menu figures_radius"
+			"label"		" Radius: 75"
+		}
+		"4"
+		{
+			"command"	"scripted_user_func figure_radius,100; show_menu figures_radius"
+			"label"		" Radius: 100"
+		}
+		"5"
+		{
+			"command"	"scripted_user_func figure_radius,200; show_menu figures_radius"
+			"label"		" Radius: 200"
+		}
+		"6"
+		{
+			"command"	"scripted_user_func figure_radius,300; show_menu figures_radius"
+			"label"		" Radius: 300"
+		}
+		"7"
+		{
+			"command"	"scripted_user_func figure_radius,500; show_menu figures_radius"
+			"label"		" Radius: 500"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu figures"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"host"
+	{
+		"Title"			"Host-Only"
+		
+		"1"
+		{
+			"command"	"scripted_user_func save; show_menu host"
+			"label"		" Save all lines"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func load; show_menu host"
+			"label"		" Load all lines"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func usage; show_menu host"
+			"label"		" Toggle usage for clients"
+		}
+		"4"
+		{
+			"command"	"scripted_user_func determine; show_menu host"
+			"label"		" Determine wall normal (figures)"
+		}
+		"5"
+		{
+			"command"	"scripted_user_func clr,all; show_menu host"
+			"label"		" Remove all lines"
+		}
+		"6"
+		{
+			"command"	"play buttons/button14; show_menu specified_remove"
+			"label"		" Remove specified player lines"
+		}
+	    "8"
+		{
+			"command"	"play buttons/button14; show_menu menu"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+
+	"specified_remove"
+	{
+		"Title"			"Specified Remove"
+		
+		"1"
+		{
+			"command"	"scripted_user_func clr,1; show_menu specified_remove"
+			"label"		" Index: 1"
+		}
+		"2"
+		{
+			"command"	"scripted_user_func clr,2; show_menu specified_remove"
+			"label"		" Index: 2"
+		}
+		"3"
+		{
+			"command"	"scripted_user_func clr,3; show_menu specified_remove"
+			"label"		" Index: 3"
+		}
+		"4"
+		{
+			"command"	"scripted_user_func clr,4; show_menu specified_remove"
+			"label"		" Index: 4"
+		}
+		"5"
+		{
+			"command"	"scripted_user_func clr,5; show_menu specified_remove"
+			"label"		" Index: 5"
+		}
+		"6"
+		{
+			"command"	"scripted_user_func clr,6; show_menu specified_remove"
+			"label"		" Index: 6"
+		}
+		"7"
+		{
+			"command"	"scripted_user_func clr,7; show_menu specified_remove"
+			"label"		" Index: 7"
+		}
+		"8"
+		{
+			"command"	"scripted_user_func clr,8; show_menu specified_remove"
+			"label"		" Index: 8"
+		}
+	    "9"
+		{
+			"command"	"play buttons/button14; show_menu host"
+			"label"		" << Back"
+		}
+		"0"
+		{
+			"command"	"play buttons/button14"
+			"label"		" Exit"
+		}
+	}
+}
