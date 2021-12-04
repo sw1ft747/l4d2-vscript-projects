@@ -24,7 +24,7 @@ class CCinematicCamera extends IScriptPlugin
 		HookEvent("player_ledge_grab", g_tCinematicCamera.OnPlayerLedgeGrab, g_tCinematicCamera);
 		HookEvent("player_disconnect", g_tCinematicCamera.OnPlayerDisconnect, g_tCinematicCamera);
 
-		printl("[Cinematic Camera]\nAuthor: Sw1ft\nVersion: 2.1.4");
+		printl("[Cinematic Camera]\nAuthor: Sw1ft\nVersion: 2.1.5");
 	}
 
 	function Unload()
@@ -241,9 +241,9 @@ g_tCinematicCamera <-
 					camera = SpawnEntityFromTable("point_viewcontrol_survivor", { targetname = "camera_" + hPlayer.GetPlayerUserId() })
 
 					enable = function(){
-						this.velocity = Vector();
-						this.angular_vel = Vector();
-						this.previous_angles = QAngle();
+						this.velocity = Vector(0, 0, 0);
+						this.angular_vel = QAngle(0, 0, 0);
+						this.previous_angles = QAngle(0, 0, 0);
 						this.camera.SetOrigin(hPlayer.EyePosition());
 						this.camera.SetAngles(hPlayer.EyeAngles());
 
