@@ -1,43 +1,42 @@
-// Squirrel
 // Gas Station Explosion
 
 class CScriptPluginGasStationExplosion extends IScriptPlugin
 {
 	function Load()
 	{
-		::g_ConVar_AllowGasStationExp <- CreateConVar("gs_allow", 1, "integer", 0, 1);
-		::g_ConVar_GasStationExpChance <- CreateConVar("gs_chance", 90, "integer", 0, 100);
-		::g_ConVar_GasStationExpClearTime <- CreateConVar("gs_time", 0.0, "float", 0.0);
-		::g_ConVar_GasStationExpDamage <- CreateConVar("gs_damage", 1, "integer", 0, 1);
-		::g_ConVar_GasStationExpLimit <- CreateConVar("gs_limit", 10, "integer", 1);
-		::g_ConVar_GasStationExpHordeTime <- CreateConVar("gs_horde", 2.0, "float", 0.0);
+		RegisterOnTickFunction("g_GasStationExplosion.GSE_Think");
+		RegisterOnTickFunction("g_GasStationExplosion.InvalidEntitiesListener_Think");
 
-		RegisterOnTickFunction("g_tGasStationExplosion.GSE_Think");
-		RegisterOnTickFunction("g_tGasStationExplosion.InvalidEntitiesListener_Think");
-
-		g_ConVar_GasStationExpLimit.AddChangeHook(g_tGasStationExplosion.OnConVarChange);
-
-		printl("[Gas Station Explosion]\nAuthor: Sw1ft\nVersion: 1.0.2");
+		printl("[Gas Station Explosion]\nAuthor: Sw1ft\nVersion: 1.0.3");
 	}
 
 	function Unload()
 	{
+		RemoveOnTickFunction("g_GasStationExplosion.GSE_Think");
+		RemoveOnTickFunction("g_GasStationExplosion.InvalidEntitiesListener_Think");
 
+		RemoveChatCommand("!gs_mode");
+		RemoveChatCommand("!gs_clear");
+		RemoveChatCommand("!gas");
+		RemoveChatCommand("!bgas");
+		RemoveChatCommand("!lgas");
+		RemoveChatCommand("!rgas");
 	}
 
 	function OnRoundStartPost()
 	{
 		local hEntity, chance;
-		if ((chance = GetConVarInt(g_ConVar_GasStationExpChance)) > 0)
+
+		if ((chance = g_GasStationExplosion.Settings.Chance) > 0)
 		{
-			foreach (map, tbl in g_tGasStationExpParams)
+			foreach (map, tbl in g_GasStationExplosion.tGasStationExpParams)
 			{
 				if (g_sMapName == map)
 				{
 					if (RandomInt(1, 100) <= chance)
 					{
-						g_tGasStationExplosion.SpawnGasStation(g_tGasStationExpParams[g_sMapName]["origin"], g_tGasStationExpParams[g_sMapName]["angles"]);
-						printl("> [Gas Station Explosion] Gas station has been spawned for the current map at " + kvstr(g_tGasStationExpParams[g_sMapName]["origin"]));
+						g_GasStationExplosion.SpawnGasStation(g_GasStationExplosion.tGasStationExpParams[g_sMapName]["origin"], g_GasStationExplosion.tGasStationExpParams[g_sMapName]["angles"]);
+						printl("> [Gas Station Explosion] Gas station has been spawned for the current map at " + kvstr(g_GasStationExplosion.tGasStationExpParams[g_sMapName]["origin"]));
 					}
 				}
 			}
@@ -46,17 +45,16 @@ class CScriptPluginGasStationExplosion extends IScriptPlugin
 
 	function OnRoundEnd()
 	{
-
 	}
 
-	function AdditionalClassMethodsInjected()
+	function OnExtendClassMethods()
 	{
-		RegisterChatCommand("!gs_mode", g_tGasStationExplosion.SwitchMode, true);
-		RegisterChatCommand("!gs_clear", g_tGasStationExplosion.Clear, true);
-		RegisterChatCommand("!gas", g_tGasStationExplosion.Forward, true);
-		RegisterChatCommand("!bgas", g_tGasStationExplosion.Behind, true);
-		RegisterChatCommand("!lgas", g_tGasStationExplosion.Left, true);
-		RegisterChatCommand("!rgas", g_tGasStationExplosion.Right, true);
+		RegisterChatCommand("!gs_mode", g_GasStationExplosion.SwitchMode, true);
+		RegisterChatCommand("!gs_clear", g_GasStationExplosion.Clear, true);
+		RegisterChatCommand("!gas", g_GasStationExplosion.Forward, true);
+		RegisterChatCommand("!bgas", g_GasStationExplosion.Behind, true);
+		RegisterChatCommand("!lgas", g_GasStationExplosion.Left, true);
+		RegisterChatCommand("!rgas", g_GasStationExplosion.Right, true);
 	}
 
 	function GetClassName() { return m_sClassName; }
@@ -65,73 +63,10 @@ class CScriptPluginGasStationExplosion extends IScriptPlugin
 
 	function GetInterfaceVersion() { return m_InterfaceVersion; }
 
-	function _set(key, val) { throw null; }
-
 	static m_InterfaceVersion = 1;
 	static m_sClassName = "CScriptPluginGasStationExplosion";
 	static m_sScriptPluginName = "Gas Station Explosion";
 }
-
-enum eExplosionType
-{
-	Forward,
-	Behind,
-	Left,
-	Right
-}
-
-g_GasStationExplosion <- CScriptPluginGasStationExplosion();
-
-g_bMode <- true;
-g_flLastSurvivorsReaction <- 0.0;
-
-g_aGasStations <- [];
-g_aInvalidEntitiesListener <- [];
-
-g_sGasStationExpModel <-
-[
-	"models/hybridphysx/gasstationpart_1.mdl"
-	"models/hybridphysx/gasstationpart_2.mdl"
-	"models/hybridphysx/gasstationpart_3.mdl"
-	"models/hybridphysx/gasstationpart_4.mdl"
-	"models/hybridphysx/gasstationpart_5.mdl"
-	"models/hybridphysx/gasstationpart_6.mdl"
-	"models/hybridphysx/gasstationpart_7.mdl"
-	"models/hybridphysx/gasstationpart_8.mdl"
-	"models/hybridphysx/gasstationpart_9.mdl"
-	"models/hybridphysx/gasstation_endstate_2.mdl"
-	"models/hybridphysx/gaspumpdestruction.mdl"
-	"models/hybridphysx/gasstationpit.mdl"
-	"models/props_equipment/gas_pump_nodebris.mdl"
-	"models/props_interiors/airportdeparturerampcontrol01.mdl"
-];
-
-g_tGasStationExpParams <-
-{
-	c1m2_streets =
-	{
-		origin = Vector(-6438.181, -3003.592, 390.657)
-		angles = QAngle(0, -90, 0)
-	}
-
-	c6m3_port =
-	{
-		origin = Vector(638.044, 1093.173, 158.031)
-		angles = QAngle(0, 90, 0)
-	}
-
-	c7m1_docks =
-	{
-		origin = Vector(10494.208, 2892.211, 128.031)
-		angles = QAngle(0, 180, 0)
-	}
-
-	c7m3_port =
-	{
-		origin = Vector(638.044, 1093.173, 158.031)
-		angles = QAngle(0, 90, 0)
-	}
-};
 
 class CGasStationExplosion
 {
@@ -266,7 +201,7 @@ class CGasStationExplosion
 				angles = sAngles
 				disableshadows = 1
 				targetname = "__gas_station_exp__"
-				model = g_sGasStationExpModel[i]
+				model = g_GasStationExplosion.sGasStationExpModel[i]
 			}));
 		}
 
@@ -347,7 +282,7 @@ class CGasStationExplosion
 			disableshadows = 1
 			StartDisabled = 1
 			targetname = "__gas_station_exp__"
-			model = g_sGasStationExpModel[9]
+			model = g_GasStationExplosion.sGasStationExpModel[9]
 		}), "DisableCollision");
 
 		AttachEntity(m_hDebrisDoor = SpawnEntityFromTable("func_door", {
@@ -368,7 +303,7 @@ class CGasStationExplosion
 			disableshadows = 1
 			StartDisabled = 1
 			targetname = "__gas_station_exp__"
-			model = g_sGasStationExpModel[11]
+			model = g_GasStationExplosion.sGasStationExpModel[11]
 		});
 
 		m_hGasPumpLeft = SpawnEntityFromTable("prop_dynamic", {
@@ -377,7 +312,7 @@ class CGasStationExplosion
 			disableshadows = 1
 			StartDisabled = 1
 			targetname = "__gas_station_exp__"
-			model = g_sGasStationExpModel[10]
+			model = g_GasStationExplosion.sGasStationExpModel[10]
 		});
 
 		m_hGasPumpRight = SpawnEntityFromTable("prop_dynamic", {
@@ -386,7 +321,7 @@ class CGasStationExplosion
 			disableshadows = 1
 			StartDisabled = 1
 			targetname = "__gas_station_exp__"
-			model = g_sGasStationExpModel[10]
+			model = g_GasStationExplosion.sGasStationExpModel[10]
 		});
 
 		m_hGasPumpLeftParticle = SpawnEntityFromTable("info_particle_system", {
@@ -421,7 +356,7 @@ class CGasStationExplosion
 			PerformanceMode = 1
 			Damagetype = DMG_CLUB
 			targetname = "__gas_station_exp__"
-			model = g_sGasStationExpModel[12]
+			model = g_GasStationExplosion.sGasStationExpModel[12]
 		});
 
 		m_hGasPumpRightBreakable = SpawnEntityFromTable("prop_physics", {
@@ -435,21 +370,21 @@ class CGasStationExplosion
 			PerformanceMode = 1
 			Damagetype = DMG_CLUB
 			targetname = "__gas_station_exp__"
-			model = g_sGasStationExpModel[12]
+			model = g_GasStationExplosion.sGasStationExpModel[12]
 		});
 
-		g_aInvalidEntitiesListener.push({
+		g_GasStationExplosion.aInvalidEntitiesListener.push({
 			ent = m_hGasPumpLeftBreakable
-			func = g_tGasStationExplosion.OnGasPumpKill
+			func = g_GasStationExplosion.OnGasPumpKill
 			params = {
 				pump = "left"
 				__instance = this
 			}
 		});
 
-		g_aInvalidEntitiesListener.push({
+		g_GasStationExplosion.aInvalidEntitiesListener.push({
 			ent = m_hGasPumpRightBreakable
-			func = g_tGasStationExplosion.OnGasPumpKill
+			func = g_GasStationExplosion.OnGasPumpKill
 			params = {
 				pump = "right"
 				__instance = this
@@ -538,14 +473,14 @@ class CGasStationExplosion
 				AcceptEntityInput(ent, "SetAnimation", "boom");
 			}
 
-			if (GetConVarFloat(g_ConVar_GasStationExpHordeTime) > 0)
+			if (g_GasStationExplosion.Settings.HordeDelay > 0)
 			{
 				if (!Entities.FindByName(null, "director"))
 				{
 					SpawnEntityFromTable("info_director", {targetname = "director"});
 				}
 
-				m_aTimers.push(CreateTimer(GetConVarFloat(g_ConVar_GasStationExpHordeTime), function(){
+				m_aTimers.push(CreateTimer(g_GasStationExplosion.Settings.HordeDelay, function(){
 					EntFire("director", "ForcePanicEvent", "1");
 					EntFire("@director", "ForcePanicEvent", "1");
 				}));
@@ -567,7 +502,7 @@ class CGasStationExplosion
 			}, m_sPushFunction));
 
 			m_aTimers.push(CreateTimer(6.0, function(){
-				if (g_flLastSurvivorsReaction + 10.0 < Time())
+				if (__fun_shit_last_survivors_reaction__ + 10.0 < Time())
 				{
 					local hPlayer;
 					local aL4D1Survivors = [];
@@ -607,7 +542,7 @@ class CGasStationExplosion
 						local hEntity = SpawnEntityFromTable("func_orator", {
 							disableshadows = 1
 							spawnflags = 1
-							model = g_sGasStationExpModel[13]
+							model = g_GasStationExplosion.sGasStationExpModel[13]
 						});
 						NetProps.SetPropInt(hEntity, "m_fEffects", (1 << 5));
 						AcceptEntityInput(hEntity, "SpeakResponseConcept", "PlaneCrash");
@@ -634,7 +569,7 @@ class CGasStationExplosion
 						}
 					}
 
-					g_flLastSurvivorsReaction = Time();
+					__fun_shit_last_survivors_reaction__ = Time();
 				}
 			}));
 
@@ -737,8 +672,6 @@ class CGasStationExplosion
 		return true;
 	}
 
-	function _set(key, val) { throw null; }
-
 	m_flExplosionTime = null;
 	m_sPushFunction = null;
 	m_sHurtFunction = null;
@@ -771,14 +704,150 @@ class CGasStationExplosion
 	m_aSoundEntities = null;
 }
 
-g_tGasStationExplosion <-
+enum eGasExplosionType
 {
+	Forward,
+	Behind,
+	Left,
+	Right
+}
+
+g_PluginGasStationExplosion <- CScriptPluginGasStationExplosion();
+
+__gse_fun_shit_mode__ <- true;
+__fun_shit_last_survivors_reaction__ <- 0.0;
+
+g_GasStationExplosion <-
+{
+	aGasStations = []
+	aInvalidEntitiesListener = []
+
+	sGasStationExpModel =
+	[
+		"models/hybridphysx/gasstationpart_1.mdl"
+		"models/hybridphysx/gasstationpart_2.mdl"
+		"models/hybridphysx/gasstationpart_3.mdl"
+		"models/hybridphysx/gasstationpart_4.mdl"
+		"models/hybridphysx/gasstationpart_5.mdl"
+		"models/hybridphysx/gasstationpart_6.mdl"
+		"models/hybridphysx/gasstationpart_7.mdl"
+		"models/hybridphysx/gasstationpart_8.mdl"
+		"models/hybridphysx/gasstationpart_9.mdl"
+		"models/hybridphysx/gasstation_endstate_2.mdl"
+		"models/hybridphysx/gaspumpdestruction.mdl"
+		"models/hybridphysx/gasstationpit.mdl"
+		"models/props_equipment/gas_pump_nodebris.mdl"
+		"models/props_interiors/airportdeparturerampcontrol01.mdl"
+	]
+
+	tGasStationExpParams =
+	{
+		c1m2_streets =
+		{
+			origin = Vector(-6438.181, -3003.592, 390.657)
+			angles = QAngle(0, -90, 0)
+		}
+
+		c6m3_port =
+		{
+			origin = Vector(638.044, 1093.173, 158.031)
+			angles = QAngle(0, 90, 0)
+		}
+
+		c7m1_docks =
+		{
+			origin = Vector(10494.208, 2892.211, 128.031)
+			angles = QAngle(0, 180, 0)
+		}
+
+		c7m3_port =
+		{
+			origin = Vector(638.044, 1093.173, 158.031)
+			angles = QAngle(0, 90, 0)
+		}
+	}
+
+	Settings =
+	{
+		Allow = true
+		Chance = 90
+		ClearTime = 0.0
+		AllowDamage = true
+		Limit = 10
+		HordeDelay = 2.0
+	}
+
+    ParseConfigFile = function()
+    {
+        this = ::g_GasStationExplosion;
+
+		local tData;
+
+		local function SerializeSettings()
+		{
+			local sData = "{";
+
+			foreach (key, val in Settings)
+			{
+				switch (typeof val)
+				{
+				case "string":
+					sData = format("%s\n\t%s = \"%s\"", sData, key, val);
+					break;
+				
+				case "float":
+					sData = format("%s\n\t%s = %f", sData, key, val);
+					break;
+				
+				case "integer":
+				case "bool":
+					sData = sData + "\n\t" + key + " = " + val;
+					break;
+				}
+			}
+
+			sData = sData + "\n}";
+			StringToFile("gas_station_explosion/settings.nut", sData);
+		}
+
+		if (tData = FileToString("gas_station_explosion/settings.nut"))
+		{
+			try
+            {
+				tData = compilestring("return " + tData)();
+
+				foreach (key, val in Settings)
+				{
+					if (tData.rawin(key))
+					{
+						if (key == "Chance")
+							Settings[key] = Math.Clamp(0, 100);
+						else if (key == "Limit" && tData[key] < 1)
+							Settings[key] = 1;
+						else
+							Settings[key] = tData[key];
+					}
+				}
+			}
+			catch (error)
+            {
+				SerializeSettings();
+			}
+		}
+		else
+		{
+			SerializeSettings();
+		}
+    }
+
 	OnConVarChange = function(ConVar, LastValue, NewValue)
 	{
-		while (g_aGasStations.len() > NewValue)
+		this = ::g_GasStationExplosion;
+
+		while (aGasStations.len() > NewValue)
 		{
-			g_aGasStations[0].ClearExplosion();
-			g_aGasStations.remove(0);
+			aGasStations[0].ClearExplosion();
+			aGasStations.remove(0);
 		}
 	}
 
@@ -792,31 +861,33 @@ g_tGasStationExplosion <-
 
 	Initialize = function(hPlayer, iExplosionType)
 	{
-		if (hPlayer.IsHost() && GetConVarBool(g_ConVar_AllowGasStationExp))
+		if (hPlayer.IsHost() && g_GasStationExplosion.Settings.Allow)
 		{
 			local vecOrigin;
 			local eAngles = hPlayer.EyeAngles();
-			if (g_bMode) vecOrigin = hPlayer.GetOrigin();
+			if (__gse_fun_shit_mode__) vecOrigin = hPlayer.GetOrigin();
 			else vecOrigin = hPlayer.DoTraceLine(eTrace.Type_Pos, eTrace.Distance, eTrace.Mask_Shot);
-			if (iExplosionType == eExplosionType.Behind) eAngles += QAngle(0, 180, 0);
-			else if (iExplosionType == eExplosionType.Left) eAngles += QAngle(0, 90, 0);
-			else if (iExplosionType == eExplosionType.Right) eAngles -= QAngle(0, 90, 0);
-			g_tGasStationExplosion.SpawnGasStation(vecOrigin, eAngles);
+			if (iExplosionType == eGasExplosionType.Behind) eAngles += QAngle(0, 180, 0);
+			else if (iExplosionType == eGasExplosionType.Left) eAngles += QAngle(0, 90, 0);
+			else if (iExplosionType == eGasExplosionType.Right) eAngles -= QAngle(0, 90, 0);
+			g_GasStationExplosion.SpawnGasStation(vecOrigin, eAngles);
 		}
 	}
 
 	GSE_Think = function()
 	{
-		if (g_aGasStations.len() > 0 && GetConVarFloat(g_ConVar_GasStationExpClearTime) > 0)
+		this = ::g_GasStationExplosion;
+
+		if (aGasStations.len() > 0 && g_GasStationExplosion.Settings.ClearTime > 0)
 		{
-			for (local i = 0; i < g_aGasStations.len(); i++)
+			for (local i = 0; i < aGasStations.len(); ++i)
 			{
-				if (g_aGasStations[i].m_flExplosionTime != null)
+				if (aGasStations[i].m_flExplosionTime != null)
 				{
-					if (g_aGasStations[i].m_flExplosionTime + GetConVarFloat(g_ConVar_GasStationExpClearTime) < Time())
+					if (aGasStations[i].m_flExplosionTime + g_GasStationExplosion.Settings.ClearTime < Time())
 					{
-						g_aGasStations[i].ClearExplosion();
-						g_aGasStations.remove(i);
+						aGasStations[i].ClearExplosion();
+						aGasStations.remove(i);
 						i--;
 					}
 				}
@@ -827,13 +898,15 @@ g_tGasStationExplosion <-
 	InvalidEntitiesListener_Think = function()
 	{
 		local tbl;
-		for (local i = 0; i < g_aInvalidEntitiesListener.len(); i++)
+
+		for (local i = 0; i < g_GasStationExplosion.aInvalidEntitiesListener.len(); ++i)
 		{
-			tbl = g_aInvalidEntitiesListener[i];
+			tbl = g_GasStationExplosion.aInvalidEntitiesListener[i];
+
 			if (!tbl.ent.IsValid())
 			{
 				tbl.func(tbl.params);
-				g_aInvalidEntitiesListener.remove(i);
+				g_GasStationExplosion.aInvalidEntitiesListener.remove(i);
 				i--;
 			}
 		}
@@ -841,22 +914,26 @@ g_tGasStationExplosion <-
 
 	SpawnGasStation = function(vecOrigin, eAngles)
 	{
-		if (g_aGasStations.len() > 0 && g_aGasStations.len() + 1 > GetConVarInt(g_ConVar_GasStationExpLimit))
+		this = ::g_GasStationExplosion;
+
+		if (aGasStations.len() > 0 && aGasStations.len() + 1 > g_GasStationExplosion.Settings.Limit)
 		{
-			g_aGasStations[0].ClearExplosion();
-			g_aGasStations.remove(0);
+			aGasStations[0].ClearExplosion();
+			aGasStations.remove(0);
 		}
-		g_aGasStations.push(CGasStationExplosion(vecOrigin, eAngles, GetConVarBool(g_ConVar_GasStationExpDamage)));
+		aGasStations.push(CGasStationExplosion(vecOrigin, eAngles, g_GasStationExplosion.Settings.AllowDamage));
 	}
 
 	Clear = function(hPlayer)
 	{
+		this = ::g_GasStationExplosion;
+
 		if (hPlayer.IsHost())
 		{
-			for (local i = 0; i < g_aGasStations.len(); i++)
+			for (local i = 0; i < aGasStations.len(); i++)
 			{
-				g_aGasStations[i].ClearExplosion();
-				g_aGasStations.remove(i);
+				aGasStations[i].ClearExplosion();
+				aGasStations.remove(i);
 				i--;
 			}
 		}
@@ -866,18 +943,18 @@ g_tGasStationExplosion <-
 	{
 		if (hPlayer.IsHost())
 		{
-			SayMsg("[Gas Station Explosion] Explosion mode: " + (g_bMode ? "camera direction" : "near the player"));
-			g_bMode = !g_bMode;
+			SayMsg("[Gas Station Explosion] Explosion mode: " + (__gse_fun_shit_mode__ ? "camera direction" : "near the player"));
+			__gse_fun_shit_mode__ = !__gse_fun_shit_mode__;
 		}
 	}
 
-	Forward = function(hPlayer) { g_tGasStationExplosion.Initialize(hPlayer, eExplosionType.Forward); }
+	Forward = function(hPlayer) { g_GasStationExplosion.Initialize(hPlayer, eGasExplosionType.Forward); }
 
-	Behind = function(hPlayer) { g_tGasStationExplosion.Initialize(hPlayer, eExplosionType.Behind); }
+	Behind = function(hPlayer) { g_GasStationExplosion.Initialize(hPlayer, eGasExplosionType.Behind); }
 
-	Left = function(hPlayer) { g_tGasStationExplosion.Initialize(hPlayer, eExplosionType.Left); }
+	Left = function(hPlayer) { g_GasStationExplosion.Initialize(hPlayer, eGasExplosionType.Left); }
 
-	Right = function(hPlayer) { g_tGasStationExplosion.Initialize(hPlayer, eExplosionType.Right); }
+	Right = function(hPlayer) { g_GasStationExplosion.Initialize(hPlayer, eGasExplosionType.Right); }
 };
 
 PrecacheEntityFromTable({classname = "ambient_generic", message = "Objects.gas_station_explosion"});
@@ -886,9 +963,9 @@ PrecacheEntityFromTable({classname = "ambient_generic", message = "explode_3"});
 PrecacheEntityFromTable({classname = "ambient_generic", message = "fire_large"});
 PrecacheEntityFromTable({classname = "env_explosion", fireballsprite = "sprites/zerogxplode.spr"});
 
-for (local i = 0; i < g_sGasStationExpModel.len(); i++)
+for (local i = 0; i < g_GasStationExplosion.sGasStationExpModel.len(); i++)
 {
-	PrecacheEntityFromTable({classname = "prop_dynamic", model = g_sGasStationExpModel[i]});
+	PrecacheEntityFromTable({classname = "prop_dynamic", model = g_GasStationExplosion.sGasStationExpModel[i]});
 }
 
-g_ScriptPluginsHelper.AddScriptPlugin(g_GasStationExplosion);
+g_ScriptPluginsHelper.AddScriptPlugin(g_PluginGasStationExplosion);

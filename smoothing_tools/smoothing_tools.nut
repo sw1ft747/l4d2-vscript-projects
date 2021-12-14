@@ -1,4 +1,3 @@
-// Squirrel
 // Smoothing Tools
 
 const SMOOTH_INTERP_NONE = -1;
@@ -18,77 +17,125 @@ class CSmoothingTools extends IScriptPlugin
 	{
 		::g_SmoothMaster <- CSmoothMaster(); // exposing the singleton object
 
-        printl("[Smoothing Tools]\nAuthor: Sw1ft\nVersion: 1.0");
+        printl("[Smoothing Tools]\nAuthor: Sw1ft\nVersion: 1.0.1");
 	}
 
 	function Unload()
 	{
+        RemoveChatCommand("!s_load");
+        RemoveChatCommand("!s_save");
+        RemoveChatCommand("!s_play");
+        RemoveChatCommand("!s_stop");
+        RemoveChatCommand("!s_add");
+        RemoveChatCommand("!s_remove");
+        RemoveChatCommand("!s_remove_all");
+        RemoveChatCommand("!s_sremove");
+        RemoveChatCommand("!s_replace");
+        RemoveChatCommand("!s_add_before");
+        RemoveChatCommand("!s_add_after");
+        RemoveChatCommand("!s_add_tick");
+        RemoveChatCommand("!s_tick");
+        RemoveChatCommand("!s_static");
+        RemoveChatCommand("!s_nonstatic");
+        RemoveChatCommand("!s_next");
+        RemoveChatCommand("!s_prev");
+        RemoveChatCommand("!s_toggle_unialloc");
+        RemoveChatCommand("!s_toggle_process");
+        RemoveChatCommand("!s_toggle_preview");
+        RemoveChatCommand("!s_preview");
+        RemoveChatCommand("!s_process_origin");
+        RemoveChatCommand("!s_process_angles");
+        RemoveChatCommand("!s_set_interp");
+        RemoveChatCommand("!s_kb_params");
 
+        RemoveUserCommand("s_load");
+        RemoveUserCommand("s_save");
+        RemoveUserCommand("s_play");
+        RemoveUserCommand("s_stop");
+        RemoveUserCommand("s_add");
+        RemoveUserCommand("s_remove");
+        RemoveUserCommand("s_remove_all");
+        RemoveUserCommand("s_sremove");
+        RemoveUserCommand("s_replace");
+        RemoveUserCommand("s_add_before");
+        RemoveUserCommand("s_add_after");
+        RemoveUserCommand("s_add_tick");
+        RemoveUserCommand("s_tick");
+        RemoveUserCommand("s_static");
+        RemoveUserCommand("s_nonstatic");
+        RemoveUserCommand("s_next");
+        RemoveUserCommand("s_prev");
+        RemoveUserCommand("s_toggle_unialloc");
+        RemoveUserCommand("s_toggle_process");
+        RemoveUserCommand("s_toggle_preview");
+        RemoveUserCommand("s_preview");
+        RemoveUserCommand("s_process_origin");
+        RemoveUserCommand("s_process_angles");
+        RemoveUserCommand("s_set_interp");
+        RemoveUserCommand("s_kb_params");
 	}
 
 	function OnRoundStartPost()
 	{
-		
 	}
 
 	function OnRoundEnd()
 	{
-
 	}
 
-	function AdditionalClassMethodsInjected()
+	function OnExtendClassMethods()
 	{
-        RegisterChatCommand("!s_load", g_tRealTimeSmoother.LoadSmooth, true, true);
-        RegisterChatCommand("!s_save", g_tRealTimeSmoother.SaveSmooth, true, true);
-        RegisterChatCommand("!s_play", g_tRealTimeSmoother.PlaySmooth, true, false);
-        RegisterChatCommand("!s_stop", g_tRealTimeSmoother.StopSmooth, true, false);
-        RegisterChatCommand("!s_add", g_tRealTimeSmoother.AddSample, true, true);
-        RegisterChatCommand("!s_remove", g_tRealTimeSmoother.RemoveSample, true, false);
-        RegisterChatCommand("!s_remove_all", g_tRealTimeSmoother.RemoveAllSamples, true, false);
-        RegisterChatCommand("!s_sremove", g_tRealTimeSmoother.RemoveSelectedSample, true, false);
-        RegisterChatCommand("!s_replace", g_tRealTimeSmoother.ReplaceSelectedSample, true, false);
-        RegisterChatCommand("!s_add_before", g_tRealTimeSmoother.AddSampleBeforeSelected, true, true);
-        RegisterChatCommand("!s_add_after", g_tRealTimeSmoother.AddSampleAfterSelected, true, true);
-        RegisterChatCommand("!s_add_tick", g_tRealTimeSmoother.AddTicksToSelectedSample, true, true);
-        RegisterChatCommand("!s_tick", g_tRealTimeSmoother.GetTick, true, false);
-        RegisterChatCommand("!s_static", g_tRealTimeSmoother.MakeStaticSample, true, false);
-        RegisterChatCommand("!s_nonstatic", g_tRealTimeSmoother.MakeNonStaticSample, true, false);
-        RegisterChatCommand("!s_next", g_tRealTimeSmoother.SelectNextSample, true, false);
-        RegisterChatCommand("!s_prev", g_tRealTimeSmoother.SelectPreviousSample, true, false);
-        RegisterChatCommand("!s_toggle_unialloc", g_tRealTimeSmoother.ToggleUniformAllocation, true, false);
-        RegisterChatCommand("!s_toggle_process", g_tRealTimeSmoother.ToggleAutoProcess, true, false);
-        RegisterChatCommand("!s_toggle_preview", g_tRealTimeSmoother.TogglePreview, true, false);
-        RegisterChatCommand("!s_preview", g_tRealTimeSmoother.DrawPreview, true, false);
-        RegisterChatCommand("!s_process_origin", g_tRealTimeSmoother.InterpSampleOrigin, true, true);
-        RegisterChatCommand("!s_process_angles", g_tRealTimeSmoother.InterpSampleAngles, true, true);
-        RegisterChatCommand("!s_set_interp", g_tRealTimeSmoother.SetInterpType, true, true);
-        RegisterChatCommand("!s_kb_params", g_tRealTimeSmoother.SetKBParams, true, true);
+        RegisterChatCommand("!s_load", g_SmoothingTools.LoadSmooth, true, true);
+        RegisterChatCommand("!s_save", g_SmoothingTools.SaveSmooth, true, true);
+        RegisterChatCommand("!s_play", g_SmoothingTools.PlaySmooth, true, false);
+        RegisterChatCommand("!s_stop", g_SmoothingTools.StopSmooth, true, false);
+        RegisterChatCommand("!s_add", g_SmoothingTools.AddSample, true, true);
+        RegisterChatCommand("!s_remove", g_SmoothingTools.RemoveSample, true, false);
+        RegisterChatCommand("!s_remove_all", g_SmoothingTools.RemoveAllSamples, true, false);
+        RegisterChatCommand("!s_sremove", g_SmoothingTools.RemoveSelectedSample, true, false);
+        RegisterChatCommand("!s_replace", g_SmoothingTools.ReplaceSelectedSample, true, false);
+        RegisterChatCommand("!s_add_before", g_SmoothingTools.AddSampleBeforeSelected, true, true);
+        RegisterChatCommand("!s_add_after", g_SmoothingTools.AddSampleAfterSelected, true, true);
+        RegisterChatCommand("!s_add_tick", g_SmoothingTools.AddTicksToSelectedSample, true, true);
+        RegisterChatCommand("!s_tick", g_SmoothingTools.GetTick, true, false);
+        RegisterChatCommand("!s_static", g_SmoothingTools.MakeStaticSample, true, false);
+        RegisterChatCommand("!s_nonstatic", g_SmoothingTools.MakeNonStaticSample, true, false);
+        RegisterChatCommand("!s_next", g_SmoothingTools.SelectNextSample, true, false);
+        RegisterChatCommand("!s_prev", g_SmoothingTools.SelectPreviousSample, true, false);
+        RegisterChatCommand("!s_toggle_unialloc", g_SmoothingTools.ToggleUniformAllocation, true, false);
+        RegisterChatCommand("!s_toggle_process", g_SmoothingTools.ToggleAutoProcess, true, false);
+        RegisterChatCommand("!s_toggle_preview", g_SmoothingTools.TogglePreview, true, false);
+        RegisterChatCommand("!s_preview", g_SmoothingTools.DrawPreview, true, false);
+        RegisterChatCommand("!s_process_origin", g_SmoothingTools.InterpSampleOrigin, true, true);
+        RegisterChatCommand("!s_process_angles", g_SmoothingTools.InterpSampleAngles, true, true);
+        RegisterChatCommand("!s_set_interp", g_SmoothingTools.SetInterpType, true, true);
+        RegisterChatCommand("!s_kb_params", g_SmoothingTools.SetKBParams, true, true);
 
-        RegisterUserCommand("s_load", g_tRealTimeSmoother.LoadSmooth, true, true);
-        RegisterUserCommand("s_save", g_tRealTimeSmoother.SaveSmooth, true, true);
-        RegisterUserCommand("s_play", g_tRealTimeSmoother.PlaySmooth, false, true);
-        RegisterUserCommand("s_stop", g_tRealTimeSmoother.StopSmooth, false, true);
-        RegisterUserCommand("s_add", g_tRealTimeSmoother.AddSample, true, true);
-        RegisterUserCommand("s_remove", g_tRealTimeSmoother.RemoveSample, false, true);
-        RegisterUserCommand("s_remove_all", g_tRealTimeSmoother.RemoveAllSamples, false, true);
-        RegisterUserCommand("s_sremove", g_tRealTimeSmoother.RemoveSelectedSample, false, true);
-        RegisterUserCommand("s_replace", g_tRealTimeSmoother.ReplaceSelectedSample, false, true);
-        RegisterUserCommand("s_add_before", g_tRealTimeSmoother.AddSampleBeforeSelected, true, true);
-        RegisterUserCommand("s_add_after", g_tRealTimeSmoother.AddSampleAfterSelected, true, true);
-        RegisterUserCommand("s_add_tick", g_tRealTimeSmoother.AddTicksToSelectedSample, true, true);
-        RegisterUserCommand("s_tick", g_tRealTimeSmoother.GetTick, false, true);
-        RegisterUserCommand("s_static", g_tRealTimeSmoother.MakeStaticSample, false, true);
-        RegisterUserCommand("s_nonstatic", g_tRealTimeSmoother.MakeNonStaticSample, false, true);
-        RegisterUserCommand("s_next", g_tRealTimeSmoother.SelectNextSample, false, true);
-        RegisterUserCommand("s_prev", g_tRealTimeSmoother.SelectPreviousSample, false, true);
-        RegisterUserCommand("s_toggle_unialloc", g_tRealTimeSmoother.ToggleUniformAllocation, false, true);
-        RegisterUserCommand("s_toggle_process", g_tRealTimeSmoother.ToggleAutoProcess, false, true);
-        RegisterUserCommand("s_toggle_preview", g_tRealTimeSmoother.TogglePreview, false, true);
-        RegisterUserCommand("s_preview", g_tRealTimeSmoother.DrawPreview, false, true);
-        RegisterUserCommand("s_process_origin", g_tRealTimeSmoother.InterpSampleOrigin, true, true);
-        RegisterUserCommand("s_process_angles", g_tRealTimeSmoother.InterpSampleAngles, true, true);
-        RegisterUserCommand("s_set_interp", g_tRealTimeSmoother.SetInterpType, true, true);
-        RegisterUserCommand("s_kb_params", g_tRealTimeSmoother.SetKBParams, true, true);
+        RegisterUserCommand("s_load", g_SmoothingTools.LoadSmooth, true, true);
+        RegisterUserCommand("s_save", g_SmoothingTools.SaveSmooth, true, true);
+        RegisterUserCommand("s_play", g_SmoothingTools.PlaySmooth, false, true);
+        RegisterUserCommand("s_stop", g_SmoothingTools.StopSmooth, false, true);
+        RegisterUserCommand("s_add", g_SmoothingTools.AddSample, true, true);
+        RegisterUserCommand("s_remove", g_SmoothingTools.RemoveSample, false, true);
+        RegisterUserCommand("s_remove_all", g_SmoothingTools.RemoveAllSamples, false, true);
+        RegisterUserCommand("s_sremove", g_SmoothingTools.RemoveSelectedSample, false, true);
+        RegisterUserCommand("s_replace", g_SmoothingTools.ReplaceSelectedSample, false, true);
+        RegisterUserCommand("s_add_before", g_SmoothingTools.AddSampleBeforeSelected, true, true);
+        RegisterUserCommand("s_add_after", g_SmoothingTools.AddSampleAfterSelected, true, true);
+        RegisterUserCommand("s_add_tick", g_SmoothingTools.AddTicksToSelectedSample, true, true);
+        RegisterUserCommand("s_tick", g_SmoothingTools.GetTick, false, true);
+        RegisterUserCommand("s_static", g_SmoothingTools.MakeStaticSample, false, true);
+        RegisterUserCommand("s_nonstatic", g_SmoothingTools.MakeNonStaticSample, false, true);
+        RegisterUserCommand("s_next", g_SmoothingTools.SelectNextSample, false, true);
+        RegisterUserCommand("s_prev", g_SmoothingTools.SelectPreviousSample, false, true);
+        RegisterUserCommand("s_toggle_unialloc", g_SmoothingTools.ToggleUniformAllocation, false, true);
+        RegisterUserCommand("s_toggle_process", g_SmoothingTools.ToggleAutoProcess, false, true);
+        RegisterUserCommand("s_toggle_preview", g_SmoothingTools.TogglePreview, false, true);
+        RegisterUserCommand("s_preview", g_SmoothingTools.DrawPreview, false, true);
+        RegisterUserCommand("s_process_origin", g_SmoothingTools.InterpSampleOrigin, true, true);
+        RegisterUserCommand("s_process_angles", g_SmoothingTools.InterpSampleAngles, true, true);
+        RegisterUserCommand("s_set_interp", g_SmoothingTools.SetInterpType, true, true);
+        RegisterUserCommand("s_kb_params", g_SmoothingTools.SetKBParams, true, true);
 	}
 
 	function GetClassName() { return m_sClassName; }
@@ -165,7 +212,7 @@ class CSmoothMaster
             local aSeekKeys2 = ["mapname", "origin_interp", "angles_interp", "version"];
 
             // validate keys of tables
-            for (local i = 0; i < length; i++)
+            for (local i = 0; i < length; ++i)
             {
                 nIterations++;
 
@@ -231,7 +278,7 @@ class CSmoothMaster
             nOriginInterpType = aCommonData["origin_interp"];
             nAnglesInterpType = aCommonData["angles_interp"];
 
-            for (local i = 0; i < length - 1; i++)
+            for (local i = 0; i < length - 1; ++i)
             {
                 if (i > 0 && aSmoothData[i]["tick"] < 1)
                     throw "key 'tick' must be bigger than 0";
@@ -316,7 +363,7 @@ class CSmoothMaster
         local sOutput;
         local aSmoothData = [];
 
-        for (local i = 0; i < m_aSamplePoints.len(); i++)
+        for (local i = 0; i < m_aSamplePoints.len(); ++i)
         {
             local p = m_aSamplePoints[i];
 
@@ -345,7 +392,7 @@ class CSmoothMaster
             version = 1 // in case I update smoother and it will affect I/O system
         });
 
-        sOutput = g_tRealTimeSmoother.SerializeObject(aSmoothData, "[\n", "]\n", false);
+        sOutput = g_SmoothingTools.SerializeObject(aSmoothData, "[\n", "]\n", false);
         StringToFile("smoothing_tools/smooth/" + sFileName + ".nut", sOutput);
 
         sayf("Smooth saved to file 'left4dead2/ems/smoothing_tools/smooth/%s.nut'", sFileName);
@@ -359,13 +406,13 @@ class CSmoothMaster
     {
         if (KeyInScriptScope(hPlayer, "selfie_camera"))
         {
-            if (g_bSelfieCamera[hPlayer.GetEntityIndex()])
+            if (g_SelfieCamera.bSelfieCamera[hPlayer.GetEntityIndex()])
                 return;
         }
 
 		if (KeyInScriptScope(hPlayer, "cinema_camera"))
 		{
-			if (g_bCinematicCamera[hPlayer.GetEntityIndex()])
+			if (g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()])
 				return;
 		}
 
@@ -398,7 +445,7 @@ class CSmoothMaster
         EnableCamera();
 
         m_SmoothStartTimer = CreateTimer(1.0, function(SmoothMaster){
-            RegisterOnTickFunction("g_tRealTimeSmoother.CameraSmooth_Think", SmoothMaster);
+            RegisterOnTickFunction("g_SmoothingTools.CameraSmooth_Think", SmoothMaster);
             SmoothMaster.m_SmoothStartTimer = null;
         }, this);
     }
@@ -411,9 +458,9 @@ class CSmoothMaster
     {
         if (m_bPlayingSmooth)
         {
-            if (IsOnTickFunctionRegistered("g_tRealTimeSmoother.CameraSmooth_Think", this))
+            if (IsOnTickFunctionRegistered("g_SmoothingTools.CameraSmooth_Think", this))
             {
-                RemoveOnTickFunction("g_tRealTimeSmoother.CameraSmooth_Think");
+                RemoveOnTickFunction("g_SmoothingTools.CameraSmooth_Think");
             }
             else
             {
@@ -787,7 +834,7 @@ class CSmoothMaster
         local start_tick = 0;
         local end_tick = 0;
 
-        for (local i = 0; i < m_aSamplePoints.len() - 1; i++)
+        for (local i = 0; i < m_aSamplePoints.len() - 1; ++i)
         {
             local nIterations = 0;
 
@@ -809,7 +856,7 @@ class CSmoothMaster
                 _interpType = current.GetInterpType();
 
             // interp points between two samples
-            for (local j = start_tick; j < end_tick; j++)
+            for (local j = start_tick; j < end_tick; ++j)
             {
                 local result;
                 nIterations++;
@@ -839,12 +886,12 @@ class CSmoothMaster
                     break;
                 
                 case SMOOTH_INTERP_SPLINE:
-                    result = g_tRealTimeSmoother.Catmull_Rom_Spline_Normalize(earliest.GetViewOrigin(), current.GetViewOrigin(), next.GetViewOrigin(), latest.GetViewOrigin(), frac);
+                    result = g_SmoothingTools.Catmull_Rom_Spline_Normalize(earliest.GetViewOrigin(), current.GetViewOrigin(), next.GetViewOrigin(), latest.GetViewOrigin(), frac);
                     break;
                 
                 case SMOOTH_INTERP_KOCHANEK_BARTELS_SPLINE:
                     local params = current.GetKochanekBartelsParams();
-                    result = g_tRealTimeSmoother.Kochanek_Bartels_Spline(
+                    result = g_SmoothingTools.Kochanek_Bartels_Spline(
                         params[0],
                         params[1],
                         params[2],
@@ -858,7 +905,7 @@ class CSmoothMaster
                 
                 case SMOOTH_INTERP_KOCHANEK_BARTELS_SPLINE_NORM:
                     local params = current.GetKochanekBartelsParams();
-                    result = g_tRealTimeSmoother.Kochanek_Bartels_Spline_NormalizeX(
+                    result = g_SmoothingTools.Kochanek_Bartels_Spline_NormalizeX(
                         params[0],
                         params[1],
                         params[2],
@@ -871,23 +918,23 @@ class CSmoothMaster
                     break;
                 
                 case SMOOTH_INTERP_HERMITE_SPLINE:
-                    result = g_tRealTimeSmoother.Hermite_Spline(earliest.GetViewOrigin(), current.GetViewOrigin(), next.GetViewOrigin(), frac);
+                    result = g_SmoothingTools.Hermite_Spline(earliest.GetViewOrigin(), current.GetViewOrigin(), next.GetViewOrigin(), frac);
                     break;
                 
                 case SMOOTH_INTERP_CUBIC_SPLINE:
-                    result = g_tRealTimeSmoother.Cubic_Spline(earliest.GetViewOrigin(), current.GetViewOrigin(), next.GetViewOrigin(), latest.GetViewOrigin(), frac);
+                    result = g_SmoothingTools.Cubic_Spline(earliest.GetViewOrigin(), current.GetViewOrigin(), next.GetViewOrigin(), latest.GetViewOrigin(), frac);
                     break;
                 
                 case SMOOTH_INTERP_CUBIC_SPLINE_NORM:
-                    result = g_tRealTimeSmoother.Cubic_Spline_NormalizeX(earliest.GetViewOrigin(), current.GetViewOrigin(), next.GetViewOrigin(), latest.GetViewOrigin(), frac);
+                    result = g_SmoothingTools.Cubic_Spline_NormalizeX(earliest.GetViewOrigin(), current.GetViewOrigin(), next.GetViewOrigin(), latest.GetViewOrigin(), frac);
                     break;
                 
                 case SMOOTH_INTERP_BSPLINE:
-                    result = g_tRealTimeSmoother.BSpline(earliest.GetViewOrigin(), current.GetViewOrigin(), next.GetViewOrigin(), latest.GetViewOrigin(), frac);
+                    result = g_SmoothingTools.BSpline(earliest.GetViewOrigin(), current.GetViewOrigin(), next.GetViewOrigin(), latest.GetViewOrigin(), frac);
                     break;
                 
                 case SMOOTH_INTERP_PARABOLIC_SPLINE:
-                    result = g_tRealTimeSmoother.Parabolic_Spline(earliest.GetViewOrigin(), current.GetViewOrigin(), next.GetViewOrigin(), latest.GetViewOrigin(), frac);
+                    result = g_SmoothingTools.Parabolic_Spline(earliest.GetViewOrigin(), current.GetViewOrigin(), next.GetViewOrigin(), latest.GetViewOrigin(), frac);
                     break;
                 
                 default:
@@ -941,7 +988,7 @@ class CSmoothMaster
         local start_tick = 0;
         local end_tick = 0;
 
-        for (local i = 0; i < m_aSamplePoints.len() - 1; i++)
+        for (local i = 0; i < m_aSamplePoints.len() - 1; ++i)
         {
             local nIterations = 0;
 
@@ -956,7 +1003,7 @@ class CSmoothMaster
 
             local dt = (end_tick - start_tick).tofloat();
 
-            for (local j = start_tick; j < end_tick; j++)
+            for (local j = start_tick; j < end_tick; ++j)
             {
                 local result;
                 nIterations++;
@@ -980,11 +1027,11 @@ class CSmoothMaster
                 switch (interpType)
                 {
                 case SMOOTH_INTERP_LINEAR:
-                    result = g_tRealTimeSmoother.InterpolateAngles(current.GetViewAngles(), next.GetViewAngles(), frac);
+                    result = g_SmoothingTools.InterpolateAngles(current.GetViewAngles(), next.GetViewAngles(), frac);
                     break;
                 
                 case SMOOTH_INTERP_SPLINE:
-                    result = g_tRealTimeSmoother.InterpolateAngles(current.GetViewAngles(), next.GetViewAngles(), g_tRealTimeSmoother.SimpleSpline(frac));
+                    result = g_SmoothingTools.InterpolateAngles(current.GetViewAngles(), next.GetViewAngles(), g_SmoothingTools.SimpleSpline(frac));
                     break;
                 
                 default:
@@ -1065,7 +1112,7 @@ class CSmoothMaster
         {
             if (m_aSamplePoints.len() > 1)
             {
-                for (local i = 0; i < m_aSamplePoints.len() - 1; i++)
+                for (local i = 0; i < m_aSamplePoints.len() - 1; ++i)
                 {
                     local point = m_aSamplePoints[i];
 
@@ -1077,7 +1124,7 @@ class CSmoothMaster
         else if (m_aProcessedPoints.len() > 1)
         {
             local border = m_aProcessedPoints.len() - 1;
-            for (local i = 0; i < m_aProcessedPoints.len(); i++)
+            for (local i = 0; i < m_aProcessedPoints.len(); ++i)
             {
                 local point = m_aProcessedPoints[i];
 
@@ -1411,7 +1458,7 @@ class CSmoothSample extends CSmoothPoint
     m_nInterpType = SMOOTH_INTERP_NONE;
 }
 
-g_tRealTimeSmoother <-
+g_SmoothingTools <-
 {
     Spline_Normalize = function(p1, p2, p3, p4, output_list)
     {
@@ -1449,8 +1496,8 @@ g_tRealTimeSmoother <-
     Cubic_Spline_NormalizeX = function(p1, p2, p3, p4, t)
     {
         local vectors = [null, null];
-        g_tRealTimeSmoother.Spline_Normalize(p1, p2, p3, p4, vectors);
-        return g_tRealTimeSmoother.Cubic_Spline(vectors[0], p2, p3, vectors[1], t);
+        g_SmoothingTools.Spline_Normalize(p1, p2, p3, p4, vectors);
+        return g_SmoothingTools.Cubic_Spline(vectors[0], p2, p3, vectors[1], t);
     }
 
     BSpline = function(p1, p2, p3, p4, t)
@@ -1491,8 +1538,8 @@ g_tRealTimeSmoother <-
     BSpline_NormalizeX = function(p1, p2, p3, p4, t)
     {
         local vectors = [null, null];
-        g_tRealTimeSmoother.Spline_Normalize(p1, p2, p3, p4, vectors);
-        return g_tRealTimeSmoother.BSpline(vectors[0], p2, p3, vectors[1], t);
+        g_SmoothingTools.Spline_Normalize(p1, p2, p3, p4, vectors);
+        return g_SmoothingTools.BSpline(vectors[0], p2, p3, vectors[1], t);
     }
 
     Parabolic_Spline = function(p1, p2, p3, p4, t)
@@ -1523,8 +1570,8 @@ g_tRealTimeSmoother <-
     Parabolic_Spline_NormalizeX = function(p1, p2, p3, p4, t)
     {
         local vectors = [null, null];
-        g_tRealTimeSmoother.Spline_Normalize(p1, p2, p3, p4, vectors);
-        return g_tRealTimeSmoother.Parabolic_Spline(vectors[0], p2, p3, vectors[1], t);
+        g_SmoothingTools.Spline_Normalize(p1, p2, p3, p4, vectors);
+        return g_SmoothingTools.Parabolic_Spline(vectors[0], p2, p3, vectors[1], t);
     }
 
     Hermite_Spline = function(p0, p1, p2, t)
@@ -1582,8 +1629,8 @@ g_tRealTimeSmoother <-
     Kochanek_Bartels_Spline_NormalizeX = function(tension, bias, continuity, p1, p2, p3, p4, t)
     {
         local vectors = [null, null];
-        g_tRealTimeSmoother.Spline_Normalize(p1, p2, p3, p4, vectors);
-        return Kg_tRealTimeSmoother.ochanek_Bartels_Spline(tension, bias, continuity, vectors[0], p2, p3, vectors[1], t);
+        g_SmoothingTools.Spline_Normalize(p1, p2, p3, p4, vectors);
+        return Kg_SmoothingTools.ochanek_Bartels_Spline(tension, bias, continuity, vectors[0], p2, p3, vectors[1], t);
     }
 
     Catmull_Rom_Spline = function(p1, p2, p3, p4, t)
@@ -1623,7 +1670,7 @@ g_tRealTimeSmoother <-
         p1n = p2 + (p1n * dt);
         p4n = p3 + (p4n * dt);
         
-        return g_tRealTimeSmoother.Catmull_Rom_Spline(p1n, p2, p3, p4n, t);
+        return g_SmoothingTools.Catmull_Rom_Spline(p1n, p2, p3, p4n, t);
     }
 
     SimpleSpline = function(value)
@@ -1647,12 +1694,12 @@ g_tRealTimeSmoother <-
         local sTab = "";
         local sEndTab = "";
 
-        for (local i = 0; i < nTabs; i++)
+        for (local i = 0; i < nTabs; ++i)
             sTab += "\t";
         
         if (nTabs > 0)
         {
-            for (local i = 0; i < nTabs - 1; i++)
+            for (local i = 0; i < nTabs - 1; ++i)
                 sEndTab += "\t";
         }
 
@@ -1678,11 +1725,11 @@ g_tRealTimeSmoother <-
 				break;
 
 			case "table":
-				sOutput += sTab + sIndiceString + g_tRealTimeSmoother.SerializeObject(val, "{\n", "}\n", true, nTabs);
+				sOutput += sTab + sIndiceString + g_SmoothingTools.SerializeObject(val, "{\n", "}\n", true, nTabs);
 				break;
 
 			case "array":
-				sOutput += sTab + sIndiceString + g_tRealTimeSmoother.SerializeObject(val, "[\n", "]\n", false, nTabs);
+				sOutput += sTab + sIndiceString + g_SmoothingTools.SerializeObject(val, "[\n", "]\n", false, nTabs);
 				break;
 
 			case "string":
@@ -1709,7 +1756,7 @@ g_tRealTimeSmoother <-
 
         if (point)
         {
-            if (KeyInScriptScope(hPlayer, "cinema_camera") && g_bCinematicCamera[hPlayer.GetEntityIndex()])
+            if (KeyInScriptScope(hPlayer, "cinema_camera") && g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()])
             {
                 local hCamera = GetScriptScopeVar(hPlayer, "cinema_camera")["camera"];
                 hCamera.SetOrigin(point.GetViewOrigin());
@@ -1728,7 +1775,7 @@ g_tRealTimeSmoother <-
 
         if (SmoothMaster.m_aProcessedPoints.len() - 1 <= tick)
         {
-            RemoveOnTickFunction("g_tRealTimeSmoother.CameraSmooth_Think");
+            RemoveOnTickFunction("g_SmoothingTools.CameraSmooth_Think");
             SmoothMaster.OnSmoothEnd();
             return;
         }
@@ -1785,7 +1832,7 @@ g_tRealTimeSmoother <-
         local vecOrigin, eAngles;
         local nTick = str_to_int(sArgs[0]);
 
-        if (KeyInScriptScope(hPlayer, "cinema_camera") && g_bCinematicCamera[hPlayer.GetEntityIndex()])
+        if (KeyInScriptScope(hPlayer, "cinema_camera") && g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()])
         {
             local hCamera = GetScriptScopeVar(hPlayer, "cinema_camera")["camera"];
             vecOrigin = hCamera.GetOrigin();
@@ -1814,7 +1861,7 @@ g_tRealTimeSmoother <-
             return;
         
         g_SmoothMaster.RemoveSample();
-        g_tRealTimeSmoother.TeleportToSample(hPlayer);
+        g_SmoothingTools.TeleportToSample(hPlayer);
     }
 
     RemoveSelectedSample = function(hPlayer)
@@ -1823,7 +1870,7 @@ g_tRealTimeSmoother <-
             return;
         
         g_SmoothMaster.RemoveSelectedSample();
-        g_tRealTimeSmoother.TeleportToSample(hPlayer);
+        g_SmoothingTools.TeleportToSample(hPlayer);
     }
 
     ReplaceSelectedSample = function(hPlayer)
@@ -1833,7 +1880,7 @@ g_tRealTimeSmoother <-
         
         local vecOrigin, eAngles;
 
-        if (KeyInScriptScope(hPlayer, "cinema_camera") && g_bCinematicCamera[hPlayer.GetEntityIndex()])
+        if (KeyInScriptScope(hPlayer, "cinema_camera") && g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()])
         {
             local hCamera = GetScriptScopeVar(hPlayer, "cinema_camera")["camera"];
             vecOrigin = hCamera.GetOrigin();
@@ -1861,7 +1908,7 @@ g_tRealTimeSmoother <-
         local vecOrigin, eAngles;
         local nTick = str_to_int(sArgs[0]);
 
-        if (KeyInScriptScope(hPlayer, "cinema_camera") && g_bCinematicCamera[hPlayer.GetEntityIndex()])
+        if (KeyInScriptScope(hPlayer, "cinema_camera") && g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()])
         {
             local hCamera = GetScriptScopeVar(hPlayer, "cinema_camera")["camera"];
             vecOrigin = hCamera.GetOrigin();
@@ -1889,7 +1936,7 @@ g_tRealTimeSmoother <-
         local vecOrigin, eAngles;
         local nTick = str_to_int(sArgs[0]);
 
-        if (KeyInScriptScope(hPlayer, "cinema_camera") && g_bCinematicCamera[hPlayer.GetEntityIndex()])
+        if (KeyInScriptScope(hPlayer, "cinema_camera") && g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()])
         {
             local hCamera = GetScriptScopeVar(hPlayer, "cinema_camera")["camera"];
             vecOrigin = hCamera.GetOrigin();
@@ -1949,7 +1996,7 @@ g_tRealTimeSmoother <-
             return;
         
         g_SmoothMaster.SelectNextSample();
-        g_tRealTimeSmoother.TeleportToSample(hPlayer);
+        g_SmoothingTools.TeleportToSample(hPlayer);
     }
 
     SelectPreviousSample = function(hPlayer)
@@ -1958,7 +2005,7 @@ g_tRealTimeSmoother <-
             return;
         
         g_SmoothMaster.SelectPreviousSample();
-        g_tRealTimeSmoother.TeleportToSample(hPlayer);
+        g_SmoothingTools.TeleportToSample(hPlayer);
     }
 
     ToggleUniformAllocation = function(hPlayer)
@@ -2095,5 +2142,5 @@ g_tRealTimeSmoother <-
     }
 };
 
-g_SmoothingTools <- CSmoothingTools();
-g_ScriptPluginsHelper.AddScriptPlugin(g_SmoothingTools);
+g_PluginSmoothingTools <- CSmoothingTools();
+g_ScriptPluginsHelper.AddScriptPlugin(g_PluginSmoothingTools);

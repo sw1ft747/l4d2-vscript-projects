@@ -1,42 +1,48 @@
-// Squirrel
 // Dynamic Light
 
-class CScriptPluginDynamicLight extends IScriptPlugin
+class CDynamicLight extends IScriptPlugin
 {
 	function Load()
 	{
-		g_tDynamicLight.ParseConfigFile();
+		g_DynamicLight.ParseConfigFile();
 
-		HookEvent("molotov_thrown", g_tDynamicLight.OnMolotovThrown, g_tDynamicLight);
-		HookEvent("weapon_fire", g_tDynamicLight.OnWeaponFire, g_tDynamicLight);
-		HookEvent("ability_use", g_tDynamicLight.OnAbilityUse, g_tDynamicLight);
-		HookEvent("break_prop", g_tDynamicLight.OnBreakProp, g_tDynamicLight);
+		HookEvent("molotov_thrown", g_DynamicLight.OnMolotovThrown, g_DynamicLight);
+		HookEvent("weapon_fire", g_DynamicLight.OnWeaponFire, g_DynamicLight);
+		HookEvent("ability_use", g_DynamicLight.OnAbilityUse, g_DynamicLight);
+		HookEvent("break_prop", g_DynamicLight.OnBreakProp, g_DynamicLight);
 
-		printl("[Dynamic Light]\nAuthor: Sw1ft\nVersion: 2.0.1c");
+		printl("[Dynamic Light]\nAuthor: Sw1ft\nVersion: 2.0.3");
 	}
 
 	function Unload()
 	{
+		UnhookEvent("molotov_thrown", g_DynamicLight.OnMolotovThrown, g_DynamicLight);
+		UnhookEvent("weapon_fire", g_DynamicLight.OnWeaponFire, g_DynamicLight);
+		UnhookEvent("ability_use", g_DynamicLight.OnAbilityUse, g_DynamicLight);
+		UnhookEvent("break_prop", g_DynamicLight.OnBreakProp, g_DynamicLight);
 
+		RemoveLoopFunction("DynamicLight_Think", 0.0334);
+		RemoveOnTickFunction("g_DynamicLight.DynamicLight_Think2");
+
+		RemoveChatCommand("!dl_reset");
+		RemoveChatCommand("!dl_reload");
 	}
 
 	function OnRoundStartPost()
-	{
-		
+	{	
 	}
 
 	function OnRoundEnd()
 	{
-
 	}
 
-	function AdditionalClassMethodsInjected()
+	function OnExtendClassMethods()
 	{
 		RegisterLoopFunction("DynamicLight_Think", 0.0334);
-		RegisterOnTickFunction("g_tDynamicLight.DynamicLight_Think2");
+		RegisterOnTickFunction("g_DynamicLight.DynamicLight_Think2");
 
-		RegisterChatCommand("!dl_reset", g_tDynamicLight.ResetDynamicLightSettings_Cmd, true);
-		RegisterChatCommand("!dl_reload", g_tDynamicLight.ReloadDynamicLightSettings_Cmd, true);
+		RegisterChatCommand("!dl_reset", g_DynamicLight.ResetDynamicLightSettings_Cmd, true);
+		RegisterChatCommand("!dl_reload", g_DynamicLight.ReloadDynamicLightSettings_Cmd, true);
 	}
 
 	function GetClassName() { return m_sClassName; }
@@ -45,21 +51,14 @@ class CScriptPluginDynamicLight extends IScriptPlugin
 
 	function GetInterfaceVersion() { return m_InterfaceVersion; }
 
-	function _set(key, val) { throw null; }
-
 	static m_InterfaceVersion = 1;
-	static m_sClassName = "CScriptPluginDynamicLight";
+	static m_sClassName = "CDynamicLight";
 	static m_sScriptPluginName = "Dynamic Light [No CVars Edition]";
 }
 
-g_DynamicLight <- CScriptPluginDynamicLight();
+g_PluginDynamicLight <- CDynamicLight();
 
-g_hMuzzleFlashParticle <- null;
-
-g_aParticlesList <- [];
-g_flMuzzleFlashTime <- array(MAXCLIENTS + 1, 0.0);
-
-g_tDynamicLightSettings <-
+::g_DynamicLightSettings <-
 {
 	dl_allow = 1
 	dl_mode = DL_HELD_ITEM | DL_PROJECTILE | DL_INFLUENCE_EFFECT | DL_INFECTED_GLOW | DL_MUZZLE_FLASH
@@ -73,10 +72,15 @@ g_tDynamicLightSettings <-
 	dl_spit_color = "0 192 0"
 }
 
-g_tDynamicLightSettingsSrc <- clone g_tDynamicLightSettings;
+::g_DynamicLightSettingsSrc <- clone g_DynamicLightSettings;
 
-g_tDynamicLight <-
+g_DynamicLight <-
 {
+	hMuzzleFlashParticle = null
+
+	aParticlesList = []
+	flMuzzleFlashTime = array(MAXCLIENTS + 1, 0.0)
+
 	ParseConfigFile = function(bReset = false)
 	{
 		local tData;
@@ -85,7 +89,7 @@ g_tDynamicLight <-
 		{
 			local sData = "{";
 
-			foreach (key, val in ::g_tDynamicLightSettings)
+			foreach (key, val in ::g_DynamicLightSettings)
 			{
 				switch (typeof val)
 				{
@@ -110,7 +114,7 @@ g_tDynamicLight <-
 
 		if (bReset)
 		{
-			g_tDynamicLightSettings = clone g_tDynamicLightSettingsSrc;
+			g_DynamicLightSettings = clone g_DynamicLightSettingsSrc;
 			SerializeSettings();
 			return;
 		}
@@ -119,36 +123,36 @@ g_tDynamicLight <-
 		{
 			try {
 				tData = compilestring("return " + tData)();
-				foreach (key, val in g_tDynamicLightSettings)
+				foreach (key, val in g_DynamicLightSettings)
 				{
 					if (tData.rawin(key))
 					{
 						switch (key)
 						{
 						case "dl_allow":
-							g_tDynamicLightSettings[key] = Math.Clamp(tData[key], 0, 1);
+							g_DynamicLightSettings[key] = Math.Clamp(tData[key], 0, 1);
 							break;
 						
 						case "dl_mode":
-							g_tDynamicLightSettings[key] = Math.Clamp(tData[key], 0, 31);
+							g_DynamicLightSettings[key] = Math.Clamp(tData[key], 0, 31);
 							break;
 						
 						case "dl_limit":
-							g_tDynamicLightSettings[key] = (tData[key] < 0 ? 0 : tData[key]);
+							g_DynamicLightSettings[key] = (tData[key] < 0 ? 0 : tData[key]);
 							break;
 						
 						case "dl_blink_interval":
-							g_tDynamicLightSettings[key] = (tData[key] < 0.01 ? 0.01 : tData[key]);
+							g_DynamicLightSettings[key] = (tData[key] < 0.01 ? 0.01 : tData[key]);
 							break;
 						
 						case "dl_flame_radius":
 						case "dl_pipe_radius":
 						case "dl_spit_radius":
-							g_tDynamicLightSettings[key] = Math.Clamp(tData[key], 0, 1000.0);
+							g_DynamicLightSettings[key] = Math.Clamp(tData[key], 0, 1000.0);
 							break;
 						
 						default:
-							g_tDynamicLightSettings[key] = tData[key];
+							g_DynamicLightSettings[key] = tData[key];
 							break;
 						}
 					}
@@ -200,14 +204,14 @@ g_tDynamicLight <-
 		{
 			CreateTimer(flDelay, function(hLight, flRadius, flDelay, bMode){
 				NetProps.SetPropFloat(hLight, "m_Radius", bMode ? 0.0 : flRadius);
-				g_tDynamicLight.Blink(hLight, flRadius, flDelay, !bMode);
+				g_DynamicLight.Blink(hLight, flRadius, flDelay, !bMode);
 			}, hLight, flRadius, flDelay, bMode);
 		}
 	}
 
 	PutOutMuzzleFlash = function(hLight, idx)
 	{
-		if (g_flMuzzleFlashTime[idx] <= Time())
+		if (g_DynamicLight.flMuzzleFlashTime[idx] <= Time())
 		{
 			NetProps.SetPropFloat(hLight, "m_Radius", 0.0);
 			AcceptEntityInput(hLight, "TurnOff");
@@ -216,13 +220,15 @@ g_tDynamicLight <-
 
 	OnProjectileSpawn = function(hProjectile, iType)
 	{
-		if (g_tDynamicLightSettings["dl_allow"] && g_tDynamicLightSettings["dl_mode"] & DL_PROJECTILE)
+		this = ::g_DynamicLight;
+
+		if (g_DynamicLightSettings["dl_allow"] && g_DynamicLightSettings["dl_mode"] & DL_PROJECTILE)
 		{
 			if (iType == 0) // pipe bomb
 			{
-				if (g_aParticlesList.len() + 1 < g_tDynamicLightSettings["dl_limit"])
+				if (aParticlesList.len() + 1 < g_DynamicLightSettings["dl_limit"])
 				{
-					local flRadius = g_tDynamicLightSettings["dl_pipe_radius"] * 1.25;
+					local flRadius = g_DynamicLightSettings["dl_pipe_radius"] * 1.25;
 					
 					local hLight = SpawnEntityFromTable("light_dynamic", {
 						_light = "200 0 0"
@@ -239,30 +245,30 @@ g_tDynamicLight <-
 						style = 6
 					});
 
-					g_tDynamicLight.Blink(hLight, flRadius, g_tDynamicLightSettings["dl_blink_interval"], true);
+					Blink(hLight, flRadius, g_DynamicLightSettings["dl_blink_interval"], true);
 
 					AttachEntity(hProjectile, hLight, "pipebomb_light");
 					AttachEntity(hProjectile, hLight2, "fuse");
 
-					g_aParticlesList.push(hLight);
-					g_aParticlesList.push(hLight2);
+					aParticlesList.push(hLight);
+					aParticlesList.push(hLight2);
 				}
 				return;
 			}
-			if (g_aParticlesList.len() < g_tDynamicLightSettings["dl_limit"])
+			if (aParticlesList.len() < g_DynamicLightSettings["dl_limit"])
 			{
 				if (iType == 1) // molotov
 				{
 					local hLight = SpawnEntityFromTable("light_dynamic", {
-						_light = g_tDynamicLightSettings["dl_molotov_color"]
+						_light = g_DynamicLightSettings["dl_molotov_color"]
 						spotlight_radius = 128
-						distance = g_tDynamicLightSettings["dl_flame_radius"]
+						distance = g_DynamicLightSettings["dl_flame_radius"]
 						brightness = 1
 						style = 6
 					});
 
 					AttachEntity(hProjectile, hLight, "wick");
-					g_aParticlesList.push(hLight);
+					aParticlesList.push(hLight);
 
 					return;
 				}
@@ -270,22 +276,22 @@ g_tDynamicLight <-
 				// spit
 				local hLight = SpawnEntityFromTable("light_dynamic", {
 					origin = hProjectile.GetOrigin()
-					_light = g_tDynamicLightSettings["dl_spit_color"]
+					_light = g_DynamicLightSettings["dl_spit_color"]
 					spotlight_radius = 128
-					distance = g_tDynamicLightSettings["dl_flame_radius"] * 0.75
+					distance = g_DynamicLightSettings["dl_flame_radius"] * 0.75
 					brightness = 1
 					style = 6
 				});
 
 				AttachEntity(hProjectile, hLight);
-				g_aParticlesList.push(hLight);
+				aParticlesList.push(hLight);
 			}
 		}
 	}
 
 	OnInfluenceEffectSpawn = function(hEntity, iType)
 	{
-		if (g_tDynamicLightSettings["dl_allow"] && g_tDynamicLightSettings["dl_mode"] & DL_INFLUENCE_EFFECT && g_aParticlesList.len() < g_tDynamicLightSettings["dl_limit"])
+		if (g_DynamicLightSettings["dl_allow"] && g_DynamicLightSettings["dl_mode"] & DL_INFLUENCE_EFFECT && g_DynamicLight.aParticlesList.len() < g_DynamicLightSettings["dl_limit"])
 		{
 			local flInfluenceEffectLifeTime, flRadius, sColor;
 
@@ -294,24 +300,24 @@ g_tDynamicLight <-
 			// inferno or fireworks
 			case 0:
 			case 1:
-				flRadius = g_tDynamicLightSettings["dl_flame_radius"] * 1.25;
+				flRadius = g_DynamicLightSettings["dl_flame_radius"] * 1.25;
 				flInfluenceEffectLifeTime = cvar("inferno_flame_lifetime", null, false);
 				if (iType == 0)
 				{
-					sColor = g_tDynamicLightSettings["dl_molotov_color"];
+					sColor = g_DynamicLightSettings["dl_molotov_color"];
 				}
 				else
 				{
 					flInfluenceEffectLifeTime -= 1.5;
-					sColor = g_tDynamicLightSettings["dl_fireworks_color"];
+					sColor = g_DynamicLightSettings["dl_fireworks_color"];
 				}
 				break;
 			
 			// spit
 			default:
-				flRadius = g_tDynamicLightSettings["dl_spit_radius"] * 1.25;
+				flRadius = g_DynamicLightSettings["dl_spit_radius"] * 1.25;
 				flInfluenceEffectLifeTime = 7.25;
-				sColor = g_tDynamicLightSettings["dl_spit_color"];
+				sColor = g_DynamicLightSettings["dl_spit_color"];
 				break;
 			}
 
@@ -352,7 +358,7 @@ g_tDynamicLight <-
 				}
 
 				AttachEntity(hEntity, hLight);
-				g_aParticlesList.push(hLight);
+				g_DynamicLight.aParticlesList.push(hLight);
 			}
 		}
 	}
@@ -364,7 +370,7 @@ g_tDynamicLight <-
 		{
 			if (!KeyInScriptScope(hEntity, "spawned"))
 			{
-				g_tDynamicLight.OnInfluenceEffectSpawn(hEntity, 0);
+				g_DynamicLight.OnInfluenceEffectSpawn(hEntity, 0);
 				SetScriptScopeVar(hEntity, "spawned", true);
 			}
 		}
@@ -374,7 +380,7 @@ g_tDynamicLight <-
 		{
 			if (!KeyInScriptScope(hEntity, "spawned"))
 			{
-				g_tDynamicLight.OnProjectileSpawn(hEntity, 0);
+				g_DynamicLight.OnProjectileSpawn(hEntity, 0);
 				SetScriptScopeVar(hEntity, "spawned", true);
 			}
 		}
@@ -384,7 +390,7 @@ g_tDynamicLight <-
 		{
 			if (!KeyInScriptScope(hEntity, "spawned"))
 			{
-				g_tDynamicLight.OnInfluenceEffectSpawn(hEntity, 2);
+				g_DynamicLight.OnInfluenceEffectSpawn(hEntity, 2);
 				SetScriptScopeVar(hEntity, "spawned", true);
 			}
 		}
@@ -392,29 +398,31 @@ g_tDynamicLight <-
 
 	DynamicLight_Think2 = function()
 	{
+		this = ::g_DynamicLight;
+
 		local idx = 0;
-		local length = g_aParticlesList.len();
+		local length = aParticlesList.len();
 
 		while (idx < length)
 		{
-			if (!g_aParticlesList[idx].IsValid())
+			if (!aParticlesList[idx].IsValid())
 			{
-				g_aParticlesList.remove(idx);
+				aParticlesList.remove(idx);
 				length--;
 				continue;
 			}
 			idx++;
 		}
 
-		if (g_hMuzzleFlashParticle && g_hMuzzleFlashParticle.IsValid())
+		if (hMuzzleFlashParticle && hMuzzleFlashParticle.IsValid())
 		{
-			local hPlayer = GetScriptScopeVar(g_hMuzzleFlashParticle, "owner");
+			local hPlayer = GetScriptScopeVar(hMuzzleFlashParticle, "owner");
 			if (hPlayer.IsValid())
 			{
 				local vecDirection = hPlayer.EyeAngles().Forward();
 				local vecEyePosition = hPlayer.EyePosition();
 				local vecPos = hPlayer.DoTraceLine(eTrace.Type_Pos, 30.0);
-				g_hMuzzleFlashParticle.SetOrigin(((vecEyePosition - vecPos).LengthSqr() <= 625.0) ? (vecPos - vecDirection) : (vecEyePosition + vecDirection * 25.0));
+				hMuzzleFlashParticle.SetOrigin(((vecEyePosition - vecPos).LengthSqr() <= 625.0) ? (vecPos - vecDirection) : (vecEyePosition + vecDirection * 25.0));
 			}
 		}
 	}
@@ -426,7 +434,7 @@ g_tDynamicLight <-
 		{
 			if (!KeyInScriptScope(hEntity, "spawned"))
 			{
-				g_tDynamicLight.OnInfluenceEffectSpawn(hEntity, 1);
+				g_DynamicLight.OnInfluenceEffectSpawn(hEntity, 1);
 				SetScriptScopeVar(hEntity, "spawned", true);
 			}
 		}
@@ -439,7 +447,7 @@ g_tDynamicLight <-
 		{
 			if (!KeyInScriptScope(hEntity, "spawned"))
 			{
-				g_tDynamicLight.OnProjectileSpawn(hEntity, 2);
+				g_DynamicLight.OnProjectileSpawn(hEntity, 2);
 				SetScriptScopeVar(hEntity, "spawned", true);
 			}
 		}
@@ -452,7 +460,7 @@ g_tDynamicLight <-
 		{
 			if (!KeyInScriptScope(hEntity, "spawned"))
 			{
-				g_tDynamicLight.OnProjectileSpawn(hEntity, 1);
+				g_DynamicLight.OnProjectileSpawn(hEntity, 1);
 				SetScriptScopeVar(hEntity, "spawned", true);
 			}
 		}
@@ -460,7 +468,7 @@ g_tDynamicLight <-
 
 	OnWeaponFire = function(tParams)
 	{
-		if (g_tDynamicLightSettings["dl_allow"] && g_tDynamicLightSettings["dl_mode"] & DL_MUZZLE_FLASH)
+		if (g_DynamicLightSettings["dl_allow"] && g_DynamicLightSettings["dl_mode"] & DL_MUZZLE_FLASH)
 		{
 			local bAutomaticWeapon = true;
 
@@ -495,8 +503,8 @@ g_tDynamicLight <-
 					AcceptEntityInput(hLight, "TurnOn");
 					NetProps.SetPropFloat(hLight, "m_Radius", bAutomaticWeapon ? (RandomInt(0, 1) ? 65.0 : RandomFloat(155.0, 255.0)) : RandomFloat(100.0, 255.0));
 					
-					g_flMuzzleFlashTime[hPlayer.GetEntityIndex()] = Time() + 0.0334;
-					CreateTimer(0.0334, g_tDynamicLight.PutOutMuzzleFlash, hLight, hPlayer.GetEntityIndex());
+					g_DynamicLight.flMuzzleFlashTime[hPlayer.GetEntityIndex()] = Time() + 0.0334;
+					CreateTimer(0.0334, g_DynamicLight.PutOutMuzzleFlash, hLight, hPlayer.GetEntityIndex());
 				}
 				
 				break;
@@ -507,19 +515,19 @@ g_tDynamicLight <-
 	OnAbilityUse = function(tParams)
 	{
 		if (tParams["ability"] == "ability_spit")
-			CreateTimer(0.24, g_tDynamicLight.FindSpitterProjectile);
+			CreateTimer(0.24, g_DynamicLight.FindSpitterProjectile);
 	}
 
 	OnBreakProp = function(tParams)
 	{
-		CreateTimer(0.01, g_tDynamicLight.FindFireCrackerBlast);
+		CreateTimer(0.01, g_DynamicLight.FindFireCrackerBlast);
 	}
 
 	ResetDynamicLightSettings_Cmd = function(hPlayer)
 	{
 		if (hPlayer.IsHost())
 		{
-			g_tDynamicLight.ParseConfigFile(true);
+			g_DynamicLight.ParseConfigFile(true);
 			EmitSoundOnClient("EDIT_TOGGLE_PLACE_MODE", hPlayer);
 		}
 	}
@@ -528,7 +536,7 @@ g_tDynamicLight <-
 	{
 		if (hPlayer.IsHost())
 		{
-			g_tDynamicLight.ParseConfigFile();
+			g_DynamicLight.ParseConfigFile();
 			EmitSoundOnClient("EDIT_TOGGLE_PLACE_MODE", hPlayer);
 		}
 	}
@@ -553,12 +561,12 @@ function DynamicLight_Think()
 		local sActiveWeapon;
 		local tParams = GetScriptScopeVar(hPlayer, "dynamic_light");
 
-		if (g_tDynamicLightSettings["dl_allow"])
+		if (g_DynamicLightSettings["dl_allow"])
 		{
 			if (hPlayer.IsAlive())
 			{
-				local length = g_aParticlesList.len();
-				local mode = g_tDynamicLightSettings["dl_mode"];
+				local length = g_DynamicLight.aParticlesList.len();
+				local mode = g_DynamicLightSettings["dl_mode"];
 				
 				if (hPlayer.IsSurvivor() && NetProps.GetPropInt(hPlayer, "m_nWaterLevel") < 3)
 				{
@@ -578,7 +586,7 @@ function DynamicLight_Think()
 
 						if (hPlayer.IsHost())
 						{
-							g_hMuzzleFlashParticle = hLight;
+							g_DynamicLight.hMuzzleFlashParticle = hLight;
 							SetScriptScopeVar(hLight, "owner", hPlayer);
 						}
 						else
@@ -603,29 +611,29 @@ function DynamicLight_Think()
 							local sClass = tInv["slot2"].GetClassname();
 							if (sClass != tParams["name"] && sClass == sActiveWeapon)
 							{
-								if (sClass == "weapon_molotov" && length < g_tDynamicLightSettings["dl_limit"])
+								if (sClass == "weapon_molotov" && length < g_DynamicLightSettings["dl_limit"])
 								{
 									local hLight = SpawnEntityFromTable("light_dynamic", {
-										_light = g_tDynamicLightSettings["dl_molotov_color"]
+										_light = g_DynamicLightSettings["dl_molotov_color"]
 										spotlight_radius = 128
-										distance = g_tDynamicLightSettings["dl_flame_radius"]
+										distance = g_DynamicLightSettings["dl_flame_radius"]
 										brightness = 1
 										style = 6
 									});
 
-									AttachEntity(hPlayer, hLight, g_tDynamicLight.GetParticleAttachment(NetProps.GetPropString(hPlayer, "m_ModelName")));
+									AttachEntity(hPlayer, hLight, g_DynamicLight.GetParticleAttachment(NetProps.GetPropString(hPlayer, "m_ModelName")));
 
-									g_aParticlesList.push(hLight);
+									g_DynamicLight.aParticlesList.push(hLight);
 
-									g_tDynamicLight.RemoveParticles(tParams);
+									g_DynamicLight.RemoveParticles(tParams);
 									tParams["particle"] = hLight;
 									tParams["name"] = sClass;
 
 									continue;
 								}
-								else if (sClass == "weapon_pipe_bomb" && length + 1 < g_tDynamicLightSettings["dl_limit"])
+								else if (sClass == "weapon_pipe_bomb" && length + 1 < g_DynamicLightSettings["dl_limit"])
 								{
-									local flRadius = g_tDynamicLightSettings["dl_pipe_radius"];
+									local flRadius = g_DynamicLightSettings["dl_pipe_radius"];
 
 									local hLight = SpawnEntityFromTable("light_dynamic", {
 										_light = "255 0 0"
@@ -643,15 +651,15 @@ function DynamicLight_Think()
 										style = 6
 									});
 
-									g_tDynamicLight.Blink(hLight, flRadius, g_tDynamicLightSettings["dl_blink_interval"], true);
+									g_DynamicLight.Blink(hLight, flRadius, g_DynamicLightSettings["dl_blink_interval"], true);
 
-									AttachEntity(hPlayer, hLight, g_tDynamicLight.GetParticleAttachment(NetProps.GetPropString(hPlayer, "m_ModelName")));
+									AttachEntity(hPlayer, hLight, g_DynamicLight.GetParticleAttachment(NetProps.GetPropString(hPlayer, "m_ModelName")));
 									AttachEntity(hPlayer, hLight2, "armR_T");
 
-									g_aParticlesList.push(hLight);
-									g_aParticlesList.push(hLight2);
+									g_DynamicLight.aParticlesList.push(hLight);
+									g_DynamicLight.aParticlesList.push(hLight2);
 
-									g_tDynamicLight.RemoveParticles(tParams);
+									g_DynamicLight.RemoveParticles(tParams);
 									tParams["particle"] = hLight;
 									tParams["particle2"] = hLight2;
 									tParams["name"] = sClass;
@@ -666,29 +674,29 @@ function DynamicLight_Think()
 				{
 					if (hPlayer.IsOnFire() && NetProps.GetPropInt(hPlayer, "m_nWaterLevel") < 1)
 					{
-						if (!tParams["burning"] && length < g_tDynamicLightSettings["dl_limit"])
+						if (!tParams["burning"] && length < g_DynamicLightSettings["dl_limit"])
 						{
 							local hLight = SpawnEntityFromTable("light_dynamic", {
 								origin = hPlayer.GetBodyPosition(0.35)
-								_light = g_tDynamicLightSettings["dl_molotov_color"]
+								_light = g_DynamicLightSettings["dl_molotov_color"]
 								spotlight_radius = 128
-								distance = g_tDynamicLightSettings["dl_flame_radius"] * 0.75
+								distance = g_DynamicLightSettings["dl_flame_radius"] * 0.75
 								brightness = 2
 								style = 6
 							});
 
 							AttachEntity(hPlayer, hLight);
 
-							g_aParticlesList.push(hLight);
+							g_DynamicLight.aParticlesList.push(hLight);
 
-							g_tDynamicLight.RemoveParticles(tParams);
+							g_DynamicLight.RemoveParticles(tParams);
 							tParams["particle"] = hLight;
 						}
 						tParams["burning"] = true;
 					}
 					else
 					{
-						if (tParams["burning"]) g_tDynamicLight.RemoveParticles(tParams);
+						if (tParams["burning"]) g_DynamicLight.RemoveParticles(tParams);
 						tParams["burning"] = false;
 					}
 				}
@@ -697,14 +705,44 @@ function DynamicLight_Think()
 
 		if (tParams["name"] != sActiveWeapon)
 		{
-			g_tDynamicLight.RemoveParticles(tParams);
+			g_DynamicLight.RemoveParticles(tParams);
 			tParams["name"] = null;
 			tParams["particle"] = null;
 			tParams["particle2"] = null;
 		}
 	}
 
-	newthread(g_tDynamicLight.DynamicLight_ThinkThread).call();
+	local hEntity;
+	while (hEntity = Entities.FindByClassname(hEntity, "inferno"))
+	{
+		if (!KeyInScriptScope(hEntity, "spawned"))
+		{
+			g_DynamicLight.OnInfluenceEffectSpawn(hEntity, 0);
+			SetScriptScopeVar(hEntity, "spawned", true);
+		}
+	}
+
+	hEntity = null;
+	while (hEntity = Entities.FindByClassname(hEntity, "pipe_bomb_projectile"))
+	{
+		if (!KeyInScriptScope(hEntity, "spawned"))
+		{
+			g_DynamicLight.OnProjectileSpawn(hEntity, 0);
+			SetScriptScopeVar(hEntity, "spawned", true);
+		}
+	}
+
+	hEntity = null;
+	while (hEntity = Entities.FindByClassname(hEntity, "insect_swarm"))
+	{
+		if (!KeyInScriptScope(hEntity, "spawned"))
+		{
+			g_DynamicLight.OnInfluenceEffectSpawn(hEntity, 2);
+			SetScriptScopeVar(hEntity, "spawned", true);
+		}
+	}
+
+	// newthread(g_DynamicLight.DynamicLight_ThinkThread).call();
 }
 
-g_ScriptPluginsHelper.AddScriptPlugin(g_DynamicLight);
+g_ScriptPluginsHelper.AddScriptPlugin(g_PluginDynamicLight);

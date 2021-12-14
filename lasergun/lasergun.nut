@@ -1,40 +1,44 @@
-// Squirrel
 // Laser Gun
 
-class CScriptPluginLaserGun extends IScriptPlugin
+class CLaserGun extends IScriptPlugin
 {
 	function Load()
 	{
 		::g_ConVar_LaserGunMaxReflects <- CreateConVar("laser_max_reflects", 10);
 
-		RegisterOnTickFunction("g_tLaserGun.LaserGun_Think");
-		RegisterOnTickFunction("g_tLaserGun.LaserBeam_Think");
+		RegisterOnTickFunction("g_LaserGun.LaserGun_Think");
+		RegisterOnTickFunction("g_LaserGun.LaserBeam_Think");
 
-		HookEvent("player_disconnect", g_tLaserGun.OnPlayerDisconnect, g_tLaserGun);
+		HookEvent("player_disconnect", g_LaserGun.OnPlayerDisconnect, g_LaserGun);
 
-		g_ConVar_LaserGunMaxReflects.AddChangeHook(g_tLaserGun.OnConVarChange);
+		g_ConVar_LaserGunMaxReflects.AddChangeHook(g_LaserGun.OnConVarChange);
 
-		printl("[Laser Gun]\nAuthor: Sw1ft\nVersion: 2.1.4");
+		printl("[Laser Gun]\nAuthor: Sw1ft\nVersion: 2.1.5");
 	}
 
 	function Unload()
 	{
+		RemoveConVar(g_ConVar_LaserGunMaxReflects);
 
+		RemoveOnTickFunction("g_LaserGun.LaserGun_Think");
+		RemoveOnTickFunction("g_LaserGun.LaserBeam_Think");
+
+		UnhookEvent("player_disconnect", g_LaserGun.OnPlayerDisconnect, g_LaserGun);
+
+		RemoveChatCommand("!laser_color");
 	}
 
 	function OnRoundStartPost()
 	{
-		
 	}
 
 	function OnRoundEnd()
 	{
-
 	}
 
-	function AdditionalClassMethodsInjected()
+	function OnExtendClassMethods()
 	{
-		RegisterChatCommand("!laser_color", g_tLaserGun.ChangeLaserBeamColor, true, true);
+		RegisterChatCommand("!laser_color", g_LaserGun.ChangeLaserBeamColor, true, true);
 	}
 
 	function GetClassName() { return m_sClassName; }
@@ -43,10 +47,8 @@ class CScriptPluginLaserGun extends IScriptPlugin
 
 	function GetInterfaceVersion() { return m_InterfaceVersion; }
 
-	function _set(key, val) { throw null; }
-
 	static m_InterfaceVersion = 1;
-	static m_sClassName = "CScriptPluginLaserGun";
+	static m_sClassName = "CLaserGun";
 	static m_sScriptPluginName = "Laser Gun";
 }
 
@@ -77,17 +79,17 @@ class CLaserBeam
 	m_flLifeTime = 0.0;
 }
 
-g_LaserGun <- CScriptPluginLaserGun();
+g_PluginLaserGun <- CLaserGun();
 
-if (!("g_sLaserBeamColor" in this)) g_sLaserBeamColor <- array(MAXCLIENTS + 1, "0 127 255");
+if (!("g_sLGLaserBeamColor" in this)) g_sLGLaserBeamColor <- array(MAXCLIENTS + 1, "0 127 255");
 
-BeamTraceMask <- eTrace.Mask_Shot & ~0x02; // CONTENTS_WINDOW
+::trace_util_BeamTraceMask <- eTrace.Mask_Shot & ~0x02; // CONTENTS_WINDOW
 
-g_aLaserBeams <- [];
-
-g_tLaserGun <-
+g_LaserGun <-
 {
-	g_sExclusionClasses =
+	aLaserBeams = []
+
+	sExclusionClasses =
 	[
 		"player"
 		"infected"
@@ -97,7 +99,7 @@ g_tLaserGun <-
 		"func_breakable"
 	]
 
-	g_aExclusionModelList =
+	aExclusionModelList =
 	[
 		"models/props_junk/gascan001a.mdl"
 		"models/props_equipment/oxygentank01.mdl"
@@ -128,7 +130,7 @@ g_tLaserGun <-
 				break;
 				
 			case "prop_physics":
-				if (g_tLaserGun.g_aExclusionModelList.find(NetProps.GetPropString(hEntity, "m_ModelName")) != null) aEntities.push(hEntity);
+				if (g_LaserGun.aExclusionModelList.find(NetProps.GetPropString(hEntity, "m_ModelName")) != null) aEntities.push(hEntity);
 				break;
 			}
 		}
@@ -140,27 +142,26 @@ g_tLaserGun <-
 			local aHitEntities = [];
 			local hEntityNew, vecStartNew;
 			local vecRayDir = eAngles.Forward();
-			local vecDropPoint = DoTraceLine(vecStart, vecRayDir, eTrace.Type_Pos, eTrace.Distance, BeamTraceMask, hPlayer);
+			local vecDropPoint = DoTraceLine(vecStart, vecRayDir, eTrace.Type_Pos, eTrace.Distance, trace_util_BeamTraceMask, hPlayer);
 
-			if (hEntity = DoTraceLine(vecStart, vecRayDir, eTrace.Type_Hit, eTrace.Distance, BeamTraceMask, hPlayer))
+			if (hEntity = DoTraceLine(vecStart, vecRayDir, eTrace.Type_Hit, eTrace.Distance, trace_util_BeamTraceMask, hPlayer))
 			{
 				// did we hit entity that the beam must pass through?
-				if (g_tLaserGun.g_sExclusionClasses.find(hEntity.GetClassname()) != null || g_tLaserGun.g_aExclusionModelList.find(NetProps.GetPropString(hEntity, "m_ModelName")) != null)
+				if (g_LaserGun.sExclusionClasses.find(hEntity.GetClassname()) != null || g_LaserGun.aExclusionModelList.find(NetProps.GetPropString(hEntity, "m_ModelName")) != null)
 				{
 					aHitEntities.push(hEntity);
 					while (hEntity)
 					{
 						hEntityNew = hEntity;
 						vecStartNew = vecDropPoint;
-
-						vecDropPoint = DoTraceLine(vecDropPoint, vecRayDir, eTrace.Type_Pos, eTrace.Distance, BeamTraceMask, hEntity);
-						hEntity = DoTraceLine(vecDropPoint, vecRayDir, eTrace.Type_Hit, eTrace.Distance, BeamTraceMask, hEntity);
-
+						vecDropPoint = DoTraceLine(vecDropPoint, vecRayDir, eTrace.Type_Pos, eTrace.Distance, trace_util_BeamTraceMask, hEntity);
+						hEntity = DoTraceLine(vecDropPoint, vecRayDir, eTrace.Type_Hit, eTrace.Distance, trace_util_BeamTraceMask, hEntity);
 						if (hEntity)
 						{
-							if (g_tLaserGun.g_sExclusionClasses.find(hEntity.GetClassname()) == null && g_tLaserGun.g_aExclusionModelList.find(NetProps.GetPropString(hEntity, "m_ModelName")) == null)
+							if (g_LaserGun.sExclusionClasses.find(hEntity.GetClassname()) == null && g_LaserGun.aExclusionModelList.find(NetProps.GetPropString(hEntity, "m_ModelName")) == null)
+							{
 								break;
-
+							}
 							aHitEntities.push(hEntity);
 						}
 					}
@@ -169,10 +170,10 @@ g_tLaserGun <-
 
 			// trace additional points for triangle
 			local vecPointA = DoTraceLine(vecStartNew != null ? vecStartNew : vecStart, (eAngles - QAngle(0, 0.01, 0)).Forward(),
-										eTrace.Type_Pos, eTrace.Distance, BeamTraceMask,  hEntityNew != null ? hEntityNew : hPlayer);
+										eTrace.Type_Pos, eTrace.Distance, trace_util_BeamTraceMask,  hEntityNew != null ? hEntityNew : hPlayer);
 
 			local vecPointB = DoTraceLine(vecStartNew != null ? vecStartNew : vecStart, (eAngles - QAngle(0.01, 0, 0)).Forward(),
-										eTrace.Type_Pos, eTrace.Distance,  BeamTraceMask, hEntityNew != null ? hEntityNew : hPlayer);
+										eTrace.Type_Pos, eTrace.Distance,  trace_util_BeamTraceMask, hEntityNew != null ? hEntityNew : hPlayer);
 
 			local vecNormal = ((vecPointA - vecDropPoint).Cross(vecPointB - vecDropPoint)).Normalize(); // get normal of wall (or something else) using cross product
 			local vecDir = VMath.Reflect(vecRayDir, vecNormal); // get new direction of the reflected ray
@@ -183,7 +184,6 @@ g_tLaserGun <-
 				start_active = 1
 				effect_name = "sparks_generic_random_core"
 			});
-
 			hParticle.SetAngles(VectorToQAngle(vecNormal));
 
 			CreateTimer(1.0, function(hParticle){
@@ -191,9 +191,9 @@ g_tLaserGun <-
 			}, hParticle);
 			
 			// beam effect
-			g_aLaserBeams.push(CLaserBeam(SpawnEntityFromTable("env_laser", {
+			g_LaserGun.aLaserBeams.push(CLaserBeam(SpawnEntityFromTable("env_laser", {
 				origin = vecStart
-				rendercolor = g_sLaserBeamColor[hPlayer.GetEntityIndex()]
+				rendercolor = g_sLGLaserBeamColor[hPlayer.GetEntityIndex()]
 				texture = "sprites/laserbeam.spr"
 				renderamt = "255"
 				TextureScroll = 100
@@ -216,9 +216,13 @@ g_tLaserGun <-
 				local vecOrigin = hEntity.GetOrigin();
 
 				if (sClass == "player")
+				{
 					vecOrigin = hEntity.GetBodyPosition();
+				}
 				else if (sClass == "infected" || sClass == "witch")
+				{
 					vecOrigin += Vector(0, 0, 47);
+				}
 
 				// is entity between two points of the beam?
 				if ((vecDropPoint - vecStart).Dot(vecOrigin - vecStart) > 0 && (vecStart - vecDropPoint).Dot(vecOrigin - vecDropPoint) > 0)
@@ -240,7 +244,7 @@ g_tLaserGun <-
 			{
 				local hLight = SpawnEntityFromTable("light_dynamic", {
 					origin = vecStart
-					_light = g_sLaserBeamColor[hPlayer.GetEntityIndex()]
+					_light = g_sLGLaserBeamColor[hPlayer.GetEntityIndex()]
 					spotlight_radius = 128
 					distance = 150.0
 					brightness = 1
@@ -254,7 +258,6 @@ g_tLaserGun <-
 
 			eAngles = VectorToQAngle(vecDir);
 			vecStart = vecDropPoint;
-
 			iReflects++;
 		}
 	}
@@ -281,8 +284,8 @@ g_tLaserGun <-
 				default:			return;
 				}
 
-				if (sColor == g_sLaserBeamColor[hPlayer.GetEntityIndex()]) return;
-				else g_sLaserBeamColor[hPlayer.GetEntityIndex()] = sColor;
+				if (sColor == g_sLGLaserBeamColor[hPlayer.GetEntityIndex()]) return;
+				else g_sLGLaserBeamColor[hPlayer.GetEntityIndex()] = sColor;
 			}
 			else if (sColor.len() == 3)
 			{
@@ -298,7 +301,7 @@ g_tLaserGun <-
 				catch (error) {b = 0};
 
 				if (r + g + b < 40) return SayMsg("[Laser Gun] The color is too dull, try another");
-				else g_sLaserBeamColor[hPlayer.GetEntityIndex()] = format("%d %d %d", r, g, b);
+				else g_sLGLaserBeamColor[hPlayer.GetEntityIndex()] = format("%d %d %d", r, g, b);
 			}
 			else return;
 
@@ -313,12 +316,12 @@ g_tLaserGun <-
 		while (hProjectile = Entities.FindByClassname(hProjectile, "grenade_launcher_projectile"))
 		{
 			local hPlayer;
-
+			
 			if (hPlayer = NetProps.GetPropEntity(hProjectile, "m_hThrower"))
 			{
 				local vecPush = hPlayer.EyeAngles().Forward(); vecPush.z = 0.0; vecPush *= -200;
-				
-				g_tLaserGun.LaserGun(hPlayer, hPlayer.EyeAngles(), hProjectile.GetOrigin());
+
+				g_LaserGun.LaserGun(hPlayer, hPlayer.EyeAngles(), hProjectile.GetOrigin());
 				NetProps.SetPropVector(hPlayer, "m_vecBaseVelocity", vecPush);
 
 				hProjectile.Kill();
@@ -328,16 +331,18 @@ g_tLaserGun <-
 
 	LaserBeam_Think = function()
 	{
-		for (local i = 0; i < g_aLaserBeams.len(); i++)
+		this = ::g_LaserGun;
+
+		for (local i = 0; i < aLaserBeams.len(); i++)
 		{
-			if (g_aLaserBeams[i].IsBeamEntityValid() && !g_aLaserBeams[i].IsLifeTimeOut())
+			if (aLaserBeams[i].IsBeamEntityValid() && !aLaserBeams[i].IsLifeTimeOut())
 			{
-				g_aLaserBeams[i].SetEndPosition();
+				aLaserBeams[i].SetEndPosition();
 			}
 			else
 			{
-				g_aLaserBeams[i].DestroyBeam();
-				g_aLaserBeams.remove(i);
+				aLaserBeams[i].DestroyBeam();
+				aLaserBeams.remove(i);
 				i--;
 			}
 		}
@@ -345,7 +350,8 @@ g_tLaserGun <-
 
 	OnConVarChange = function(ConVar, sLastValue, sNewValue)
 	{
-		try {
+		try
+		{
 			sNewValue = sNewValue.tointeger();
 			if (sNewValue < 1)
 			{
@@ -353,18 +359,19 @@ g_tLaserGun <-
 				ConVar.SetValue(1);
 			}
 		}
-		catch (error) {
+		catch (error)
+		{
 			ConVar.SetValue(sLastValue);
 		}
 	}
 
 	OnPlayerDisconnect = function(tParams)
 	{
-		g_sLaserBeamColor[tParams["_player"].GetEntityIndex()] = "0 127 255";
+		g_sLGLaserBeamColor[tParams["_player"].GetEntityIndex()] = "0 127 255";
 	}
 };
 
 PrecacheEntityFromTable({classname = "env_laser", texture = "sprites/laserbeam.spr"});
 PrecacheEntityFromTable({classname = "info_particle_system", effect_name = "sparks_generic_random_core"});
 
-g_ScriptPluginsHelper.AddScriptPlugin(g_LaserGun);
+g_ScriptPluginsHelper.AddScriptPlugin(g_PluginLaserGun);

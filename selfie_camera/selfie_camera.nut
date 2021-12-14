@@ -1,35 +1,38 @@
-// Squirrel
 // Selfie Camera
 
 class CSelfieCamera extends IScriptPlugin
 {
 	function Load()
 	{
-		RegisterOnTickFunction("g_tSelfieCamera.Camera_Think");
-		HookEvent("player_disconnect", g_tSelfieCamera.OnPlayerDisconnect, g_tSelfieCamera);
+		RegisterOnTickFunction("g_SelfieCamera.Camera_Think");
+		HookEvent("player_disconnect", g_SelfieCamera.OnPlayerDisconnect, g_SelfieCamera);
 
-		printl("[Selfie Camera]\nAuthor: Sw1ft\nVersion: 2.1");
+		printl("[Selfie Camera]\nAuthor: Sw1ft\nVersion: 2.1.1");
 	}
 
 	function Unload()
 	{
+		RemoveOnTickFunction("g_SelfieCamera.Camera_Think");
+		UnhookEvent("player_disconnect", g_SelfieCamera.OnPlayerDisconnect, g_SelfieCamera);
 
+		RemoveChatCommand("!sc");
+		RemoveChatCommand("!sc_dist");
 	}
 
 	function OnRoundStartPost()
 	{
-		
 	}
 
 	function OnRoundEnd()
 	{
-
 	}
 
-	function AdditionalClassMethodsInjected()
+	function OnExtendClassMethods()
 	{
-		RegisterChatCommand("!sc", g_tSelfieCamera.SwitchCamera, true);
-		RegisterChatCommand("!sc_dist", g_tSelfieCamera.SwitchCameraDistance, true, true);
+		g_Hooks.RegisterHook(g_Hooks.OnIteratePlayersPerTick, g_SelfieCamera.OnIteratePlayersPerTick);
+
+		RegisterChatCommand("!sc", g_SelfieCamera.SwitchCamera, true);
+		RegisterChatCommand("!sc_dist", g_SelfieCamera.SwitchCameraDistance, true, true);
 	}
 
 	function GetClassName() { return m_sClassName; }
@@ -38,66 +41,64 @@ class CSelfieCamera extends IScriptPlugin
 
 	function GetInterfaceVersion() { return m_InterfaceVersion; }
 
-	function _set(key, val) { throw null; }
-
 	static m_InterfaceVersion = 1;
 	static m_sClassName = "CSelfieCamera";
 	static m_sScriptPluginName = "Selfie Camera";
 }
 
-g_SelfieCamera <- CSelfieCamera();
+g_PluginSelfieCamera <- CSelfieCamera();
 
-g_bSelfieCamera <- array(MAXCLIENTS + 1, false);
-if (!("g_flCameraDistance" in this)) g_flCameraDistance <- array(MAXCLIENTS + 1, 25.0);
+if (!("g_SC_flCameraDistance" in this)) g_SC_flCameraDistance <- array(MAXCLIENTS + 1, 25.0);
 
-g_tSelfieCamera <-
+g_SelfieCamera <-
 {
-	Camera_Think = function()
+	bSelfieCamera = array(MAXCLIENTS + 1, false)
+
+	OnIteratePlayersPerTick = function(hPlayer)
 	{
-		local hPlayer;
-		while (hPlayer = Entities.FindByClassname(hPlayer, "player"))
+		if (hPlayer.IsAlive() && g_SelfieCamera.bSelfieCamera[hPlayer.GetEntityIndex()])
 		{
-			if (hPlayer.IsAlive() && g_bSelfieCamera[hPlayer.GetEntityIndex()])
+			if (KeyInScriptScope(hPlayer, "selfie_camera"))
 			{
-				if (KeyInScriptScope(hPlayer, "selfie_camera"))
+				local hEntity = GetScriptScopeVar(hPlayer, "selfie_camera")["camera"];
+				if (hEntity.IsValid())
 				{
-					local hEntity = GetScriptScopeVar(hPlayer, "selfie_camera")["camera"];
-					if (hEntity.IsValid())
-					{
-						local vecAngles = hPlayer.EyeAngles();
-						local vecCameraOrigin = hPlayer.EyeAngles().Forward() * g_flCameraDistance[hPlayer.GetEntityIndex()] + hPlayer.GetVelocity() * NetProps.GetPropFloat(hPlayer, "m_fLerpTime");
-						local flCameraDistance = vecCameraOrigin.Length();
-						local vecTrace = hPlayer.DoTraceLine(eTrace.Type_Pos, flCameraDistance, eTrace.Mask_Shot);
+					local vecAngles = hPlayer.EyeAngles();
+					local vecCameraOrigin = hPlayer.EyeAngles().Forward() * g_SC_flCameraDistance[hPlayer.GetEntityIndex()] + hPlayer.GetVelocity() * NetProps.GetPropFloat(hPlayer, "m_fLerpTime");
+					local flCameraDistance = vecCameraOrigin.Length();
+					local vecTrace = hPlayer.DoTraceLine(eTrace.Type_Pos, flCameraDistance, eTrace.Mask_Shot);
 
-						if ((hPlayer.EyePosition() - vecTrace).Length() - 1 >= flCameraDistance)
-							hEntity.__KeyValueFromVector("origin", hPlayer.EyePosition() + vecCameraOrigin);
-						else
-							hEntity.__KeyValueFromVector("origin", vecTrace);
-
-						hEntity.__KeyValueFromVector("angles", Vector(vecAngles.x * -1, vecAngles.y + 180, 0));
-					}
+					if ((hPlayer.EyePosition() - vecTrace).Length() - 1 >= flCameraDistance)
+						hEntity.__KeyValueFromVector("origin", hPlayer.EyePosition() + vecCameraOrigin);
 					else
-					{
-						GetScriptScopeVar(hPlayer, "selfie_camera")["disable"]();
-						RemoveScriptScopeKey(hPlayer, "selfie_camera");
-					}
+						hEntity.__KeyValueFromVector("origin", vecTrace);
+
+					hEntity.__KeyValueFromVector("angles", Vector(vecAngles.x * -1, vecAngles.y + 180, 0));
+				}
+				else
+				{
+					GetScriptScopeVar(hPlayer, "selfie_camera")["disable"]();
+					RemoveScriptScopeKey(hPlayer, "selfie_camera");
 				}
 			}
 		}
+
+		return HOOK_CONTINUE;
 	}
 
 	SwitchCameraDistance = function(hPlayer, sValue)
 	{
 		sValue = split(sValue, " ")[0];
-		try {
+		try
+		{
 			if (sValue.tointeger() >= 0 && sValue.tointeger() <= 100)
 			{
-				g_flCameraDistance[hPlayer.GetEntityIndex()] = sValue.tointeger();
+				g_SC_flCameraDistance[hPlayer.GetEntityIndex()] = sValue.tointeger();
 				EmitSoundOnClient("EDIT_TOGGLE_PLACE_MODE", hPlayer);
 			}
 		}
-		catch (error) {
-
+		catch (error)
+		{
 		}
 	}
 
@@ -108,7 +109,7 @@ g_tSelfieCamera <-
 
 		if (KeyInScriptScope(hPlayer, "cinema_camera"))
 		{
-			if (g_bCinematicCamera[hPlayer.GetEntityIndex()])
+			if (g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()])
 				return;
 		}
 
@@ -123,12 +124,14 @@ g_tSelfieCamera <-
 		else if (!GetScriptScopeVar(hPlayer, "selfie_camera")["camera"].IsValid())
 		{
 			RemoveScriptScopeKey(hPlayer, "selfie_camera");
-			g_tSelfieCamera.SwitchCamera(hPlayer);
+			g_SelfieCamera.SwitchCamera(hPlayer);
+
 			return;
 		}
 
 		local idx = hPlayer.GetEntityIndex();
-		if (g_bSelfieCamera[idx])
+
+		if (g_SelfieCamera.bSelfieCamera[idx])
 		{
 			GetScriptScopeVar(hPlayer, "selfie_camera")["disable"]();
 			EmitSoundOnClient("Buttons.snd11", hPlayer);
@@ -139,16 +142,16 @@ g_tSelfieCamera <-
 			EmitSoundOnClient("EDIT_TOGGLE_PLACE_MODE", hPlayer);
 		}
 
-		g_bSelfieCamera[idx] = !g_bSelfieCamera[idx];
+		g_SelfieCamera.bSelfieCamera[idx] = !g_SelfieCamera.bSelfieCamera[idx];
 	}
 
 	OnPlayerDisconnect = function(tParams)
 	{
 		local hEntity;
-		g_bSelfieCamera[tParams["_player"].GetEntityIndex()] = false;
-		g_flCameraDistance[tParams["_player"].GetEntityIndex()] = 25.0;
+		g_SelfieCamera.bSelfieCamera[tParams["_player"].GetEntityIndex()] = false;
+		g_SC_flCameraDistance[tParams["_player"].GetEntityIndex()] = 25.0;
 		if (hEntity = Entities.FindByName(null, "camera_" + tParams["_player"].GetPlayerUserId())) hEntity.Kill()
 	}
 };
 
-g_ScriptPluginsHelper.AddScriptPlugin(g_SelfieCamera);
+g_ScriptPluginsHelper.AddScriptPlugin(g_PluginSelfieCamera);

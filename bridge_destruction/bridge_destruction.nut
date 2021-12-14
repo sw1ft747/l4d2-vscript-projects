@@ -1,35 +1,33 @@
-// Squirrel
 // Bridge Destruction
 
 class CScriptPluginBridgeDestruction extends IScriptPlugin
 {
 	function Load()
 	{
-		::g_ConVar_AllowBridgeDest <- CreateConVar("bd_allow", 1, "integer", 0, 1);
-		::g_ConVar_BridgeDestChance <- CreateConVar("bd_chance", 90, "integer", 0, 100);
-		::g_ConVar_BridgeDestClearTime <- CreateConVar("bd_time", 0.0, "float", 0.0);
-		::g_ConVar_BridgeDestDamage <- CreateConVar("bd_damage", 1, "integer", 0, 1);
-		::g_ConVar_BridgeDestLimit <- CreateConVar("bd_limit", 10, "integer", 1);
-		::g_ConVar_BridgeDestHordeTime <- CreateConVar("bd_horde", 10.5, "float", 0.0);
+		RegisterOnTickFunction("g_BridgeDestruction.BridgeDestruction_Think");
 
-		RegisterOnTickFunction("g_tBridgeDestruction.BridgeDestruction_Think");
-
-		g_ConVar_BridgeDestLimit.AddChangeHook(g_tBridgeDestruction.OnConVarChange);
-
-		printl("[Bridge Destruction]\nAuthor: Sw1ft\nVersion: 1.2.1");
+		printl("[Bridge Destruction]\nAuthor: Sw1ft\nVersion: 1.2.2");
 	}
 
 	function Unload()
 	{
+		RemoveOnTickFunction("g_BridgeDestruction.BridgeDestruction_Think");
 
+		RemoveChatCommand("!bd_mode");
+		RemoveChatCommand("!bd_clear");
+		RemoveChatCommand("!bridge");
+		RemoveChatCommand("!bbridge");
+		RemoveChatCommand("!lbridge");
+		RemoveChatCommand("!rbridge");
 	}
 
 	function OnRoundStartPost()
 	{
 		local hEntity, chance;
-		if ((chance = GetConVarInt(g_ConVar_BridgeDestChance)) > 0)
+
+		if ((chance = g_BridgeDestruction.Settings.Chance) > 0)
 		{
-			foreach (map, tbl in g_tBridgeDestParams)
+			foreach (map, tbl in g_BridgeDestruction.tBridgeDestParams)
 			{
 				if (g_sMapName == map)
 				{
@@ -41,15 +39,17 @@ class CScriptPluginBridgeDestruction extends IScriptPlugin
 								continue;
 						}
 
-						local idx = ++g_iUniquePendingBridges; idx = idx.tostring();
+						local idx = ++g_BridgeDestruction.iUniquePendingBridges; idx = idx.tostring();
 
-						if (g_iUniquePendingBridges == 99999) g_iUniquePendingBridges = 0;
+						if (g_BridgeDestruction.iUniquePendingBridges == 99999) g_BridgeDestruction.iUniquePendingBridges = 0;
 						while (idx.len() != 5) idx = "0" + idx;
 
 						local sName = "bridge_dest" + "_" + idx + "_" + g_sMapName;
 
-						g_tBridgeDestruction.SpawnTrigger(sName, tbl["trigger_origin"], tbl["trigger_maxs"], tbl["trigger_mins"]);
-						g_tPendingBridges[sName] <- CBridgeDestruction(g_tBridgeDestParams[g_sMapName]["origin"], g_tBridgeDestParams[g_sMapName]["angles"], GetConVarBool(g_ConVar_BridgeDestDamage));
+						g_BridgeDestruction.SpawnTrigger(sName, tbl["trigger_origin"], tbl["trigger_maxs"], tbl["trigger_mins"]);
+						g_BridgeDestruction.tPendingBridges[sName] <- CBridgeDestruction(g_BridgeDestruction.tBridgeDestParams[g_sMapName]["origin"],
+																						g_BridgeDestruction.tBridgeDestParams[g_sMapName]["angles"],
+																						g_BridgeDestruction.Settings.AllowDamage);
 
 						printf("> [Bridge Destruction] A trigger has been spawned for the current map at %.03f %.03f %.03f", tbl["trigger_origin"].x, tbl["trigger_origin"].y, tbl["trigger_origin"].z);
 					}
@@ -64,16 +64,16 @@ class CScriptPluginBridgeDestruction extends IScriptPlugin
 						local hEntity;
 						if (hEntity = Entities.FindByName(null, "ferry_button"))
 						{
-							local idx = ++g_iUniquePendingBridges; idx = idx.tostring();
+							local idx = ++g_BridgeDestruction.iUniquePendingBridges; idx = idx.tostring();
 
-							if (g_iUniquePendingBridges == 99999) g_iUniquePendingBridges = 0;
+							if (g_BridgeDestruction.iUniquePendingBridges == 99999) g_BridgeDestruction.iUniquePendingBridges = 0;
 							while (idx.len() != 5) idx = "0" + idx;
 
 							local sName = "bridge_dest" + "_" + idx + "_" + g_sMapName;
-							getroottable()["OnFerryButtonPress"] <- function() foreach (key, val in g_tPendingBridges) EntFire(key, "Enable");
+							getroottable()["OnFerryButtonPress"] <- function() foreach (key, val in g_BridgeDestruction.tPendingBridges) EntFire(key, "Enable");
 
-							g_tBridgeDestruction.SpawnTrigger(sName, Vector(-6958.838, 4708.850, -24.768), Vector(2601.610, 3271.359, 1301.132), Vector(), "g_tBridgeDestruction.OnTriggerTouch", TR_OFF | TR_CLIENTS);
-							g_tPendingBridges[sName] <- CBridgeDestruction(Vector(-4816.808, 6674.193, -9.375), QAngle(), GetConVarBool(g_ConVar_BridgeDestDamage));
+							g_BridgeDestruction.SpawnTrigger(sName, Vector(-6958.838, 4708.850, -24.768), Vector(2601.610, 3271.359, 1301.132), Vector(), "g_BridgeDestruction.OnTriggerTouch", TR_OFF | TR_CLIENTS);
+							g_BridgeDestruction.tPendingBridges[sName] <- CBridgeDestruction(Vector(-4816.808, 6674.193, -9.375), QAngle(), g_BridgeDestruction.Settings.AllowDamage);
 
 							hEntity.ConnectOutput("OnPressed", "OnFerryButtonPress");
 						}
@@ -85,17 +85,16 @@ class CScriptPluginBridgeDestruction extends IScriptPlugin
 
 	function OnRoundEnd()
 	{
-
 	}
 
-	function AdditionalClassMethodsInjected()
+	function OnExtendClassMethods()
 	{
-		RegisterChatCommand("!bd_mode", g_tBridgeDestruction.SwitchMode, true);
-		RegisterChatCommand("!bd_clear", g_tBridgeDestruction.Clear, true);
-		RegisterChatCommand("!bridge", g_tBridgeDestruction.Forward, true);
-		RegisterChatCommand("!bbridge", g_tBridgeDestruction.Behind, true);
-		RegisterChatCommand("!lbridge", g_tBridgeDestruction.Left, true);
-		RegisterChatCommand("!rbridge", g_tBridgeDestruction.Right, true);
+		RegisterChatCommand("!bd_mode", g_BridgeDestruction.SwitchMode, true);
+		RegisterChatCommand("!bd_clear", g_BridgeDestruction.Clear, true);
+		RegisterChatCommand("!bridge", g_BridgeDestruction.Forward, true);
+		RegisterChatCommand("!bbridge", g_BridgeDestruction.Behind, true);
+		RegisterChatCommand("!lbridge", g_BridgeDestruction.Left, true);
+		RegisterChatCommand("!rbridge", g_BridgeDestruction.Right, true);
 	}
 
 	function GetClassName() { return m_sClassName; }
@@ -104,135 +103,10 @@ class CScriptPluginBridgeDestruction extends IScriptPlugin
 
 	function GetInterfaceVersion() { return m_InterfaceVersion; }
 
-	function _set(key, val) { throw null; }
-
 	static m_InterfaceVersion = 1;
 	static m_sClassName = "CScriptPluginBridgeDestruction";
 	static m_sScriptPluginName = "Bridge Destruction";
 }
-
-enum eDestructionType
-{
-	Forward,
-	Behind,
-	Left,
-	Right
-}
-
-g_BridgeDestruction <- CScriptPluginBridgeDestruction();
-
-g_bMode <- true;
-g_iUniquePendingBridges <- 0;
-g_flLastSurvivorsReaction <- 0.0;
-
-g_aBridges <- [];
-
-g_sBridgeDestModel <-
-[
-	"models/c5_bridge_destruction/bridge_centdwn_1.mdl"
-	"models/c5_bridge_destruction/bridge_centdwn_1b.mdl"
-	"models/c5_bridge_destruction/bridge_centdwn_2.mdl"
-	"models/c5_bridge_destruction/bridge_centup_1.mdl"
-	"models/c5_bridge_destruction/bridge_centup_1b.mdl"
-	"models/c5_bridge_destruction/bridge_centup_2.mdl"
-	"models/c5_bridge_destruction/bridge_centup_2b.mdl"
-	"models/c5_bridge_destruction/bridge_left_tower.mdl"
-	"models/c5_bridge_destruction/bridge_right_tower.mdl"
-	"models/c5_bridge_destruction/bridge_lfttower_rip_botfloors.mdl"
-	"models/c5_bridge_destruction/bridge_lfttower_rip_topfloors.mdl"
-	"models/c5_bridge_destruction/bridge_lfttower_stat_floors.mdl"
-	"models/c5_bridge_destruction/bridge_rgttower_floors.mdl"
-	"models/c5_bridge_destruction/bridge_rgttower_topfloors.mdl"
-	"models/c5_bridge_destruction/bridge_vertical_rails.mdl"
-	"models/c5_bridge_destruction/bridge_pierbase.mdl"
-	"models/c5_bridge_destruction/bridge_semiflatnose.mdl"
-	"models/c5_bridge_destruction/bridge_fueltruck.mdl"
-	"models/c5_bridge_destruction/bridge_hummers.mdl"
-	"models/c5_bridge_destruction/bridge_dynamic_center1.mdl"
-	"models/c5_bridge_destruction/bridge_dynamic_center2.mdl"
-	"models/c5_bridge_destruction/bridge_dynamic_end1.mdl"
-	"models/c5_bridge_destruction/bridge_dynamic_end2.mdl"
-	"models/c5_bridge_destruction/bridge_busses.mdl"
-	"models/props_interiors/airportdeparturerampcontrol01.mdl"
-	"models/f18/f18_placeholder.mdl"
-];
-
-g_tPendingBridges <- {};
-
-g_tBridgeDestParams <-
-{
-	c6m3_port =
-	{
-		trigger_origin = Vector(-2062.633, -685.943, -191.969)
-		trigger_maxs = Vector(108.640, 12.566, 410.655)
-		trigger_mins = Vector()
-		origin = Vector(-3141.602, -2143.331, -110.209)
-		angles = QAngle(0, 180, 0)
-	}
-
-	c9m1_alleys =
-	{
-		trigger_origin = Vector(-949.667, -7970.812, -223.675)
-		trigger_maxs = Vector(22.216, 3177.197, 1364.365)
-		trigger_mins = Vector()
-		origin = Vector(2080.064, -4009.666, 228.966)
-		angles = QAngle(0, 0, 0)
-	}
-
-	c9m2_lots =
-	{
-		trigger_origin = Vector(3032.958, 2666.969, -101.435)
-		trigger_maxs = Vector(807.156, 148.021, 1314.826)
-		trigger_mins = Vector()
-		origin = Vector(1275.789, 4534.177, 387.299)
-		angles = QAngle(0, 180, 0)
-	}
-
-	c10m3_ranchhouse =
-	{
-		trigger_origin = Vector(-9937.490, -7684.239, -64.212)
-		trigger_maxs = Vector(81.160, 2330.433, 1253.644)
-		trigger_mins = Vector()
-		origin = Vector(-11367.77, -8278.106, -63.968)
-		angles = QAngle(0, -90, 0)
-	}
-
-	c12m4_barn =
-	{
-		trigger_origin = Vector(10822.685, -4212.229, 116.031)
-		trigger_maxs = Vector(17.283, 180.896, 127.043)
-		trigger_mins = Vector()
-		origin = Vector(8984.604, -2053.905, 238.65)
-		angles = QAngle(0, 180, 0)
-	}
-
-	c13m2_southpinestream =
-	{
-		trigger_origin = Vector(-1047.866, 5766.257, 272.152)
-		trigger_maxs = Vector(2673.266, 13.561, 2565.334)
-		trigger_mins = Vector()
-		origin = Vector(30.444, 6942.437, 275.739)
-		angles = QAngle(0, 90, 0)
-	}
-
-	c13m3_memorialbridge =
-	{
-		trigger_origin = Vector(-3722.606, -6447.695, 444.042)
-		trigger_maxs = Vector(10.111, 1822.004, 1662.693)
-		trigger_mins = Vector()
-		origin = Vector(-1914.662, -7212.97, 157.138)
-		angles = QAngle(0, -100, 0)
-	}
-
-	c14m1_junkyard =
-	{
-		trigger_origin = Vector(-4432.354, -6572.248, -315.754)
-		trigger_maxs = Vector(1713.458, 14.379, 1649.094)
-		trigger_mins = Vector()
-		origin = Vector(-6870.083, -5472.271, -380.567)
-		angles = QAngle(0, 180, 0)
-	}
-};
 
 class CBridgeDestruction
 {
@@ -277,23 +151,23 @@ class CBridgeDestruction
 
 		for (local i = 0; i < 19; i++)
 		{
-			m_aBridge.append(SpawnEntityFromTable("prop_dynamic", {
+			m_aBridge.push(SpawnEntityFromTable("prop_dynamic", {
 				origin = vecOrigin
 				angles = eAngles
 				disableshadows = 1
 				targetname = "__bridge_dest__"
-				model = g_sBridgeDestModel[i]
+				model = g_BridgeDestruction.sBridgeDestModel[i]
 			}));
 		}
 
 		for (local j = 19; j < 23; j++)
 		{
-			m_aBridgeSupport.append(SpawnEntityFromTable("prop_dynamic", {
+			m_aBridgeSupport.push(SpawnEntityFromTable("prop_dynamic", {
 				origin = vecOrigin
 				angles = eAngles
 				disableshadows = 1
 				targetname = "__bridge_dest__"
-				model = g_sBridgeDestModel[j]
+				model = g_BridgeDestruction.sBridgeDestModel[j]
 			}));
 		}
 
@@ -302,7 +176,7 @@ class CBridgeDestruction
 			angles = eAngles
 			disableshadows = 1
 			targetname = "__bridge_dest__"
-			model = g_sBridgeDestModel[23]
+			model = g_BridgeDestruction.sBridgeDestModel[23]
 		});
 
 		m_hBridgeDestBusB = SpawnEntityFromTable("prop_dynamic", {
@@ -310,7 +184,7 @@ class CBridgeDestruction
 			angles = eAngles
 			disableshadows = 1
 			targetname = "__bridge_dest__"
-			model = g_sBridgeDestModel[23]
+			model = g_BridgeDestruction.sBridgeDestModel[23]
 		});
 		AcceptEntityInput(m_hBridgeDestBusB, "SetAnimation", "hold_bus2");
 
@@ -319,11 +193,11 @@ class CBridgeDestruction
 			angles = eAngles
 			disableshadows = 1
 			targetname = "__bridge_dest__"
-			model = g_sBridgeDestModel[23]
+			model = g_BridgeDestruction.sBridgeDestModel[23]
 		});
 		AcceptEntityInput(m_hBridgeDestBusC, "SetAnimation", "hold_bus3");
 
-		m_aBridgeDestSounds.append(SpawnEntityFromTable("ambient_generic", {
+		m_aBridgeDestSounds.push(SpawnEntityFromTable("ambient_generic", {
 			origin = vecOrigin
 			volume = 10
 			spawnflags = 1 | 16 | 32
@@ -334,7 +208,7 @@ class CBridgeDestruction
 			message = "bridge.outro03"
 		}));
 
-		m_aBridgeDestSounds.append(SpawnEntityFromTable("ambient_generic", {
+		m_aBridgeDestSounds.push(SpawnEntityFromTable("ambient_generic", {
 			origin = vecOrigin
 			volume = 10
 			spawnflags = 1 | 16 | 32
@@ -345,7 +219,7 @@ class CBridgeDestruction
 			message = "bridge.jetflyby03"
 		}));
 
-		m_aBridgeDestSounds.append(SpawnEntityFromTable("ambient_generic", {
+		m_aBridgeDestSounds.push(SpawnEntityFromTable("ambient_generic", {
 			origin = vecOrigin
 			volume = 10
 			spawnflags = 1 | 16 | 32
@@ -376,7 +250,7 @@ class CBridgeDestruction
 			StartDisabled = 1
 			DefaultAnim = "home"
 			targetname = "__bridge_dest__"
-			model = g_sBridgeDestModel[25]
+			model = g_BridgeDestruction.sBridgeDestModel[25]
 		});
 		NetProps.SetPropFloat(m_hBridgeDestJetA, "m_flModelScale", 20);
 
@@ -389,7 +263,7 @@ class CBridgeDestruction
 			StartDisabled = 1
 			DefaultAnim = "home"
 			targetname = "__bridge_dest__"
-			model = g_sBridgeDestModel[25]
+			model = g_BridgeDestruction.sBridgeDestModel[25]
 		});
 		NetProps.SetPropFloat(m_hBridgeDestJetB, "m_flModelScale", 20);
 
@@ -434,21 +308,21 @@ class CBridgeDestruction
 				AcceptEntityInput(ent, "SetAnimation", "hit", 9.0);
 			}
 
-			if (GetConVarFloat(g_ConVar_BridgeDestHordeTime) > 0)
+			if (g_BridgeDestruction.Settings.HordeDelay > 0)
 			{
 				if (!Entities.FindByName(null, "director"))
 				{
 					SpawnEntityFromTable("info_director", {targetname = "director"});
 				}
 
-				m_PanicEventTimer = CreateTimer(GetConVarFloat(g_ConVar_BridgeDestHordeTime), function(){
+				m_PanicEventTimer = CreateTimer(g_BridgeDestruction.Settings.HordeDelay, function(){
 					EntFire("director", "ForcePanicEvent", "1");
 					EntFire("@director", "ForcePanicEvent", "1");
 				});
 			}
 
 			m_SurvivorsReactionTimer = CreateTimer(14.0, function(){
-				if (g_flLastSurvivorsReaction + 10.0 < Time())
+				if (__fun_shit_last_survivors_reaction__ + 10.0 < Time())
 				{
 					local hPlayer;
 					local aL4D1Survivors = [];
@@ -463,7 +337,7 @@ class CBridgeDestruction
 						{
 							if (hPlayer.IsSurvivor() && hPlayer.IsAlive() && !hPlayer.IsIncapacitated())
 							{
-								aL4D1Survivors.append(hPlayer);
+								aL4D1Survivors.push(hPlayer);
 							}
 						}
 					}
@@ -477,7 +351,7 @@ class CBridgeDestruction
 							{
 								if (GetCharacterDisplayName(hPlayer).tolower() == aL4D2SurvivorsNames[j])
 								{
-									aL4D2Survivors.append(hPlayer);
+									aL4D2Survivors.push(hPlayer);
 								}
 							}
 						}
@@ -488,7 +362,7 @@ class CBridgeDestruction
 						local hEntity = SpawnEntityFromTable("func_orator", {
 							disableshadows = 1
 							spawnflags = 1
-							model = g_sBridgeDestModel[24]
+							model = g_BridgeDestruction.sBridgeDestModel[24]
 						});
 						NetProps.SetPropInt(hEntity, "m_fEffects", (1 << 5));
 						AcceptEntityInput(hEntity, "SpeakResponseConcept", "PlaneCrash");
@@ -504,7 +378,7 @@ class CBridgeDestruction
 						while (aL4D2Survivors.len() > 0)
 						{
 							idx = RandomInt(0, aL4D2Survivors.len() - 1);
-							arr.append(aL4D2Survivors[idx]);
+							arr.push(aL4D2Survivors[idx]);
 							aL4D2Survivors.remove(idx);
 						}
 						
@@ -515,7 +389,7 @@ class CBridgeDestruction
 						}
 					}
 
-					g_flLastSurvivorsReaction = Time();
+					__fun_shit_last_survivors_reaction__ = Time();
 				}
 			});
 
@@ -523,6 +397,7 @@ class CBridgeDestruction
 
 			return true;
 		}
+
 		return false;
 	}
 
@@ -582,10 +457,9 @@ class CBridgeDestruction
 			if (!ent || !ent.IsValid())
 				return false;
 		}
+
 		return true;
 	}
-
-	function _set(key, val) { throw null; }
 
 	m_flDestructionTime = null;
 	m_hExplosionA = null;
@@ -604,13 +478,147 @@ class CBridgeDestruction
 	m_PanicEventTimer = null;
 }
 
-g_tBridgeDestruction <-
+enum eDestructionType
 {
+	Forward,
+	Behind,
+	Left,
+	Right
+}
+
+g_PluginBridgeDestruction <- CScriptPluginBridgeDestruction();
+
+__bd_fun_shit_mode__ <- true;
+__fun_shit_last_survivors_reaction__ <- 0.0;
+
+g_BridgeDestruction <-
+{
+	iUniquePendingBridges = 0
+
+	aBridges = []
+
+	sBridgeDestModel =
+	[
+		"models/c5_bridge_destruction/bridge_centdwn_1.mdl"
+		"models/c5_bridge_destruction/bridge_centdwn_1b.mdl"
+		"models/c5_bridge_destruction/bridge_centdwn_2.mdl"
+		"models/c5_bridge_destruction/bridge_centup_1.mdl"
+		"models/c5_bridge_destruction/bridge_centup_1b.mdl"
+		"models/c5_bridge_destruction/bridge_centup_2.mdl"
+		"models/c5_bridge_destruction/bridge_centup_2b.mdl"
+		"models/c5_bridge_destruction/bridge_left_tower.mdl"
+		"models/c5_bridge_destruction/bridge_right_tower.mdl"
+		"models/c5_bridge_destruction/bridge_lfttower_rip_botfloors.mdl"
+		"models/c5_bridge_destruction/bridge_lfttower_rip_topfloors.mdl"
+		"models/c5_bridge_destruction/bridge_lfttower_stat_floors.mdl"
+		"models/c5_bridge_destruction/bridge_rgttower_floors.mdl"
+		"models/c5_bridge_destruction/bridge_rgttower_topfloors.mdl"
+		"models/c5_bridge_destruction/bridge_vertical_rails.mdl"
+		"models/c5_bridge_destruction/bridge_pierbase.mdl"
+		"models/c5_bridge_destruction/bridge_semiflatnose.mdl"
+		"models/c5_bridge_destruction/bridge_fueltruck.mdl"
+		"models/c5_bridge_destruction/bridge_hummers.mdl"
+		"models/c5_bridge_destruction/bridge_dynamic_center1.mdl"
+		"models/c5_bridge_destruction/bridge_dynamic_center2.mdl"
+		"models/c5_bridge_destruction/bridge_dynamic_end1.mdl"
+		"models/c5_bridge_destruction/bridge_dynamic_end2.mdl"
+		"models/c5_bridge_destruction/bridge_busses.mdl"
+		"models/props_interiors/airportdeparturerampcontrol01.mdl"
+		"models/f18/f18_placeholder.mdl"
+	]
+
+	tPendingBridges = {}
+
+	tBridgeDestParams =
+	{
+		c6m3_port =
+		{
+			trigger_origin = Vector(-2062.633, -685.943, -191.969)
+			trigger_maxs = Vector(108.640, 12.566, 410.655)
+			trigger_mins = Vector()
+			origin = Vector(-3141.602, -2143.331, -110.209)
+			angles = QAngle(0, 180, 0)
+		}
+
+		c9m1_alleys =
+		{
+			trigger_origin = Vector(-949.667, -7970.812, -223.675)
+			trigger_maxs = Vector(22.216, 3177.197, 1364.365)
+			trigger_mins = Vector()
+			origin = Vector(2080.064, -4009.666, 228.966)
+			angles = QAngle(0, 0, 0)
+		}
+
+		c9m2_lots =
+		{
+			trigger_origin = Vector(3032.958, 2666.969, -101.435)
+			trigger_maxs = Vector(807.156, 148.021, 1314.826)
+			trigger_mins = Vector()
+			origin = Vector(1275.789, 4534.177, 387.299)
+			angles = QAngle(0, 180, 0)
+		}
+
+		c10m3_ranchhouse =
+		{
+			trigger_origin = Vector(-9937.490, -7684.239, -64.212)
+			trigger_maxs = Vector(81.160, 2330.433, 1253.644)
+			trigger_mins = Vector()
+			origin = Vector(-11367.77, -8278.106, -63.968)
+			angles = QAngle(0, -90, 0)
+		}
+
+		c12m4_barn =
+		{
+			trigger_origin = Vector(10822.685, -4212.229, 116.031)
+			trigger_maxs = Vector(17.283, 180.896, 127.043)
+			trigger_mins = Vector()
+			origin = Vector(8984.604, -2053.905, 238.65)
+			angles = QAngle(0, 180, 0)
+		}
+
+		c13m2_southpinestream =
+		{
+			trigger_origin = Vector(-1047.866, 5766.257, 272.152)
+			trigger_maxs = Vector(2673.266, 13.561, 2565.334)
+			trigger_mins = Vector()
+			origin = Vector(30.444, 6942.437, 275.739)
+			angles = QAngle(0, 90, 0)
+		}
+
+		c13m3_memorialbridge =
+		{
+			trigger_origin = Vector(-3722.606, -6447.695, 444.042)
+			trigger_maxs = Vector(10.111, 1822.004, 1662.693)
+			trigger_mins = Vector()
+			origin = Vector(-1914.662, -7212.97, 157.138)
+			angles = QAngle(0, -100, 0)
+		}
+
+		c14m1_junkyard =
+		{
+			trigger_origin = Vector(-4432.354, -6572.248, -315.754)
+			trigger_maxs = Vector(1713.458, 14.379, 1649.094)
+			trigger_mins = Vector()
+			origin = Vector(-6870.083, -5472.271, -380.567)
+			angles = QAngle(0, 180, 0)
+		}
+	}
+
+	Settings =
+	{
+		Allow = true
+		Chance = 90
+		ClearTime = 0.0
+		AllowDamage = true
+		Limit = 10
+		HordeDelay = 10.5
+	}
+
 	SpawnTrigger = function(sName,
 							vecOrigin,
 							vecMaxs = Vector(64, 64, 128),
 							vecMins = Vector(-64, -64, 0),
-							sFunction = "g_tBridgeDestruction.OnTriggerTouch",
+							sFunction = "g_BridgeDestruction.OnTriggerTouch",
 							iType = TR_CLIENTS,
 							sOutput = "OnStartTouch",
 							sClass = "trigger_multiple")
@@ -633,10 +641,12 @@ g_tBridgeDestruction <-
 
 	OnConVarChange = function(ConVar, LastValue, NewValue)
 	{
-		while (g_aBridges.len() > NewValue)
+		this = ::g_BridgeDestruction;
+
+		while (aBridges.len() > NewValue)
 		{
-			g_aBridges[0].ClearDestruction();
-			g_aBridges.remove(0);
+			aBridges[0].ClearDestruction();
+			aBridges.remove(0);
 		}
 	}
 
@@ -648,27 +658,29 @@ g_tBridgeDestruction <-
 			local sName = caller.GetName();
 			if (sName.find("bridge_dest_") != null)
 			{
-				if (GetConVarBool(g_ConVar_AllowBridgeDest))
+				if (g_BridgeDestruction.Settings.Allow)
 				{
 					if (g_sMapName == sName.slice(18))
 					{
-						if (sName in g_tPendingBridges)
+						if (sName in g_BridgeDestruction.tPendingBridges)
 						{
-							local bridge = g_tPendingBridges[sName];
+							local bridge = g_BridgeDestruction.tPendingBridges[sName];
+
 							if (!bridge.StartDestruction())
 							{
 								bridge.ClearDestruction();
 							}
 							else
 							{
-								if (g_aBridges.len() > 0 && g_aBridges.len() + 1 > GetConVarInt(g_ConVar_BridgeDestLimit))
+								if (g_BridgeDestruction.aBridges.len() > 0 && g_BridgeDestruction.aBridges.len() + 1 > g_BridgeDestruction.Settings.Limit)
 								{
-									g_aBridges[0].ClearDestruction();
-									g_aBridges.remove(0);
+									g_BridgeDestruction.aBridges[0].ClearDestruction();
+									g_BridgeDestruction.aBridges.remove(0);
 								}
-								g_aBridges.append(bridge);
+								g_BridgeDestruction.aBridges.push(bridge);
 							}
-							delete g_tPendingBridges[sName];
+
+							delete g_BridgeDestruction.tPendingBridges[sName];
 							caller.Kill();
 						}
 					}
@@ -679,16 +691,18 @@ g_tBridgeDestruction <-
 
 	BridgeDestruction_Think = function()
 	{
-		if (g_aBridges.len() > 0 && GetConVarFloat(g_ConVar_BridgeDestClearTime) > 0)
+		this = ::g_BridgeDestruction;
+
+		if (aBridges.len() > 0 && g_BridgeDestruction.Settings.ClearTime > 0)
 		{
-			for (local i = 0; i < g_aBridges.len(); i++)
+			for (local i = 0; i < aBridges.len(); i++)
 			{
-				if (g_aBridges[i].m_flDestructionTime != null)
+				if (aBridges[i].m_flDestructionTime != null)
 				{
-					if (g_aBridges[i].m_flDestructionTime + GetConVarFloat(g_ConVar_BridgeDestClearTime) < Time())
+					if (aBridges[i].m_flDestructionTime + g_BridgeDestruction.Settings.ClearTime < Time())
 					{
-						g_aBridges[i].ClearDestruction();
-						g_aBridges.remove(i);
+						aBridges[i].ClearDestruction();
+						aBridges.remove(i);
 						i--;
 					}
 				}
@@ -698,39 +712,47 @@ g_tBridgeDestruction <-
 
 	Start = function(vecOrigin, eAngles)
 	{
-		if (g_aBridges.len() > 0 && g_aBridges.len() + 1 > GetConVarInt(g_ConVar_BridgeDestLimit))
+		this = ::g_BridgeDestruction;
+
+		if (aBridges.len() > 0 && aBridges.len() + 1 > g_BridgeDestruction.Settings.Limit)
 		{
-			g_aBridges[0].ClearDestruction();
-			g_aBridges.remove(0);
+			aBridges[0].ClearDestruction();
+			aBridges.remove(0);
 		}
-		local bridge = CBridgeDestruction(vecOrigin, eAngles, GetConVarBool(g_ConVar_BridgeDestDamage));
-		if (!bridge.StartDestruction()) bridge.ClearDestruction();
-		else g_aBridges.append(bridge);
+
+		local bridge = CBridgeDestruction(vecOrigin, eAngles, g_BridgeDestruction.Settings.AllowDamage);
+
+		if (!bridge.StartDestruction())
+			bridge.ClearDestruction();
+		else
+			aBridges.push(bridge);
 	}
 
 	Initialize = function(hPlayer, iDestructionType)
 	{
-		if (hPlayer.IsHost() && GetConVarBool(g_ConVar_AllowBridgeDest))
+		if (hPlayer.IsHost() && g_BridgeDestruction.Settings.Allow)
 		{
 			local vecOrigin;
 			local eAngles = hPlayer.EyeAngles();
-			if (g_bMode) vecOrigin = hPlayer.GetOrigin();
+			if (__bd_fun_shit_mode__) vecOrigin = hPlayer.GetOrigin();
 			else vecOrigin = hPlayer.DoTraceLine(eTrace.Type_Pos, eTrace.Distance, eTrace.Mask_Shot);
 			if (iDestructionType == eDestructionType.Behind) eAngles += QAngle(0, 180, 0);
 			else if (iDestructionType == eDestructionType.Left) eAngles += QAngle(0, 90, 0);
 			else if (iDestructionType == eDestructionType.Right) eAngles -= QAngle(0, 90, 0);
-			g_tBridgeDestruction.Start(vecOrigin, eAngles);
+			g_BridgeDestruction.Start(vecOrigin, eAngles);
 		}
 	}
 
 	Clear = function(hPlayer)
 	{
+		this = ::g_BridgeDestruction;
+
 		if (hPlayer.IsHost())
 		{
-			for (local i = 0; i < g_aBridges.len(); i++)
+			for (local i = 0; i < aBridges.len(); i++)
 			{
-				g_aBridges[i].ClearDestruction();
-				g_aBridges.remove(i);
+				aBridges[i].ClearDestruction();
+				aBridges.remove(i);
 				i--;
 			}
 		}
@@ -740,27 +762,27 @@ g_tBridgeDestruction <-
 	{
 		if (hPlayer.IsHost())
 		{
-			sayf("[Bridge Destruction] Destruction mode: %s", g_bMode ? "camera direction" : "near the player");
-			g_bMode = !g_bMode;
+			sayf("[Bridge Destruction] Destruction mode: %s", __bd_fun_shit_mode__ ? "camera direction" : "near the player");
+			__bd_fun_shit_mode__ = !__bd_fun_shit_mode__;
 		}
 	}
 
-	Forward = function(hPlayer) { g_tBridgeDestruction.Initialize(hPlayer, eDestructionType.Forward); }
+	Forward = function(hPlayer) { g_BridgeDestruction.Initialize(hPlayer, eDestructionType.Forward); }
 
-	Behind = function(hPlayer) { g_tBridgeDestruction.Initialize(hPlayer, eDestructionType.Behind); }
+	Behind = function(hPlayer) { g_BridgeDestruction.Initialize(hPlayer, eDestructionType.Behind); }
 
-	Left = function(hPlayer) { g_tBridgeDestruction.Initialize(hPlayer, eDestructionType.Left); }
+	Left = function(hPlayer) { g_BridgeDestruction.Initialize(hPlayer, eDestructionType.Left); }
 
-	Right = function(hPlayer) { g_tBridgeDestruction.Initialize(hPlayer, eDestructionType.Right); }
+	Right = function(hPlayer) { g_BridgeDestruction.Initialize(hPlayer, eDestructionType.Right); }
 };
 
 PrecacheEntityFromTable({classname = "ambient_generic", message = "bridge.outro03"});
 PrecacheEntityFromTable({classname = "ambient_generic", message = "bridge.jetflyby03"});
 PrecacheEntityFromTable({classname = "env_explosion", fireballsprite = "sprites/zerogxplode.spr"});
 
-for (local i = 0; i < g_sBridgeDestModel.len(); i++)
+for (local i = 0; i < g_BridgeDestruction.sBridgeDestModel.len(); ++i)
 {
-	PrecacheEntityFromTable({classname = "prop_dynamic", model = g_sBridgeDestModel[i]});
+	PrecacheEntityFromTable({classname = "prop_dynamic", model = g_BridgeDestruction.sBridgeDestModel[i]});
 }
 
-g_ScriptPluginsHelper.AddScriptPlugin(g_BridgeDestruction);
+g_ScriptPluginsHelper.AddScriptPlugin(g_PluginBridgeDestruction);

@@ -1,37 +1,37 @@
-// Squirrel
 // Plane Crash
 
 class CScriptPluginPlaneCrash extends IScriptPlugin
 {
 	function Load()
 	{
-		::g_ConVar_AllowPlaneCrash <- CreateConVar("pc_allow", 1, "integer", 0, 1);
-		::g_ConVar_PlaneCrashChance <- CreateConVar("pc_chance", 90, "integer", 0, 100);
-		::g_ConVar_PlaneCrashClearTime <- CreateConVar("pc_time", 0.0, "float", 0.0);
-		::g_ConVar_PlaneCrashDamage <- CreateConVar("pc_damage", 20, "float", 0);
-		::g_ConVar_PlaneCrashLimit <- CreateConVar("pc_limit", 5, "integer", 1);
-		::g_ConVar_PlaneCrashHordeTime <- CreateConVar("pc_horde", 24.0, "float", 0.0);
+		RegisterOnTickFunction("g_PlaneCrash.PlaneCrash_Think");
 
-		RegisterOnTickFunction("g_tPlaneCrash.PlaneCrash_Think");
+		HookEvent("finale_escape_start", g_PlaneCrash.OnFinaleEscapeStarted, g_PlaneCrash);
 
-		HookEvent("finale_escape_start", g_tPlaneCrash.OnFinaleEscapeStarted, g_tPlaneCrash);
-
-		g_ConVar_PlaneCrashLimit.AddChangeHook(g_tPlaneCrash.OnConVarChange);
-
-		printl("[Plane Crash]\nAuthor: Sw1ft\nVersion: 2.1.2");
+		printl("[Plane Crash]\nAuthor: Sw1ft\nVersion: 2.1.3");
 	}
 
 	function Unload()
 	{
+		RemoveOnTickFunction("g_PlaneCrash.PlaneCrash_Think");
 
+		UnhokEvent("finale_escape_start", g_PlaneCrash.OnFinaleEscapeStarted, g_PlaneCrash);
+
+		RemoveChatCommand("!pc_mode");
+		RemoveChatCommand("!pc_clear");
+		RemoveChatCommand("!plane");
+		RemoveChatCommand("!bplane");
+		RemoveChatCommand("!lplane");
+		RemoveChatCommand("!rplane");
 	}
 
 	function OnRoundStartPost()
 	{
 		local hEntity, chance;
-		if ((chance = GetConVarInt(g_ConVar_PlaneCrashChance)) > 0)
+
+		if ((chance = g_PlaneCrash.Settings.Chance) > 0)
 		{
-			foreach (map, tbl in g_tPlaneCrashParams)
+			foreach (map, tbl in g_PlaneCrash.PlaneCrashParams)
 			{
 				if (g_sMapName == map)
 				{
@@ -42,11 +42,13 @@ class CScriptPluginPlaneCrash extends IScriptPlugin
 							origin = tbl["trigger_origin"]
 							spawnflags = TR_CLIENTS
 						});
+
 						hEntity.__KeyValueFromInt("solid", 2);
 						hEntity.__KeyValueFromVector("maxs", tbl["trigger_maxs"]);
 						hEntity.__KeyValueFromVector("mins", tbl["trigger_mins"]);
-						hEntity.__KeyValueFromString("OnStartTouch", "!caller,RunScriptCode,g_tPlaneCrash.OnTriggerTouch()");
+						hEntity.__KeyValueFromString("OnStartTouch", "!caller,RunScriptCode,g_PlaneCrash.OnTriggerTouch()");
 						hEntity.ValidateScriptScope();
+
 						printf("> [Plane Crash] A trigger has been spawned for the current map at %.03f %.03f %.03f", tbl["trigger_origin"].x, tbl["trigger_origin"].y, tbl["trigger_origin"].z);
 					}
 				}
@@ -56,17 +58,16 @@ class CScriptPluginPlaneCrash extends IScriptPlugin
 
 	function OnRoundEnd()
 	{
-
 	}
 
-	function AdditionalClassMethodsInjected()
+	function OnExtendClassMethods()
 	{
-		RegisterChatCommand("!pc_mode", g_tPlaneCrash.SwitchMode, true);
-		RegisterChatCommand("!pc_clear", g_tPlaneCrash.Clear, true);
-		RegisterChatCommand("!plane", g_tPlaneCrash.Forward, true);
-		RegisterChatCommand("!bplane", g_tPlaneCrash.Behind, true);
-		RegisterChatCommand("!lplane", g_tPlaneCrash.Left, true);
-		RegisterChatCommand("!rplane", g_tPlaneCrash.Right, true);
+		RegisterChatCommand("!pc_mode", g_PlaneCrash.SwitchMode, true);
+		RegisterChatCommand("!pc_clear", g_PlaneCrash.Clear, true);
+		RegisterChatCommand("!plane", g_PlaneCrash.Forward, true);
+		RegisterChatCommand("!bplane", g_PlaneCrash.Behind, true);
+		RegisterChatCommand("!lplane", g_PlaneCrash.Left, true);
+		RegisterChatCommand("!rplane", g_PlaneCrash.Right, true);
 	}
 
 	function GetClassName() { return m_sClassName; }
@@ -75,160 +76,10 @@ class CScriptPluginPlaneCrash extends IScriptPlugin
 
 	function GetInterfaceVersion() { return m_InterfaceVersion; }
 
-	function _set(key, val) { throw null; }
-
 	static m_InterfaceVersion = 1;
 	static m_sClassName = "CScriptPluginPlaneCrash";
 	static m_sScriptPluginName = "Plane Crash";
 }
-
-enum eCrashType
-{
-	Forward,
-	Behind,
-	Left,
-	Right
-}
-
-g_PlaneCrash <- CScriptPluginPlaneCrash();
-
-g_bMode <- true;
-g_flLastSurvivorsReaction <- 0.0;
-
-g_aPlanes <- [];
-
-g_sPlaneModel <-
-[
-	"models/props_interiors/airportdeparturerampcontrol01.mdl"
-	"models/hybridphysx/precrash_airliner.mdl"
-	"models/hybridphysx/airliner_fuselage_secondary_1.mdl"
-	"models/hybridphysx/airliner_fuselage_secondary_2.mdl"
-	"models/hybridphysx/airliner_fuselage_secondary_3.mdl"
-	"models/hybridphysx/airliner_fuselage_secondary_4.mdl"
-	"models/hybridphysx/airliner_left_wing_secondary.mdl"
-	"models/hybridphysx/airliner_right_wing_secondary_1.mdl"
-	"models/hybridphysx/airliner_right_wing_secondary_2.mdl"
-	"models/hybridphysx/airliner_tail_secondary.mdl"
-	"models/hybridphysx/airliner_primary_debris_4.mdl"
-	"models/hybridphysx/airliner_primary_debris_1.mdl"
-	"models/hybridphysx/airliner_primary_debris_2.mdl"
-	"models/hybridphysx/airliner_primary_debris_3.mdl"
-	"models/hybridphysx/airliner_fire_emit1.mdl"
-	"models/hybridphysx/airliner_fire_emit2.mdl"
-	"models/hybridphysx/airliner_sparks_emit.mdl"
-	"models/hybridphysx/airliner_endstate_vcollide_dummy.mdl"
-];
-
-g_tPlaneCrashParams <-
-{
-	c1m2_streets =
-	{
-		trigger_origin = Vector(-7301.124, -1146.229, 382.507)
-		trigger_maxs = Vector(13.366, 1002.849, 1080.520)
-		trigger_mins = Vector()
-		origin = Vector(-9011.491, -576.481, 384.031)
-		angles = QAngle(0, 180, 0)
-	}
-
-	c2m1_highway =
-	{
-		trigger_origin = Vector(1844.480, 6705.288, -1118.534)
-		trigger_maxs = Vector(2136.581, 16.381, 971.237)
-		trigger_mins = Vector()
-		origin = Vector(3773.583, 5229.438, -1004.816)
-		angles = QAngle(0, -93.231, 0)
-	}
-
-	c3m4_plantation =
-	{
-		trigger_origin = Vector(-2374.878, -3565.377, 3.613)
-		trigger_maxs = Vector(2003.132, 2206.400, 1191.983)
-		trigger_mins = Vector()
-		origin = Vector(-2785.709, -3676.346, 52.115)
-		angles = QAngle(0, -121.851, 0)
-	}
-
-	c5m4_quarter =
-	{
-		trigger_origin = Vector(-1380.347, -1791.956, 64.681)
-		trigger_maxs = Vector(30.247, 132.206, 1115.703)
-		trigger_mins = Vector()
-		origin = Vector(229.832, -913.114, 65.031)
-		angles = QAngle(0, 90.728, 0)
-	}
-	
-	c6m2_bedlam =
-	{
-		trigger_origin = Vector(639.570, 1281.739, -63.969)
-		trigger_maxs = Vector(1707.050, 142.284, 841.336)
-		trigger_mins = Vector()
-		origin = Vector(-757.382, 1156.305, -88.737)
-		angles = QAngle(0, 89.240, 0)
-	}
-
-	c7m3_port =
-	{
-		trigger_origin = Vector(-300.677, -1882.187, -0.630)
-		trigger_maxs = Vector(632.311, 578.951, 995.576)
-		trigger_mins = Vector()
-		origin = Vector(813.220, -32.343, -5.372)
-		angles = QAngle(0, 180, 0)
-	}
-
-	c8m1_apartment =
-	{
-		trigger_origin = Vector(749.650, 1796.665, 16.031)
-		trigger_maxs = Vector(1938.032, 55.383, 4562.303)
-		trigger_mins = Vector()
-		origin = Vector(1149.504, 1818.803, 8.031)
-		angles = QAngle(0, -90.174, 0)
-	}
-
-	c9m1_alleys =
-	{
-		trigger_origin = Vector(-4577.353, -10280.589, 5.106)
-		trigger_maxs = Vector(27.726, 2081.276, 933.604)
-		trigger_mins = Vector()
-		origin = Vector(-3199.007, -11608.114, 64.031)
-		angles = QAngle(0, -179.499, 0)
-	}
-
-	c10m4_mainstreet =
-	{
-		trigger_origin = Vector(-3146.643, -140.137, 375.231)
-		trigger_maxs = Vector(156.765, 17.999, 138.520)
-		trigger_mins = Vector()
-		origin = Vector(-4272.170, -1079.558, -63.968)
-		angles = QAngle(0, 176.842, 0)
-	}
-
-	c12m1_hilltop =
-	{
-		trigger_origin = Vector(-11067.224, -13421.997, 585.149)
-		trigger_maxs = Vector(896.173, 8.708, 1619.477)
-		trigger_mins = Vector()
-		origin = Vector(-12169.009, -12943.565, -86.600)
-		angles = QAngle(0, 111.220, 0)
-	}
-
-	c13m3_memorialbridge =
-	{
-		trigger_origin = Vector(757.256, -4666.164, 822.675)
-		trigger_maxs = Vector(1131.471, 134.771, 1519.715)
-		trigger_mins = Vector()
-		origin = Vector(353.373, -3296.894, 105.241)
-		angles = QAngle(0, 152.687, 0)
-	}
-
-	c14m2_lighthouse =
-	{
-		trigger_origin = Vector(-7334.104, 4356.157, -263.416)
-		trigger_maxs = Vector(6793.194, 41.668, 2639.376)
-		trigger_mins = Vector()
-		origin = Vector(-4913.594, 5219.752, -136.201)
-		angles = QAngle(0, 178.7, 0)
-	}
-};
 
 class CPlaneCrash
 {
@@ -274,7 +125,7 @@ class CPlaneCrash
 			spawnflags = 0
 			StartDisabled = 1
 			disableshadows = 1
-			model = g_sPlaneModel[1]
+			model = g_PlaneCrash.sPlaneModel[1]
 		});
 		TP(hEntity, vecOrigin, eAngles, null);
 		m_hPlanePreCrash = hEntity;
@@ -284,7 +135,7 @@ class CPlaneCrash
 			solid = 0
 			StartDisabled = 1
 			disableshadows = 1
-			model = g_sPlaneModel[11]
+			model = g_PlaneCrash.sPlaneModel[11]
 		});
 		TP(hEntity, vecOrigin, eAngles, null);
 		m_hPlaneCrashTail = hEntity;
@@ -293,7 +144,7 @@ class CPlaneCrash
 			spawnflags = 0
 			solid = 0
 			StartDisabled = 1
-			model = g_sPlaneModel[12]
+			model = g_PlaneCrash.sPlaneModel[12]
 		});
 		TP(hEntity, vecOrigin, eAngles, null);
 		m_hPlaneCrashEngine = hEntity;
@@ -303,7 +154,7 @@ class CPlaneCrash
 			solid = 0
 			StartDisabled = 1
 			disableshadows = 1
-			model = g_sPlaneModel[13]
+			model = g_PlaneCrash.sPlaneModel[13]
 		});
 		TP(hEntity, vecOrigin, eAngles, null);
 		m_hPlaneCrashWing = hEntity;
@@ -313,7 +164,7 @@ class CPlaneCrash
 			solid = 6
 			StartDisabled = 1
 			RandomAnimation = 0
-			model = g_sPlaneModel[17]
+			model = g_PlaneCrash.sPlaneModel[17]
 		});
 		TP(hEntity, vecOrigin + Vector(0, 0, 9999.9), eAngles, null);
 		m_hPlaneCrashCollision = hEntity;
@@ -325,10 +176,10 @@ class CPlaneCrash
 				solid = 0
 				StartDisabled = 1
 				disableshadows = 1
-				model = g_sPlaneModel[2 + i]
+				model = g_PlaneCrash.sPlaneModel[2 + i]
 			});
 			TP(hEntity, vecOrigin, eAngles, null);
-			m_aPlaneCrash.append(hEntity);
+			m_aPlaneCrash.push(hEntity);
 		}
 
 		for (local j = 0; j < 3; j++)
@@ -337,10 +188,10 @@ class CPlaneCrash
 				spawnflags = 0
 				solid = 0
 				StartDisabled = 1
-				model = g_sPlaneModel[14 + j]
+				model = g_PlaneCrash.sPlaneModel[14 + j]
 			});
 			TP(hEntity, vecOrigin, eAngles, null);
-			m_aPlaneCrashEmitters.append(hEntity);
+			m_aPlaneCrashEmitters.push(hEntity);
 		}
 
 		if (bDamage)
@@ -348,7 +199,7 @@ class CPlaneCrash
 			hEntity = SpawnEntityFromTable("trigger_hurt", {
 				spawnflags = 3
 				damagetype = 1
-				damage = GetConVarFloat(g_ConVar_PlaneCrashDamage)
+				damage = g_PlaneCrash.Settings.DamageAmount
 			});
 			AcceptEntityInput(hEntity, "Disable");
 			AttachEntity(m_hPlaneCrashTail, hEntity, "HullDebris1");
@@ -356,12 +207,12 @@ class CPlaneCrash
 			hEntity.__KeyValueFromVector("mins", Vector(-300, -300, -300));
 			hEntity.__KeyValueFromInt("solid", 2);
 			TP(hEntity, vecOrigin, eAngles, null);
-			m_aHurtTriggers.append(hEntity);
+			m_aHurtTriggers.push(hEntity);
 
 			hEntity = SpawnEntityFromTable("trigger_hurt", {
 				spawnflags = 3
 				damagetype = 1
-				damage = GetConVarFloat(g_ConVar_PlaneCrashDamage)
+				damage = g_PlaneCrash.Settings.DamageAmount
 			});
 			AcceptEntityInput(hEntity, "Disable");
 			AttachEntity(m_hPlaneCrashEngine, hEntity, "particleEmitter2");
@@ -369,12 +220,12 @@ class CPlaneCrash
 			hEntity.__KeyValueFromVector("mins", Vector(-300, -300, -300));
 			hEntity.__KeyValueFromInt("solid", 2);
 			TP(hEntity, vecOrigin, eAngles, null);
-			m_aHurtTriggers.append(hEntity);
+			m_aHurtTriggers.push(hEntity);
 
 			hEntity = SpawnEntityFromTable("trigger_hurt", {
 				spawnflags = 3
 				damagetype = 1
-				damage = GetConVarFloat(g_ConVar_PlaneCrashDamage)
+				damage = g_PlaneCrash.Settings.DamageAmount
 			});
 			AcceptEntityInput(hEntity, "Disable");
 			AttachEntity(m_hPlaneCrashWing, hEntity, "new_spark_joint_1");
@@ -382,7 +233,7 @@ class CPlaneCrash
 			hEntity.__KeyValueFromVector("mins", Vector(-300, -300, -300));
 			hEntity.__KeyValueFromInt("solid", 2);
 			TP(hEntity, vecOrigin, eAngles, null);
-			m_aHurtTriggers.append(hEntity);
+			m_aHurtTriggers.push(hEntity);
 		}
 
 		m_aEntities = [m_hPlaneCrashSound, m_hPlaneCrashShake, m_hPlaneCrashCollision, m_hPlanePreCrash, m_hPlaneCrashTail, m_hPlaneCrashWing, m_hPlaneCrashEngine];
@@ -419,14 +270,14 @@ class CPlaneCrash
 			AcceptEntityInput(m_hPlaneCrashWing, "TurnOn", "", 14.0);
 			AcceptEntityInput(m_hPlaneCrashWing, "SetAnimation", "boom", 14.95);
 
-			if (GetConVarFloat(g_ConVar_PlaneCrashHordeTime) > 0)
+			if (g_PlaneCrash.Settings.HordeDelay > 0)
 			{
 				if (!Entities.FindByName(null, "director"))
 				{
 					SpawnEntityFromTable("info_director", {targetname = "director"});
 				}
 
-				m_PanicEventTimer = CreateTimer(GetConVarFloat(g_ConVar_PlaneCrashHordeTime), function(){
+				m_PanicEventTimer = CreateTimer(g_PlaneCrash.Settings.HordeDelay, function(){
 					EntFire("director", "ForcePanicEvent", "1");
 					EntFire("@director", "ForcePanicEvent", "1");
 				});
@@ -458,7 +309,7 @@ class CPlaneCrash
 			}, m_hPlaneCrashCollision);
 
 			m_SurvivorsReactionTimer = CreateTimer(30.0, function(){
-				if (g_flLastSurvivorsReaction + 10.0 < Time())
+				if (__fun_shit_last_survivors_reaction__ + 10.0 < Time())
 				{
 					local hPlayer;
 					local aL4D1Survivors = [];
@@ -473,7 +324,7 @@ class CPlaneCrash
 						{
 							if (hPlayer.IsSurvivor() && hPlayer.IsAlive() && !hPlayer.IsIncapacitated())
 							{
-								aL4D1Survivors.append(hPlayer);
+								aL4D1Survivors.push(hPlayer);
 							}
 						}
 					}
@@ -487,7 +338,7 @@ class CPlaneCrash
 							{
 								if (GetCharacterDisplayName(hPlayer).tolower() == aL4D2SurvivorsNames[j])
 								{
-									aL4D2Survivors.append(hPlayer);
+									aL4D2Survivors.push(hPlayer);
 								}
 							}
 						}
@@ -496,7 +347,7 @@ class CPlaneCrash
 					if (aL4D1Survivors.len() > 0)
 					{
 						local hEntity = SpawnEntityFromTable("func_orator", {
-							model = g_sPlaneModel[0]
+							model = g_PlaneCrash.sPlaneModel[0]
 							disableshadows = 1
 							spawnflags = 1
 						});
@@ -514,7 +365,7 @@ class CPlaneCrash
 						while (aL4D2Survivors.len() > 0) // shuffle the array
 						{
 							idx = RandomInt(0, aL4D2Survivors.len() - 1);
-							arr.append(aL4D2Survivors[idx]);
+							arr.push(aL4D2Survivors[idx]);
 							aL4D2Survivors.remove(idx);
 						}
 
@@ -524,7 +375,7 @@ class CPlaneCrash
 							flTime += 0.25;
 						}
 					}
-					g_flLastSurvivorsReaction = Time();
+					__fun_shit_last_survivors_reaction__ = Time();
 				}
 			});
 
@@ -588,8 +439,6 @@ class CPlaneCrash
 		return true;
 	}
 
-	function _set(key, val) { throw null; }
-
 	m_flCrashTime = null;
 	m_hPlanePreCrash = null;
 	m_hPlaneCrashTail = null;
@@ -606,14 +455,237 @@ class CPlaneCrash
 	m_PanicEventTimer = null;
 }
 
-g_tPlaneCrash <-
+enum ePlaneCrashType
 {
+	Forward,
+	Behind,
+	Left,
+	Right
+}
+
+g_PluginPlaneCrash <- CScriptPluginPlaneCrash();
+
+__pc_fun_shit_mode__ <- true;
+__fun_shit_last_survivors_reaction__ <- 0.0;
+
+g_PlaneCrash <-
+{
+	aPlanes = []
+
+	sPlaneModel =
+	[
+		"models/props_interiors/airportdeparturerampcontrol01.mdl"
+		"models/hybridphysx/precrash_airliner.mdl"
+		"models/hybridphysx/airliner_fuselage_secondary_1.mdl"
+		"models/hybridphysx/airliner_fuselage_secondary_2.mdl"
+		"models/hybridphysx/airliner_fuselage_secondary_3.mdl"
+		"models/hybridphysx/airliner_fuselage_secondary_4.mdl"
+		"models/hybridphysx/airliner_left_wing_secondary.mdl"
+		"models/hybridphysx/airliner_right_wing_secondary_1.mdl"
+		"models/hybridphysx/airliner_right_wing_secondary_2.mdl"
+		"models/hybridphysx/airliner_tail_secondary.mdl"
+		"models/hybridphysx/airliner_primary_debris_4.mdl"
+		"models/hybridphysx/airliner_primary_debris_1.mdl"
+		"models/hybridphysx/airliner_primary_debris_2.mdl"
+		"models/hybridphysx/airliner_primary_debris_3.mdl"
+		"models/hybridphysx/airliner_fire_emit1.mdl"
+		"models/hybridphysx/airliner_fire_emit2.mdl"
+		"models/hybridphysx/airliner_sparks_emit.mdl"
+		"models/hybridphysx/airliner_endstate_vcollide_dummy.mdl"
+	]
+
+	PlaneCrashParams =
+	{
+		c1m2_streets =
+		{
+			trigger_origin = Vector(-7301.124, -1146.229, 382.507)
+			trigger_maxs = Vector(13.366, 1002.849, 1080.520)
+			trigger_mins = Vector()
+			origin = Vector(-9011.491, -576.481, 384.031)
+			angles = QAngle(0, 180, 0)
+		}
+
+		c2m1_highway =
+		{
+			trigger_origin = Vector(1844.480, 6705.288, -1118.534)
+			trigger_maxs = Vector(2136.581, 16.381, 971.237)
+			trigger_mins = Vector()
+			origin = Vector(3773.583, 5229.438, -1004.816)
+			angles = QAngle(0, -93.231, 0)
+		}
+
+		c3m4_plantation =
+		{
+			trigger_origin = Vector(-2374.878, -3565.377, 3.613)
+			trigger_maxs = Vector(2003.132, 2206.400, 1191.983)
+			trigger_mins = Vector()
+			origin = Vector(-2785.709, -3676.346, 52.115)
+			angles = QAngle(0, -121.851, 0)
+		}
+
+		c5m4_quarter =
+		{
+			trigger_origin = Vector(-1380.347, -1791.956, 64.681)
+			trigger_maxs = Vector(30.247, 132.206, 1115.703)
+			trigger_mins = Vector()
+			origin = Vector(229.832, -913.114, 65.031)
+			angles = QAngle(0, 90.728, 0)
+		}
+		
+		c6m2_bedlam =
+		{
+			trigger_origin = Vector(639.570, 1281.739, -63.969)
+			trigger_maxs = Vector(1707.050, 142.284, 841.336)
+			trigger_mins = Vector()
+			origin = Vector(-757.382, 1156.305, -88.737)
+			angles = QAngle(0, 89.240, 0)
+		}
+
+		c7m3_port =
+		{
+			trigger_origin = Vector(-300.677, -1882.187, -0.630)
+			trigger_maxs = Vector(632.311, 578.951, 995.576)
+			trigger_mins = Vector()
+			origin = Vector(813.220, -32.343, -5.372)
+			angles = QAngle(0, 180, 0)
+		}
+
+		c8m1_apartment =
+		{
+			trigger_origin = Vector(749.650, 1796.665, 16.031)
+			trigger_maxs = Vector(1938.032, 55.383, 4562.303)
+			trigger_mins = Vector()
+			origin = Vector(1149.504, 1818.803, 8.031)
+			angles = QAngle(0, -90.174, 0)
+		}
+
+		c9m1_alleys =
+		{
+			trigger_origin = Vector(-4577.353, -10280.589, 5.106)
+			trigger_maxs = Vector(27.726, 2081.276, 933.604)
+			trigger_mins = Vector()
+			origin = Vector(-3199.007, -11608.114, 64.031)
+			angles = QAngle(0, -179.499, 0)
+		}
+
+		c10m4_mainstreet =
+		{
+			trigger_origin = Vector(-3146.643, -140.137, 375.231)
+			trigger_maxs = Vector(156.765, 17.999, 138.520)
+			trigger_mins = Vector()
+			origin = Vector(-4272.170, -1079.558, -63.968)
+			angles = QAngle(0, 176.842, 0)
+		}
+
+		c12m1_hilltop =
+		{
+			trigger_origin = Vector(-11067.224, -13421.997, 585.149)
+			trigger_maxs = Vector(896.173, 8.708, 1619.477)
+			trigger_mins = Vector()
+			origin = Vector(-12169.009, -12943.565, -86.600)
+			angles = QAngle(0, 111.220, 0)
+		}
+
+		c13m3_memorialbridge =
+		{
+			trigger_origin = Vector(757.256, -4666.164, 822.675)
+			trigger_maxs = Vector(1131.471, 134.771, 1519.715)
+			trigger_mins = Vector()
+			origin = Vector(353.373, -3296.894, 105.241)
+			angles = QAngle(0, 152.687, 0)
+		}
+
+		c14m2_lighthouse =
+		{
+			trigger_origin = Vector(-7334.104, 4356.157, -263.416)
+			trigger_maxs = Vector(6793.194, 41.668, 2639.376)
+			trigger_mins = Vector()
+			origin = Vector(-4913.594, 5219.752, -136.201)
+			angles = QAngle(0, 178.7, 0)
+		}
+	}
+
+	Settings =
+	{
+		Allow = true
+		Chance = 90
+		ClearTime = 0.0
+		DamageAmount = 20.0
+		Limit = 5
+		HordeDelay = 24.0
+	}
+
+    ParseConfigFile = function()
+    {
+        this = ::g_PlaneCrash;
+
+		local tData;
+
+		local function SerializeSettings()
+		{
+			local sData = "{";
+
+			foreach (key, val in Settings)
+			{
+				switch (typeof val)
+				{
+				case "string":
+					sData = format("%s\n\t%s = \"%s\"", sData, key, val);
+					break;
+				
+				case "float":
+					sData = format("%s\n\t%s = %f", sData, key, val);
+					break;
+				
+				case "integer":
+				case "bool":
+					sData = sData + "\n\t" + key + " = " + val;
+					break;
+				}
+			}
+
+			sData = sData + "\n}";
+			StringToFile("plane_crash/settings.nut", sData);
+		}
+
+		if (tData = FileToString("plane_crash/settings.nut"))
+		{
+			try
+            {
+				tData = compilestring("return " + tData)();
+
+				foreach (key, val in Settings)
+				{
+					if (tData.rawin(key))
+					{
+						if (key == "Chance")
+							Settings[key] = Math.Clamp(0, 100);
+						else if (key == "Limit" && tData[key] < 1)
+							Settings[key] = 1;
+						else
+							Settings[key] = tData[key];
+					}
+				}
+			}
+			catch (error)
+            {
+				SerializeSettings();
+			}
+		}
+		else
+		{
+			SerializeSettings();
+		}
+    }
+
 	OnConVarChange = function(ConVar, LastValue, NewValue)
 	{
-		while (g_aPlanes.len() > NewValue)
+		this = ::g_PlaneCrash;
+
+		while (aPlanes.len() > NewValue)
 		{
-			g_aPlanes[0].ClearCrash();
-			g_aPlanes.remove(0);
+			aPlanes[0].ClearCrash();
+			aPlanes.remove(0);
 		}
 	}
 
@@ -621,12 +693,12 @@ g_tPlaneCrash <-
 	{
 		if (g_sMapName == "c4m5_milltown_escape")
 		{
-			local chance = GetConVarInt(g_ConVar_PlaneCrashChance);
+			local chance = g_PlaneCrash.Settings.Chance;
 			if (chance > 0)
 			{
 				if (RandomInt(1, 100) <= chance)
 				{
-					g_tPlaneCrash.Start(Vector(-6803.697, 7144.039, 94.930), QAngle(0, -100.016, 0));
+					g_PlaneCrash.Start(Vector(-6803.697, 7144.039, 94.930), QAngle(0, -100.016, 0));
 				}
 			}
 		}
@@ -639,16 +711,16 @@ g_tPlaneCrash <-
 		{
 			if (caller.GetName().find("plane_crash_") != null)
 			{
-				if (GetConVarBool(g_ConVar_AllowPlaneCrash))
+				if (g_PlaneCrash.Settings.Allow)
 				{
 					if (g_sMapName == caller.GetName().slice(12))
 					{
-						if (g_aPlanes.len() > 0 && g_aPlanes.len() + 1 > GetConVarInt(g_ConVar_PlaneCrashLimit))
+						if (g_PlaneCrash.aPlanes.len() > 0 && g_PlaneCrash.aPlanes.len() + 1 > g_PlaneCrash.Settings.Limit)
 						{
-							g_aPlanes[0].ClearCrash();
-							g_aPlanes.remove(0);
+							g_PlaneCrash.aPlanes[0].ClearCrash();
+							g_PlaneCrash.aPlanes.remove(0);
 						}
-						g_tPlaneCrash.Start(g_tPlaneCrashParams[g_sMapName]["origin"], g_tPlaneCrashParams[g_sMapName]["angles"]);
+						g_PlaneCrash.Start(g_PlaneCrash.PlaneCrashParams[g_sMapName]["origin"], g_PlaneCrash.PlaneCrashParams[g_sMapName]["angles"]);
 						caller.Kill();
 					}
 				}
@@ -658,16 +730,18 @@ g_tPlaneCrash <-
 
 	PlaneCrash_Think = function()
 	{
-		if (g_aPlanes.len() > 0 && GetConVarFloat(g_ConVar_PlaneCrashClearTime) > 0)
+		this = ::g_PlaneCrash;
+
+		if (aPlanes.len() > 0 && g_PlaneCrash.Settings.ClearTime > 0)
 		{
-			for (local i = 0; i < g_aPlanes.len(); i++)
+			for (local i = 0; i < aPlanes.len(); i++)
 			{
-				if (g_aPlanes[i].m_flCrashTime != null)
+				if (aPlanes[i].m_flCrashTime != null)
 				{
-					if (g_aPlanes[i].m_flCrashTime + GetConVarFloat(g_ConVar_PlaneCrashClearTime) < Time())
+					if (aPlanes[i].m_flCrashTime + g_PlaneCrash.Settings.ClearTime < Time())
 					{
-						g_aPlanes[i].ClearCrash();
-						g_aPlanes.remove(i);
+						aPlanes[i].ClearCrash();
+						aPlanes.remove(i);
 						i--;
 					}
 				}
@@ -677,39 +751,47 @@ g_tPlaneCrash <-
 
 	Start = function(vecOrigin, eAngles)
 	{
-		if (g_aPlanes.len() > 0 && g_aPlanes.len() + 1 > GetConVarInt(g_ConVar_PlaneCrashLimit))
+		this = ::g_PlaneCrash;
+
+		if (aPlanes.len() > 0 && aPlanes.len() + 1 > g_PlaneCrash.Settings.Limit)
 		{
-			g_aPlanes[0].ClearCrash();
-			g_aPlanes.remove(0);
+			aPlanes[0].ClearCrash();
+			aPlanes.remove(0);
 		}
-		local plane = CPlaneCrash(vecOrigin, eAngles, GetConVarBool(g_ConVar_PlaneCrashDamage));
-		if (!plane.StartCrash()) plane.ClearCrash();
-		else g_aPlanes.append(plane);
+
+		local plane = CPlaneCrash(vecOrigin, eAngles, g_PlaneCrash.Settings.DamageAmount != 0);
+
+		if (!plane.StartCrash())
+			plane.ClearCrash();
+		else
+			aPlanes.push(plane);
 	}
 
 	Initialize = function(hPlayer, iCrashType)
 	{
-		if (hPlayer.IsHost() && GetConVarBool(g_ConVar_AllowPlaneCrash))
+		if (hPlayer.IsHost() && g_PlaneCrash.Settings.Allow)
 		{
 			local vecOrigin;
 			local eAngles = hPlayer.EyeAngles();
-			if (g_bMode) vecOrigin = GetPositionToGround(hPlayer);
+			if (__pc_fun_shit_mode__) vecOrigin = GetPositionToGround(hPlayer);
 			else vecOrigin = hPlayer.DoTraceLine(eTrace.Type_Pos, eTrace.Distance, eTrace.Mask_Shot);
-			if (iCrashType == eCrashType.Behind) eAngles += QAngle(0, 180, 0);
-			else if (iCrashType == eCrashType.Left) eAngles += QAngle(0, 90, 0);
-			else if (iCrashType == eCrashType.Right) eAngles -= QAngle(0, 90, 0);
-			g_tPlaneCrash.Start(vecOrigin, eAngles);
+			if (iCrashType == ePlaneCrashType.Behind) eAngles += QAngle(0, 180, 0);
+			else if (iCrashType == ePlaneCrashType.Left) eAngles += QAngle(0, 90, 0);
+			else if (iCrashType == ePlaneCrashType.Right) eAngles -= QAngle(0, 90, 0);
+			g_PlaneCrash.Start(vecOrigin, eAngles);
 		}
 	}
 
 	Clear = function(hPlayer)
 	{
+		this = ::g_PlaneCrash;
+
 		if (hPlayer.IsHost())
 		{
-			for (local i = 0; i < g_aPlanes.len(); i++)
+			for (local i = 0; i < aPlanes.len(); i++)
 			{
-				g_aPlanes[i].ClearCrash();
-				g_aPlanes.remove(i);
+				aPlanes[i].ClearCrash();
+				aPlanes.remove(i);
 				i--;
 			}
 		}
@@ -719,25 +801,25 @@ g_tPlaneCrash <-
 	{
 		if (hPlayer.IsHost())
 		{
-			sayf("[Plane Crash] Crash mode: %s", g_bMode ? "camera direction" : "near the player");
-			g_bMode = !g_bMode;
+			sayf("[Plane Crash] Crash mode: %s", __pc_fun_shit_mode__ ? "camera direction" : "near the player");
+			__pc_fun_shit_mode__ = !__pc_fun_shit_mode__;
 		}
 	}
 
-	Forward = function(hPlayer) { g_tPlaneCrash.Initialize(hPlayer, eCrashType.Forward); }
+	Forward = function(hPlayer) { g_PlaneCrash.Initialize(hPlayer, ePlaneCrashType.Forward); }
 
-	Behind = function(hPlayer) { g_tPlaneCrash.Initialize(hPlayer, eCrashType.Behind); }
+	Behind = function(hPlayer) { g_PlaneCrash.Initialize(hPlayer, ePlaneCrashType.Behind); }
 
-	Left = function(hPlayer) { g_tPlaneCrash.Initialize(hPlayer, eCrashType.Left); }
+	Left = function(hPlayer) { g_PlaneCrash.Initialize(hPlayer, ePlaneCrashType.Left); }
 
-	Right = function(hPlayer) { g_tPlaneCrash.Initialize(hPlayer, eCrashType.Right); }
+	Right = function(hPlayer) { g_PlaneCrash.Initialize(hPlayer, ePlaneCrashType.Right); }
 };
 
 PrecacheEntityFromTable({classname = "ambient_generic", message = "airport.planecrash"});
 
-for (local i = 0; i < g_sPlaneModel.len(); i++)
+for (local i = 0; i < g_PlaneCrash.sPlaneModel.len(); i++)
 {
-	PrecacheEntityFromTable({classname = "prop_dynamic", model = g_sPlaneModel[i]});
+	PrecacheEntityFromTable({classname = "prop_dynamic", model = g_PlaneCrash.sPlaneModel[i]});
 }
 
-g_ScriptPluginsHelper.AddScriptPlugin(g_PlaneCrash);
+g_ScriptPluginsHelper.AddScriptPlugin(g_PluginPlaneCrash);
