@@ -1,26 +1,36 @@
 // Gas Station Explosion
 
-class CScriptPluginGasStationExplosion extends IScriptPlugin
+class CPluginGasStationExplosion extends VSLU.IScriptPlugin
 {
 	function Load()
 	{
-		RegisterOnTickFunction("g_GasStationExplosion.GSE_Think");
-		RegisterOnTickFunction("g_GasStationExplosion.InvalidEntitiesListener_Think");
+		VSLU.RegisterOnTickFunction("g_GasStationExplosion.GSE_Think");
+		VSLU.RegisterOnTickFunction("g_GasStationExplosion.InvalidEntitiesListener_Think");
+		
+		g_GasStationExplosion.Precache();
+		g_GasStationExplosion.ParseConfigFile();
 
-		printl("[Gas Station Explosion]\nAuthor: Sw1ft\nVersion: 1.0.3");
+		VSLU.RegisterChatCommand("!gs_mode", g_GasStationExplosion.SwitchMode);
+		VSLU.RegisterChatCommand("!gs_clear", g_GasStationExplosion.Clear);
+		VSLU.RegisterChatCommand("!gas", g_GasStationExplosion.Forward);
+		VSLU.RegisterChatCommand("!bgas", g_GasStationExplosion.Behind);
+		VSLU.RegisterChatCommand("!lgas", g_GasStationExplosion.Left);
+		VSLU.RegisterChatCommand("!rgas", g_GasStationExplosion.Right);
+
+		printl("[Gas Station Explosion]\nAuthor: Sw1ft\nVersion: 1.0.6");
 	}
 
 	function Unload()
 	{
-		RemoveOnTickFunction("g_GasStationExplosion.GSE_Think");
-		RemoveOnTickFunction("g_GasStationExplosion.InvalidEntitiesListener_Think");
+		VSLU.RemoveOnTickFunction("g_GasStationExplosion.GSE_Think");
+		VSLU.RemoveOnTickFunction("g_GasStationExplosion.InvalidEntitiesListener_Think");
 
-		RemoveChatCommand("!gs_mode");
-		RemoveChatCommand("!gs_clear");
-		RemoveChatCommand("!gas");
-		RemoveChatCommand("!bgas");
-		RemoveChatCommand("!lgas");
-		RemoveChatCommand("!rgas");
+		VSLU.RemoveChatCommand("!gs_mode");
+		VSLU.RemoveChatCommand("!gs_clear");
+		VSLU.RemoveChatCommand("!gas");
+		VSLU.RemoveChatCommand("!bgas");
+		VSLU.RemoveChatCommand("!lgas");
+		VSLU.RemoveChatCommand("!rgas");
 	}
 
 	function OnRoundStartPost()
@@ -31,12 +41,12 @@ class CScriptPluginGasStationExplosion extends IScriptPlugin
 		{
 			foreach (map, tbl in g_GasStationExplosion.tGasStationExpParams)
 			{
-				if (g_sMapName == map)
+				if (VSLU.sMapName == map)
 				{
 					if (RandomInt(1, 100) <= chance)
 					{
-						g_GasStationExplosion.SpawnGasStation(g_GasStationExplosion.tGasStationExpParams[g_sMapName]["origin"], g_GasStationExplosion.tGasStationExpParams[g_sMapName]["angles"]);
-						printl("> [Gas Station Explosion] Gas station has been spawned for the current map at " + kvstr(g_GasStationExplosion.tGasStationExpParams[g_sMapName]["origin"]));
+						g_GasStationExplosion.SpawnGasStation(g_GasStationExplosion.tGasStationExpParams[VSLU.sMapName]["origin"], g_GasStationExplosion.tGasStationExpParams[VSLU.sMapName]["angles"]);
+						printl("> [Gas Station Explosion] Gas station has been spawned for the current map at " + kvstr(g_GasStationExplosion.tGasStationExpParams[VSLU.sMapName]["origin"]));
 					}
 				}
 			}
@@ -47,16 +57,6 @@ class CScriptPluginGasStationExplosion extends IScriptPlugin
 	{
 	}
 
-	function OnExtendClassMethods()
-	{
-		RegisterChatCommand("!gs_mode", g_GasStationExplosion.SwitchMode, true);
-		RegisterChatCommand("!gs_clear", g_GasStationExplosion.Clear, true);
-		RegisterChatCommand("!gas", g_GasStationExplosion.Forward, true);
-		RegisterChatCommand("!bgas", g_GasStationExplosion.Behind, true);
-		RegisterChatCommand("!lgas", g_GasStationExplosion.Left, true);
-		RegisterChatCommand("!rgas", g_GasStationExplosion.Right, true);
-	}
-
 	function GetClassName() { return m_sClassName; }
 
 	function GetScriptPluginName() { return m_sScriptPluginName; }
@@ -64,7 +64,7 @@ class CScriptPluginGasStationExplosion extends IScriptPlugin
 	function GetInterfaceVersion() { return m_InterfaceVersion; }
 
 	static m_InterfaceVersion = 1;
-	static m_sClassName = "CScriptPluginGasStationExplosion";
+	static m_sClassName = "CPluginGasStationExplosion";
 	static m_sScriptPluginName = "Gas Station Explosion";
 }
 
@@ -123,13 +123,13 @@ class CGasStationExplosion
 				local hEntity, vecPos;
 				local function HurtEntity(hEntity, vecPos)
 				{
-					if (VectorBetween(vecOrigin - Vector(500, 500, 500), vecOrigin + Vector(500, 500, 500), vecPos))
+					if ( VSLU.Math.VectorBetween(vecOrigin - Vector(500, 500, 500), vecOrigin + Vector(500, 500, 500), vecPos) )
 					{
-						if (vecPos.z + 200 > vecOrigin.z && vecPos.z - 200 < vecOrigin.z)
+						if ( vecPos.z + 200 > vecOrigin.z && vecPos.z - 200 < vecOrigin.z )
 						{
-							if ((aTrianglePoints[1] - aTrianglePoints[0]).Dot(vecPos - aTrianglePoints[0]) > 0 && (aTrianglePoints[0] - aTrianglePoints[1]).Dot(vecPos - aTrianglePoints[1]) > 0)
+							if ( (aTrianglePoints[1] - aTrianglePoints[0]).Dot(vecPos - aTrianglePoints[0]) > 0 && (aTrianglePoints[0] - aTrianglePoints[1]).Dot(vecPos - aTrianglePoints[1]) > 0 )
 							{
-								if ((aTrianglePoints[2] - aTrianglePoints[0]).Dot(vecPos - aTrianglePoints[0]) > 0 && (aTrianglePoints[0] - aTrianglePoints[2]).Dot(vecPos - aTrianglePoints[2]) > 0)
+								if ( (aTrianglePoints[2] - aTrianglePoints[0]).Dot(vecPos - aTrianglePoints[0]) > 0 && (aTrianglePoints[0] - aTrianglePoints[2]).Dot(vecPos - aTrianglePoints[2]) > 0 )
 								{
 									hEntity.TakeDamage(10.0, DMG_BURN, null);
 								}
@@ -140,16 +140,16 @@ class CGasStationExplosion
 
 				while (hEntity = Entities.FindByClassname(hEntity, "player"))
 				{
-					if (hEntity.IsAlive() && NetProps.GetPropInt(hEntity, "m_iObserverMode") == 0 && !NetProps.GetPropInt(hEntity, "m_isGhost"))
+					if ( VSLU.IsEntityAlive(hEntity) && NetProps.GetPropInt(hEntity, "m_iObserverMode") == 0 && !NetProps.GetPropInt(hEntity, "m_isGhost") )
 					{
-						HurtEntity(hEntity, hEntity.GetBodyPosition())
+						HurtEntity(hEntity, VSLU.Player.GetBodyPosition(hEntity))
 					}
 				}
 
 				hEntity = null;
 				while (hEntity = Entities.FindByClassname(hEntity, "infected"))
 				{
-					if (hEntity.GetHealth() > 0 && NetProps.GetPropInt(hEntity, "movetype") != MOVETYPE_NONE)
+					if ( VSLU.IsEntityAlive(hEntity) )
 					{
 						HurtEntity(hEntity, hEntity.GetOrigin())
 					}
@@ -158,7 +158,7 @@ class CGasStationExplosion
 				hEntity = null;
 				while (hEntity = Entities.FindByClassname(hEntity, "witch"))
 				{
-					if (hEntity.GetHealth() > 0)
+					if ( VSLU.IsEntityAlive(hEntity) )
 					{
 						HurtEntity(hEntity, hEntity.GetOrigin())
 					}
@@ -175,12 +175,12 @@ class CGasStationExplosion
 			}
 		}
 
-		getroottable()[m_sPushFunction = "_gas_station_push" + UniqueString()] <- function()
+		getroottable()[m_sPushFunction = "__gas_station_push" + UniqueString()] <- function()
 		{
 			local hPlayer, vecDirection;
 			while (hPlayer = Entities.FindByClassname(hPlayer, "player"))
 			{
-				if (hPlayer.IsAlive() && NetProps.GetPropInt(hPlayer, "m_iObserverMode") == 0 && !NetProps.GetPropInt(hPlayer, "m_isGhost"))
+				if (VSLU.IsEntityAlive(hPlayer) && NetProps.GetPropInt(hPlayer, "m_iObserverMode") == 0 && !NetProps.GetPropInt(hPlayer, "m_isGhost"))
 				{
 					if ((hPlayer.GetOrigin() - vecOrigin).LengthSqr() <= 25e4)
 					{
@@ -273,7 +273,7 @@ class CGasStationExplosion
 			message = "explode_3"
 		}));
 
-		AcceptEntityInput(m_hGasStationBrush = SpawnEntityFromTable("prop_dynamic", {
+		VSLU.AcceptEntityInput(m_hGasStationBrush = SpawnEntityFromTable("prop_dynamic", {
 			origin = vecOrigin - Vector(0, 0, 144.031)
 			angles = sAngles
 			solid = 6
@@ -285,7 +285,7 @@ class CGasStationExplosion
 			model = g_GasStationExplosion.sGasStationExpModel[9]
 		}), "DisableCollision");
 
-		AttachEntity(m_hDebrisDoor = SpawnEntityFromTable("func_door", {
+		VSLU.AttachEntity(m_hDebrisDoor = SpawnEntityFromTable("func_door", {
 			origin = vecOrigin - Vector(0, 0, 216.031)
 			angles = kvstr(eAngles - QAngle(0, 90, 0))
 			disableshadows = 1
@@ -414,8 +414,8 @@ class CGasStationExplosion
 	{
 		if (!m_bExplosionStarted)
 		{
-			AcceptEntityInput(m_hGasExplosionSound, "PlaySound");
-			m_aTimers.push(CreateTimer(2.0, function(__instance){
+			VSLU.AcceptEntityInput(m_hGasExplosionSound, "PlaySound");
+			m_aTimers.push(VSLU.CreateTimer(2.0, function(__instance){
 				if (!__instance.StartExplosion())
 					__instance.ClearExplosion();
 			}, this));
@@ -427,50 +427,50 @@ class CGasStationExplosion
 	{
 		if (IsAllEntitiesValid())
 		{
-			AcceptEntityInput(m_hGasExplosionSound, "PlaySound");
-			AcceptEntityInput(m_hBurningPipeLeft, "PlaySound", "", 1.0);
-			AcceptEntityInput(m_hBurningPipeRight, "PlaySound", "", 1.0);
-			AcceptEntityInput(m_hGasExplosionImpactSound, "PlaySound", "", 3.1);
+			VSLU.AcceptEntityInput(m_hGasExplosionSound, "PlaySound");
+			VSLU.AcceptEntityInput(m_hBurningPipeLeft, "PlaySound", "", 1.0);
+			VSLU.AcceptEntityInput(m_hBurningPipeRight, "PlaySound", "", 1.0);
+			VSLU.AcceptEntityInput(m_hGasExplosionImpactSound, "PlaySound", "", 3.1);
 
-			AcceptEntityInput(m_hGasStationExplosionShake, "StartShake");
-			AcceptEntityInput(m_hGasStationExplosionParticle, "Start", "", 0.5);
+			VSLU.AcceptEntityInput(m_hGasStationExplosionShake, "StartShake");
+			VSLU.AcceptEntityInput(m_hGasStationExplosionParticle, "Start", "", 0.5);
 
-			AcceptEntityInput(m_hDebrisDoor, "Close", "", 1.0);
-			AcceptEntityInput(m_hGasStationBrush, "Enable", "", 1.0);
-			AcceptEntityInput(m_hGasStationBrush, "EnableCollision", "", 1.0);
-			AcceptEntityInput(m_hGasStationPit, "Enable", "", 1.0);
+			VSLU.AcceptEntityInput(m_hDebrisDoor, "Close", "", 1.0);
+			VSLU.AcceptEntityInput(m_hGasStationBrush, "Enable", "", 1.0);
+			VSLU.AcceptEntityInput(m_hGasStationBrush, "EnableCollision", "", 1.0);
+			VSLU.AcceptEntityInput(m_hGasStationPit, "Enable", "", 1.0);
 
-			AcceptEntityInput(m_hGasPumpLeftParticle, "Kill", "", 1.0);
-			AcceptEntityInput(m_hGasPumpRightParticle, "Kill", "", 1.0);
+			VSLU.AcceptEntityInput(m_hGasPumpLeftParticle, "Kill", "", 1.0);
+			VSLU.AcceptEntityInput(m_hGasPumpRightParticle, "Kill", "", 1.0);
 
-			AcceptEntityInput(m_hGasPumpLeft, "Kill", "", 1.0);
-			AcceptEntityInput(m_hGasPumpRight, "Kill", "", 1.0);
+			VSLU.AcceptEntityInput(m_hGasPumpLeft, "Kill", "", 1.0);
+			VSLU.AcceptEntityInput(m_hGasPumpRight, "Kill", "", 1.0);
 
-			AcceptEntityInput(m_hGasPumpLeftBreakable, "Break");
-			AcceptEntityInput(m_hGasPumpRightBreakable, "Break");
+			VSLU.AcceptEntityInput(m_hGasPumpLeftBreakable, "Break");
+			VSLU.AcceptEntityInput(m_hGasPumpRightBreakable, "Break");
 
-			AcceptEntityInput(m_hGasExplosionSound, "Kill", "", 12.0);
-			AcceptEntityInput(m_hGasExplosionImpactSound, "Kill", "", 12.0);
-			AcceptEntityInput(m_hGasStationExplosionShake, "Kill", "", 12.0);
-			AcceptEntityInput(m_hGasPumpExplosionShake, "Kill", "", 6.0);
-			AcceptEntityInput(m_hGasPumpExplosionSound, "Kill", "", 6.0);
+			VSLU.AcceptEntityInput(m_hGasExplosionSound, "Kill", "", 12.0);
+			VSLU.AcceptEntityInput(m_hGasExplosionImpactSound, "Kill", "", 12.0);
+			VSLU.AcceptEntityInput(m_hGasStationExplosionShake, "Kill", "", 12.0);
+			VSLU.AcceptEntityInput(m_hGasPumpExplosionShake, "Kill", "", 6.0);
+			VSLU.AcceptEntityInput(m_hGasPumpExplosionSound, "Kill", "", 6.0);
 
 			if (!m_bGasPumpLeftExploded)
 			{
-				if (m_hGasPumpLeftExplosion) AcceptEntityInput(m_hGasPumpLeftExplosion, "Explode");
-				AcceptEntityInput(m_hGasPumpLeftParticle, "Start");
-				AcceptEntityInput(m_hGasPumpExplosionSound, "PlaySound");
+				if (m_hGasPumpLeftExplosion) VSLU.AcceptEntityInput(m_hGasPumpLeftExplosion, "Explode");
+				VSLU.AcceptEntityInput(m_hGasPumpLeftParticle, "Start");
+				VSLU.AcceptEntityInput(m_hGasPumpExplosionSound, "PlaySound");
 			}
 			else if (!m_bGasPumpRightExploded)
 			{
-				if (m_hGasPumpRightExplosion) AcceptEntityInput(m_hGasPumpRightExplosion, "Explode");
-				AcceptEntityInput(m_hGasPumpRightParticle, "Start");
-				AcceptEntityInput(m_hGasPumpExplosionSound, "PlaySound");
+				if (m_hGasPumpRightExplosion) VSLU.AcceptEntityInput(m_hGasPumpRightExplosion, "Explode");
+				VSLU.AcceptEntityInput(m_hGasPumpRightParticle, "Start");
+				VSLU.AcceptEntityInput(m_hGasPumpExplosionSound, "PlaySound");
 			}
 
 			foreach (ent in m_aGasStation)
 			{
-				AcceptEntityInput(ent, "SetAnimation", "boom");
+				VSLU.AcceptEntityInput(ent, "SetAnimation", "boom");
 			}
 
 			if (g_GasStationExplosion.Settings.HordeDelay > 0)
@@ -480,7 +480,7 @@ class CGasStationExplosion
 					SpawnEntityFromTable("info_director", {targetname = "director"});
 				}
 
-				m_aTimers.push(CreateTimer(g_GasStationExplosion.Settings.HordeDelay, function(){
+				m_aTimers.push(VSLU.CreateTimer(g_GasStationExplosion.Settings.HordeDelay, function(){
 					EntFire("director", "ForcePanicEvent", "1");
 					EntFire("@director", "ForcePanicEvent", "1");
 				}));
@@ -488,20 +488,20 @@ class CGasStationExplosion
 
 			if (m_sHurtFunction)
 			{
-				m_aTimers.push(CreateTimer(0.4, RegisterLoopFunction, m_sHurtFunction, 0.5, m_aTrianglePoints));
-				m_aTimers.push(CreateTimer(64.6, function(sHurtFunction, aTrianglePoints){
-					if (IsLoopFunctionRegistered(sHurtFunction, aTrianglePoints))
-						RemoveLoopFunction(sHurtFunction, aTrianglePoints);
+				m_aTimers.push(VSLU.CreateTimer(0.4, VSLU.RegisterLoopFunction, m_sHurtFunction, 0.5, m_aTrianglePoints));
+				m_aTimers.push(VSLU.CreateTimer(64.6, function(sHurtFunction, aTrianglePoints){
+					if (VSLU.IsLoopFunctionRegistered(sHurtFunction, aTrianglePoints))
+						VSLU.RemoveLoopFunction(sHurtFunction, aTrianglePoints);
 				}, m_sHurtFunction, m_aTrianglePoints));
 			}
 
-			m_aTimers.push(CreateTimer(0.4, RegisterOnTickFunction, m_sPushFunction));
-			m_aTimers.push(CreateTimer(0.9, function(sPushFunction){
-				if (IsOnTickFunctionRegistered(sPushFunction))
-					RemoveOnTickFunction(sPushFunction);
+			m_aTimers.push(VSLU.CreateTimer(0.4, VSLU.RegisterOnTickFunction, m_sPushFunction));
+			m_aTimers.push(VSLU.CreateTimer(0.9, function(sPushFunction){
+				if (VSLU.IsOnTickFunctionRegistered(sPushFunction))
+					VSLU.RemoveOnTickFunction(sPushFunction);
 			}, m_sPushFunction));
 
-			m_aTimers.push(CreateTimer(6.0, function(){
+			m_aTimers.push(VSLU.CreateTimer(6.0, function(){
 				if (__fun_shit_last_survivors_reaction__ + 10.0 < Time())
 				{
 					local hPlayer;
@@ -512,10 +512,9 @@ class CGasStationExplosion
 
 					for (local i = 0; i < aL4D1SurvivorsNames.len(); i++)
 					{
-						hPlayer = Entities.FindByName(null, "!" + aL4D1SurvivorsNames[i]);
-						if (hPlayer)
+						if ( hPlayer = Entities.FindByName(null, "!" + aL4D1SurvivorsNames[i]) )
 						{
-							if (hPlayer.IsSurvivor() && hPlayer.IsAlive() && !hPlayer.IsIncapacitated())
+							if (hPlayer.IsSurvivor() && VSLU.IsEntityAlive(hPlayer) && !hPlayer.IsIncapacitated())
 							{
 								aL4D1Survivors.push(hPlayer);
 							}
@@ -524,10 +523,9 @@ class CGasStationExplosion
 
 					for (local j = 0; j < aL4D2SurvivorsNames.len(); j++)
 					{
-						hPlayer = Entities.FindByName(null, "!" + aL4D2SurvivorsNames[j]);
-						if (hPlayer)
+						if ( hPlayer = Entities.FindByName(null, "!" + aL4D2SurvivorsNames[j]) )
 						{
-							if (hPlayer.IsSurvivor() && hPlayer.IsAlive() && !hPlayer.IsIncapacitated())
+							if (hPlayer.IsSurvivor() && VSLU.IsEntityAlive(hPlayer) && !hPlayer.IsIncapacitated())
 							{
 								if (GetCharacterDisplayName(hPlayer).tolower() == aL4D2SurvivorsNames[j])
 								{
@@ -545,8 +543,8 @@ class CGasStationExplosion
 							model = g_GasStationExplosion.sGasStationExpModel[13]
 						});
 						NetProps.SetPropInt(hEntity, "m_fEffects", (1 << 5));
-						AcceptEntityInput(hEntity, "SpeakResponseConcept", "PlaneCrash");
-						AcceptEntityInput(hEntity, "Kill", "", 0.01);
+						VSLU.AcceptEntityInput(hEntity, "SpeakResponseConcept", "PlaneCrash");
+						VSLU.AcceptEntityInput(hEntity, "Kill", "", 0.01);
 					}
 
 					if (aL4D2Survivors.len() > 0)
@@ -564,7 +562,7 @@ class CGasStationExplosion
 						
 						for (local k = 0; k < arr.len(); k++)
 						{
-							AcceptEntityInput(arr[k], "SpeakResponseConcept", "C2M1Falling", flTime);
+							VSLU.AcceptEntityInput(arr[k], "SpeakResponseConcept", "C2M1Falling", flTime);
 							flTime += 0.25;
 						}
 					}
@@ -586,12 +584,12 @@ class CGasStationExplosion
 	{
 		if (!m_bGasPumpLeftExploded)
 		{
-			if (m_hGasPumpLeftExplosion) AcceptEntityInput(m_hGasPumpLeftExplosion, "Explode", "", 1.10);
-			AcceptEntityInput(m_hGasPumpLeft, "Enable", "", 1.0);
-			AcceptEntityInput(m_hGasPumpLeft, "SetAnimation", "leftDetonator", 1.10);
-			AcceptEntityInput(m_hGasPumpExplosionShake, "StartShake", "", 1.0);
-			AcceptEntityInput(m_hGasPumpLeftParticle, "Start", "", 1.10);
-			AcceptEntityInput(m_hGasPumpExplosionSound, "PlaySound", "", 1.10);
+			if (m_hGasPumpLeftExplosion) VSLU.AcceptEntityInput(m_hGasPumpLeftExplosion, "Explode", "", 1.10);
+			VSLU.AcceptEntityInput(m_hGasPumpLeft, "Enable", "", 1.0);
+			VSLU.AcceptEntityInput(m_hGasPumpLeft, "SetAnimation", "leftDetonator", 1.10);
+			VSLU.AcceptEntityInput(m_hGasPumpExplosionShake, "StartShake", "", 1.0);
+			VSLU.AcceptEntityInput(m_hGasPumpLeftParticle, "Start", "", 1.10);
+			VSLU.AcceptEntityInput(m_hGasPumpExplosionSound, "PlaySound", "", 1.10);
 			m_bGasPumpLeftExploded = true;
 			StartPreExplosion();
 		}
@@ -601,12 +599,12 @@ class CGasStationExplosion
 	{
 		if (!m_bGasPumpRightExploded)
 		{
-			if (m_hGasPumpRightExplosion) AcceptEntityInput(m_hGasPumpRightExplosion, "Explode", "", 1.10);
-			AcceptEntityInput(m_hGasPumpRight, "Enable", "", 1.0);
-			AcceptEntityInput(m_hGasPumpRight, "SetAnimation", "rightDetonator", 1.10);
-			AcceptEntityInput(m_hGasPumpExplosionShake, "StartShake", "", 1.0);
-			AcceptEntityInput(m_hGasPumpRightParticle, "Start", "", 1.10);
-			AcceptEntityInput(m_hGasPumpExplosionSound, "PlaySound", "", 1.10);
+			if (m_hGasPumpRightExplosion) VSLU.AcceptEntityInput(m_hGasPumpRightExplosion, "Explode", "", 1.10);
+			VSLU.AcceptEntityInput(m_hGasPumpRight, "Enable", "", 1.0);
+			VSLU.AcceptEntityInput(m_hGasPumpRight, "SetAnimation", "rightDetonator", 1.10);
+			VSLU.AcceptEntityInput(m_hGasPumpExplosionShake, "StartShake", "", 1.0);
+			VSLU.AcceptEntityInput(m_hGasPumpRightParticle, "Start", "", 1.10);
+			VSLU.AcceptEntityInput(m_hGasPumpExplosionSound, "PlaySound", "", 1.10);
 			m_bGasPumpRightExploded = true;
 			StartPreExplosion();
 		}
@@ -619,13 +617,13 @@ class CGasStationExplosion
 
 		if (m_sPushFunction)
 		{
-			if (IsOnTickFunctionRegistered(m_sPushFunction)) RemoveOnTickFunction(m_sPushFunction);
+			if (VSLU.IsOnTickFunctionRegistered(m_sPushFunction)) VSLU.RemoveOnTickFunction(m_sPushFunction);
 			delete getroottable()[m_sPushFunction];
 		}
 
 		if (m_sHurtFunction)
 		{
-			if (IsLoopFunctionRegistered(m_sHurtFunction, m_aTrianglePoints)) RemoveLoopFunction(m_sHurtFunction, m_aTrianglePoints);
+			if (VSLU.IsLoopFunctionRegistered(m_sHurtFunction, m_aTrianglePoints)) VSLU.RemoveLoopFunction(m_sHurtFunction, m_aTrianglePoints);
 			delete getroottable()[m_sHurtFunction];
 		}
 
@@ -636,8 +634,8 @@ class CGasStationExplosion
 		{
 			if (ent && ent.IsValid())
 			{
-				AcceptEntityInput(ent, "Volume", "0");
-				AcceptEntityInput(ent, "Kill", "", 0.01);
+				VSLU.AcceptEntityInput(ent, "Volume", "0");
+				VSLU.AcceptEntityInput(ent, "Kill", "", 0.01);
 			}
 		}
 
@@ -651,11 +649,11 @@ class CGasStationExplosion
 
 		for (local i = 0; i < m_aTimers.len(); i++)
 		{
-			foreach (idx, timer in g_aTimers)
+			foreach (idx, timer in VSLU.aTimers)
 			{
 				if (m_aTimers[i].GetIdentifier() == timer.GetIdentifier())
 				{
-					g_aTimers.remove(idx);
+					VSLU.aTimers.remove(idx);
 					break;
 				}
 			}
@@ -704,15 +702,7 @@ class CGasStationExplosion
 	m_aSoundEntities = null;
 }
 
-enum eGasExplosionType
-{
-	Forward,
-	Behind,
-	Left,
-	Right
-}
-
-g_PluginGasStationExplosion <- CScriptPluginGasStationExplosion();
+g_PluginGasStationExplosion <- CPluginGasStationExplosion();
 
 __gse_fun_shit_mode__ <- true;
 __fun_shit_last_survivors_reaction__ <- 0.0;
@@ -721,6 +711,14 @@ g_GasStationExplosion <-
 {
 	aGasStations = []
 	aInvalidEntitiesListener = []
+
+	tExpDir =
+	{
+		Forward = 0
+		Behind = 1
+		Left = 2
+		Right = 3
+	}
 
 	sGasStationExpModel =
 	[
@@ -821,7 +819,7 @@ g_GasStationExplosion <-
 					if (tData.rawin(key))
 					{
 						if (key == "Chance")
-							Settings[key] = Math.Clamp(0, 100);
+							Settings[key] = VSLU.Math.Clamp(tData[key], 0, 100);
 						else if (key == "Limit" && tData[key] < 1)
 							Settings[key] = 1;
 						else
@@ -829,25 +827,35 @@ g_GasStationExplosion <-
 					}
 				}
 			}
-			catch (error)
+			catch (exception)
             {
 				SerializeSettings();
+
+				error("[Gas Station Explosion] " + exception + "\n");
+				error("[Gas Station Explosion] Failed to parse the config file\n");
 			}
 		}
 		else
 		{
 			SerializeSettings();
+
+			error("[Gas Station Explosion] Missing the config file, created a new one\n");
 		}
     }
 
-	OnConVarChange = function(ConVar, LastValue, NewValue)
+	Precache = function()
 	{
 		this = ::g_GasStationExplosion;
 
-		while (aGasStations.len() > NewValue)
+		PrecacheEntityFromTable( { classname = "ambient_generic", message = "Objects.gas_station_explosion" } );
+		PrecacheEntityFromTable( { classname = "ambient_generic", message = "SmashCave.WoodRockCollapse" } );
+		PrecacheEntityFromTable( { classname = "ambient_generic", message = "explode_3" } );
+		PrecacheEntityFromTable( { classname = "ambient_generic", message = "fire_large" } );
+		PrecacheEntityFromTable( { classname = "env_explosion", fireballsprite = "sprites/zerogxplode.spr" } );
+
+		for (local i = 0; i < g_GasStationExplosion.sGasStationExpModel.len(); ++i)
 		{
-			aGasStations[0].ClearExplosion();
-			aGasStations.remove(0);
+			PrecacheEntityFromTable( { classname = "prop_dynamic", model = g_GasStationExplosion.sGasStationExpModel[i] } );
 		}
 	}
 
@@ -861,15 +869,30 @@ g_GasStationExplosion <-
 
 	Initialize = function(hPlayer, iExplosionType)
 	{
-		if (hPlayer.IsHost() && g_GasStationExplosion.Settings.Allow)
+		if (VSLU.Player.IsHost(hPlayer) && g_GasStationExplosion.Settings.Allow)
 		{
 			local vecOrigin;
 			local eAngles = hPlayer.EyeAngles();
-			if (__gse_fun_shit_mode__) vecOrigin = hPlayer.GetOrigin();
-			else vecOrigin = hPlayer.DoTraceLine(eTrace.Type_Pos, eTrace.Distance, eTrace.Mask_Shot);
-			if (iExplosionType == eGasExplosionType.Behind) eAngles += QAngle(0, 180, 0);
-			else if (iExplosionType == eGasExplosionType.Left) eAngles += QAngle(0, 90, 0);
-			else if (iExplosionType == eGasExplosionType.Right) eAngles -= QAngle(0, 90, 0);
+
+			if (__gse_fun_shit_mode__)
+			{
+				vecOrigin = hPlayer.GetOrigin();
+			}
+			else
+			{
+				local tTraceResult = {};
+				VSLU.Player.TraceLine(hPlayer, tTraceResult);
+
+				vecOrigin = tTraceResult["pos"];
+			}
+
+			if (iExplosionType == g_GasStationExplosion.tExpDir.Behind)
+				eAngles += QAngle(0, 180, 0);
+			else if (iExplosionType == g_GasStationExplosion.tExpDir.Left)
+				eAngles += QAngle(0, 90, 0);
+			else if (iExplosionType == g_GasStationExplosion.tExpDir.Right)
+				eAngles -= QAngle(0, 90, 0);
+
 			g_GasStationExplosion.SpawnGasStation(vecOrigin, eAngles);
 		}
 	}
@@ -924,11 +947,11 @@ g_GasStationExplosion <-
 		aGasStations.push(CGasStationExplosion(vecOrigin, eAngles, g_GasStationExplosion.Settings.AllowDamage));
 	}
 
-	Clear = function(hPlayer)
+	Clear = function(hPlayer, sArgs)
 	{
 		this = ::g_GasStationExplosion;
 
-		if (hPlayer.IsHost())
+		if (VSLU.Player.IsHost(hPlayer))
 		{
 			for (local i = 0; i < aGasStations.len(); i++)
 			{
@@ -939,33 +962,22 @@ g_GasStationExplosion <-
 		}
 	}
 
-	SwitchMode = function(hPlayer)
+	SwitchMode = function(hPlayer, sArgs)
 	{
-		if (hPlayer.IsHost())
+		if (VSLU.Player.IsHost(hPlayer))
 		{
-			SayMsg("[Gas Station Explosion] Explosion mode: " + (__gse_fun_shit_mode__ ? "camera direction" : "near the player"));
+			VSLU.SendMessage(hPlayer, "[Gas Station Explosion] Explosion mode: " + (__gse_fun_shit_mode__ ? "camera direction" : "near the player"));
 			__gse_fun_shit_mode__ = !__gse_fun_shit_mode__;
 		}
 	}
 
-	Forward = function(hPlayer) { g_GasStationExplosion.Initialize(hPlayer, eGasExplosionType.Forward); }
+	Forward = function(hPlayer, sArgs) { g_GasStationExplosion.Initialize(hPlayer, g_GasStationExplosion.tExpDir.Forward); }
 
-	Behind = function(hPlayer) { g_GasStationExplosion.Initialize(hPlayer, eGasExplosionType.Behind); }
+	Behind = function(hPlayer, sArgs) { g_GasStationExplosion.Initialize(hPlayer, g_GasStationExplosion.tExpDir.Behind); }
 
-	Left = function(hPlayer) { g_GasStationExplosion.Initialize(hPlayer, eGasExplosionType.Left); }
+	Left = function(hPlayer, sArgs) { g_GasStationExplosion.Initialize(hPlayer, g_GasStationExplosion.tExpDir.Left); }
 
-	Right = function(hPlayer) { g_GasStationExplosion.Initialize(hPlayer, eGasExplosionType.Right); }
+	Right = function(hPlayer, sArgs) { g_GasStationExplosion.Initialize(hPlayer, g_GasStationExplosion.tExpDir.Right); }
 };
 
-PrecacheEntityFromTable({classname = "ambient_generic", message = "Objects.gas_station_explosion"});
-PrecacheEntityFromTable({classname = "ambient_generic", message = "SmashCave.WoodRockCollapse"});
-PrecacheEntityFromTable({classname = "ambient_generic", message = "explode_3"});
-PrecacheEntityFromTable({classname = "ambient_generic", message = "fire_large"});
-PrecacheEntityFromTable({classname = "env_explosion", fireballsprite = "sprites/zerogxplode.spr"});
-
-for (local i = 0; i < g_GasStationExplosion.sGasStationExpModel.len(); i++)
-{
-	PrecacheEntityFromTable({classname = "prop_dynamic", model = g_GasStationExplosion.sGasStationExpModel[i]});
-}
-
-g_ScriptPluginsHelper.AddScriptPlugin(g_PluginGasStationExplosion);
+VSLU.ScriptPluginsHelper.AddScriptPlugin(g_PluginGasStationExplosion);

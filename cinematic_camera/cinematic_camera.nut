@@ -1,53 +1,63 @@
 // Cinematic Camera
 
-class CCinematicCamera extends IScriptPlugin
+class CPluginCinematicCamera extends VSLU.IScriptPlugin
 {
 	function Load()
 	{
-		::__frametime__ <- 1.0 / 30.0;
+		::__ccam_frametime__ <- 1.0 / 30.0;
 
-		RegisterLoopFunction("CinematicCamera_Think2", 0.1);
+		VSLU.RegisterLoopFunction("CinematicCamera_Think2", 0.1);
 
-		RegisterButtonListener(IN_ATTACK, "g_CinematicCamera.OnAttackHold", eButtonType.Hold);
-		RegisterButtonListener(IN_ATTACK2, "g_CinematicCamera.OnAttack2Hold", eButtonType.Hold);
-		RegisterButtonListener(IN_ATTACK3, "g_CinematicCamera.OnAttack3Press", eButtonType.Pressed);
+		VSLU.RegisterButtonListener(IN_ATTACK, "g_CinematicCamera.OnAttackHold", BUTTON_STATE_HOLD);
+		VSLU.RegisterButtonListener(IN_ATTACK2, "g_CinematicCamera.OnAttack2Hold", BUTTON_STATE_HOLD);
+		VSLU.RegisterButtonListener(IN_ATTACK3, "g_CinematicCamera.OnAttack3Press", BUTTON_STATE_PRESSED);
 
-		RegisterButtonListener(IN_ALT1, "g_CinematicCamera.OnAlt1Press", eButtonType.Pressed);
-		RegisterButtonListener(IN_ALT2, "g_CinematicCamera.OnAlt2Press", eButtonType.Pressed);
+		VSLU.RegisterButtonListener(IN_ALT1, "g_CinematicCamera.OnAlt1Press", BUTTON_STATE_PRESSED);
+		VSLU.RegisterButtonListener(IN_ALT2, "g_CinematicCamera.OnAlt2Press", BUTTON_STATE_PRESSED);
 
-		RegisterButtonListener(IN_GRENADE1, "g_CinematicCamera.OnGrenade1Hold", eButtonType.Hold);
-		RegisterButtonListener(IN_GRENADE2, "g_CinematicCamera.OnGrenade2Hold", eButtonType.Hold);
+		VSLU.RegisterButtonListener(IN_GRENADE1, "g_CinematicCamera.OnGrenade1Hold", BUTTON_STATE_HOLD);
+		VSLU.RegisterButtonListener(IN_GRENADE2, "g_CinematicCamera.OnGrenade2Hold", BUTTON_STATE_HOLD);
 
-		HookEvent("player_incapacitated_start", g_CinematicCamera.OnPlayerIncapacitatedStart, g_CinematicCamera);
-		HookEvent("player_ledge_grab", g_CinematicCamera.OnPlayerLedgeGrab, g_CinematicCamera);
-		HookEvent("player_disconnect", g_CinematicCamera.OnPlayerDisconnect, g_CinematicCamera);
+		VSLU.HookEvent("player_incapacitated_start", g_CinematicCamera.OnPlayerIncapacitatedStart, g_CinematicCamera);
+		VSLU.HookEvent("player_ledge_grab", g_CinematicCamera.OnPlayerLedgeGrab, g_CinematicCamera);
+		VSLU.HookEvent("player_disconnect", g_CinematicCamera.OnPlayerDisconnect, g_CinematicCamera);
 
-		printl("[Cinematic Camera]\nAuthor: Sw1ft\nVersion: 2.1.6");
+		VSLU.Hooks.RegisterHook(VSLU.Hooks.OnIteratePlayersPerTick, g_CinematicCamera.OnIteratePlayersPerTick);
+
+		VSLU.RegisterChatCommand("!cc_reset", g_CinematicCamera.ResetRollAxis);
+		VSLU.RegisterChatCommand("!cc_fov", g_CinematicCamera.ChangeFOV);
+		VSLU.RegisterChatCommand("!cam", g_CinematicCamera.SwitchCamera);
+		VSLU.RegisterChatCommand("!dec", g_CinematicCamera.DecreaseSpeed);
+		VSLU.RegisterChatCommand("!inc", g_CinematicCamera.IncreaseSpeed);
+
+		printl("[Cinematic Camera]\nAuthor: Sw1ft\nVersion: 2.1.7");
 	}
 
 	function Unload()
 	{
-		RemoveLoopFunction("CinematicCamera_Think2", 0.1);
+		VSLU.RemoveLoopFunction("CinematicCamera_Think2", 0.1);
 
-		RemoveButtonListener(IN_ATTACK, "g_CinematicCamera.OnAttackHold");
-		RemoveButtonListener(IN_ATTACK2, "g_CinematicCamera.OnAttack2Hold");
-		RemoveButtonListener(IN_ATTACK3, "g_CinematicCamera.OnAttack3Press");
+		VSLU.RemoveButtonListener(IN_ATTACK, "g_CinematicCamera.OnAttackHold");
+		VSLU.RemoveButtonListener(IN_ATTACK2, "g_CinematicCamera.OnAttack2Hold");
+		VSLU.RemoveButtonListener(IN_ATTACK3, "g_CinematicCamera.OnAttack3Press");
 
-		RemoveButtonListener(IN_ALT1, "g_CinematicCamera.OnAlt1Press");
-		RemoveButtonListener(IN_ALT2, "g_CinematicCamera.OnAlt2Press");
+		VSLU.RemoveButtonListener(IN_ALT1, "g_CinematicCamera.OnAlt1Press");
+		VSLU.RemoveButtonListener(IN_ALT2, "g_CinematicCamera.OnAlt2Press");
 
-		RemoveButtonListener(IN_GRENADE1, "g_CinematicCamera.OnGrenade1Hold");
-		RemoveButtonListener(IN_GRENADE2, "g_CinematicCamera.OnGrenade2Hold");
+		VSLU.RemoveButtonListener(IN_GRENADE1, "g_CinematicCamera.OnGrenade1Hold");
+		VSLU.RemoveButtonListener(IN_GRENADE2, "g_CinematicCamera.OnGrenade2Hold");
 
-		UnhookEvent("player_incapacitated_start", g_CinematicCamera.OnPlayerIncapacitatedStart, g_CinematicCamera);
-		UnhookEvent("player_ledge_grab", g_CinematicCamera.OnPlayerLedgeGrab, g_CinematicCamera);
-		UnhookEvent("player_disconnect", g_CinematicCamera.OnPlayerDisconnect, g_CinematicCamera);
+		VSLU.UnhookEvent("player_incapacitated_start", g_CinematicCamera.OnPlayerIncapacitatedStart, g_CinematicCamera);
+		VSLU.UnhookEvent("player_ledge_grab", g_CinematicCamera.OnPlayerLedgeGrab, g_CinematicCamera);
+		VSLU.UnhookEvent("player_disconnect", g_CinematicCamera.OnPlayerDisconnect, g_CinematicCamera);
 
-		RemoveChatCommand("!cc_reset");
-		RemoveChatCommand("!cc_fov");
-		RemoveChatCommand("!cam");
-		RemoveChatCommand("!dec");
-		RemoveChatCommand("!inc");
+		VSLU.Hooks.RemoveHook(VSLU.Hooks.OnIteratePlayersPerTick, g_CinematicCamera.OnIteratePlayersPerTick);
+
+		VSLU.RemoveChatCommand("!cc_reset");
+		VSLU.RemoveChatCommand("!cc_fov");
+		VSLU.RemoveChatCommand("!cam");
+		VSLU.RemoveChatCommand("!dec");
+		VSLU.RemoveChatCommand("!inc");
 	}
 
 	function OnRoundStartPost()
@@ -58,17 +68,6 @@ class CCinematicCamera extends IScriptPlugin
 	{
 	}
 
-	function OnExtendClassMethods()
-	{
-		g_Hooks.RegisterHook(g_Hooks.OnIteratePlayersPerTick, g_CinematicCamera.OnIteratePlayersPerTick);
-
-		RegisterChatCommand("!cc_reset", g_CinematicCamera.ResetRollAxis, true);
-		RegisterChatCommand("!cc_fov", g_CinematicCamera.ChangeFOV, true, true);
-		RegisterChatCommand("!cam", g_CinematicCamera.SwitchCamera, true);
-		RegisterChatCommand("!dec", g_CinematicCamera.DecreaseSpeed, true);
-		RegisterChatCommand("!inc", g_CinematicCamera.IncreaseSpeed, true);
-	}
-
 	function GetClassName() { return m_sClassName; }
 
 	function GetScriptPluginName() { return m_sScriptPluginName; }
@@ -76,11 +75,11 @@ class CCinematicCamera extends IScriptPlugin
 	function GetInterfaceVersion() { return m_InterfaceVersion; }
 
 	static m_InterfaceVersion = 1;
-	static m_sClassName = "CCinematicCamera";
+	static m_sClassName = "CPluginCinematicCamera";
 	static m_sScriptPluginName = "Cinematic Camera";
 }
 
-g_PluginCinematicCamera <- CCinematicCamera();
+g_PluginCinematicCamera <- CPluginCinematicCamera();
 
 if (!("g_CC_iSpeedFactorIndex" in this)) g_CC_iSpeedFactorIndex <- array(MAXCLIENTS + 1, 3);
 
@@ -101,12 +100,12 @@ g_CinematicCamera <-
 				// if (__ticks__ < 30) __ticks__ = 30;
 
 				::__tickrate__ <- __ticks__;
-				::__frametime__ <- 1.0 / __ticks__;
+				::__ccam_frametime__ <- 1.0 / __ticks__;
 
 				RemoveOnTickFunction("get_tickrate");
 				delete ::get_tickrate;
 
-				printf(">> Tickrate - %d\n>> Frametime - %f", __tickrate__, __frametime__);
+				printf(">> Tickrate - %d\n>> Frametime - %f", __tickrate__, __ccam_frametime__);
 			}
 
 			__ticks__++;
@@ -117,9 +116,9 @@ g_CinematicCamera <-
 
 	OnIteratePlayersPerTick = function(hPlayer)
 	{
-		if (g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()] && KeyInScriptScope(hPlayer, "cinema_camera"))
+		if (g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()] && VSLU.KeyInScriptScope(hPlayer, "__cinema_camera"))
 		{
-			local tParams = GetScriptScopeVar(hPlayer, "cinema_camera");
+			local tParams = VSLU.GetScriptScopeVar(hPlayer, "__cinema_camera");
 			local hEntity = tParams["camera"];
 
 			if (hEntity.IsValid())
@@ -175,7 +174,7 @@ g_CinematicCamera <-
 							vecWishSpeed.z += flUpSpeed;
 						}
 
-						tParams["velocity"] += vecWishSpeed.Normalize() * flAddSpeed * ::__frametime__ * 5;
+						tParams["velocity"] += vecWishSpeed.Normalize() * flAddSpeed * ::__ccam_frametime__ * 5;
 					}
 				}
 
@@ -194,12 +193,12 @@ g_CinematicCamera <-
 				if (flRoll != 0)
 				{
 					eAnglesAngularVel.z = flRoll;
-					eAnglesAngularVel = RotateOrientationWithQuaternion(eAnglesAngularVel);
+					eAnglesAngularVel = VSLU.Math.RotateOrientationWithQuaternion(eAnglesAngularVel);
 					eAnglesAngularVel.z = 0;
 				}
 
 				local eAnglesOrientation = hEntity.GetAngles() + eAnglesAngularVel;
-				eAnglesOrientation.y = Math.NormalizeAngle(eAnglesOrientation.y);
+				eAnglesOrientation.y = VSLU.Math.NormalizeAngle(eAnglesOrientation.y);
 
 				if (Vector(tParams["angular_vel"].x, tParams["angular_vel"].y, 0).IsZero(0.1))
 					tParams["angular_vel"] *= 0;
@@ -221,35 +220,35 @@ g_CinematicCamera <-
 				}
 
 				// apply calculations
-				hEntity.__KeyValueFromVector("origin", hEntity.GetOrigin() + tParams["velocity"] * __frametime__);
+				hEntity.__KeyValueFromVector("origin", hEntity.GetOrigin() + tParams["velocity"] * __ccam_frametime__);
 				hEntity.SetAngles(eAnglesOrientation);
 			}
 			else // this won't help if someone will delete the player's camera, but still.. why not?
 			{
 				tParams["disable"]();
-				RemoveScriptScopeKey(hPlayer, "cinema_camera");
+				VSLU.RemoveScriptScopeKey(hPlayer, "__cinema_camera");
 			}
 		}
 
 		return HOOK_CONTINUE;
 	}
 
-	SwitchCamera = function(hPlayer)
+	SwitchCamera = function(hPlayer, sArgs)
 	{
-		if (hPlayer.IsAlive() && !hPlayer.IsIncapacitated())
+		if (VSLU.IsEntityAlive(hPlayer) && !hPlayer.IsIncapacitated())
 		{
 			if ("__smooth_target__" in getroottable() && __smooth_target__)
 				return;
 
-			if (KeyInScriptScope(hPlayer, "selfie_camera"))
+			if (VSLU.KeyInScriptScope(hPlayer, "__selfie_camera"))
 			{
 				if (g_SelfieCamera.bSelfieCamera[hPlayer.GetEntityIndex()])
 					return;
 			}
 
-			if (!KeyInScriptScope(hPlayer, "cinema_camera"))
+			if (!VSLU.KeyInScriptScope(hPlayer, "__cinema_camera"))
 			{
-				SetScriptScopeVar(hPlayer, "cinema_camera", {
+				VSLU.SetScriptScopeVar(hPlayer, "__cinema_camera", {
 					velocity = Vector()
 					angular_vel = QAngle()
 					previous_angles = QAngle()
@@ -263,44 +262,44 @@ g_CinematicCamera <-
 						this.camera.SetAngles(hPlayer.EyeAngles());
 
 						hPlayer.SetForwardVector(Vector(1, 0, 0));
-						hPlayer.HideHUD(HIDE_HUD_WEAPON_SELECTION | HIDE_HUD_FLASHLIGHT | HIDE_HUD_HEALTH | HIDE_HUD_MISC | HIDE_HUD_CROSSHAIR);
+						VSLU.Player.HideHUD(hPlayer, HIDE_HUD_WEAPON_SELECTION | HIDE_HUD_FLASHLIGHT | HIDE_HUD_HEALTH | HIDE_HUD_MISC | HIDE_HUD_CROSSHAIR);
 
 						NetProps.SetPropInt(hPlayer, "m_iFOV", 90);
 						NetProps.SetPropInt(hPlayer, "m_afButtonDisabled", IN_USE | IN_ZOOM);
 						NetProps.SetPropInt(hPlayer, "m_fFlags", NetProps.GetPropInt(hPlayer, "m_fFlags") | FL_ATCONTROLS);
 
-						AcceptEntityInput(this.camera, "Enable", "", 0.0, hPlayer);
+						VSLU.AcceptEntityInput(this.camera, "Enable", "", 0.0, hPlayer);
 					}
 
 					disable = function(){
 						if (hPlayer.GetActiveWeapon()) NetProps.SetPropFloat(hPlayer.GetActiveWeapon(), "m_flNextPrimaryAttack", Time());
-						hPlayer.HideHUD(0);
+						VSLU.Player.HideHUD(hPlayer, 0);
 
 						NetProps.SetPropFloat(hPlayer, "m_flNextShoveTime", Time());
 						NetProps.SetPropInt(hPlayer, "m_iFOV", 90);
 						NetProps.SetPropInt(hPlayer, "m_afButtonDisabled", 0);
 						NetProps.SetPropInt(hPlayer, "m_fFlags", NetProps.GetPropInt(hPlayer, "m_fFlags") & ~FL_ATCONTROLS);
 
-						AcceptEntityInput(this.camera, "Disable", "", 0.0, hPlayer);
+						VSLU.AcceptEntityInput(this.camera, "Disable", "", 0.0, hPlayer);
 					}
 				});
 			}
-			else if (!GetScriptScopeVar(hPlayer, "cinema_camera")["camera"].IsValid())
+			else if (!VSLU.GetScriptScopeVar(hPlayer, "__cinema_camera")["camera"].IsValid())
 			{
-				RemoveScriptScopeKey(hPlayer, "cinema_camera");
-				g_CinematicCamera.SwitchCamera(hPlayer);
+				VSLU.RemoveScriptScopeKey(hPlayer, "__cinema_camera");
+				g_CinematicCamera.SwitchCamera(hPlayer, null);
 				return;
 			}
 
 			local idx = hPlayer.GetEntityIndex();
 			if (g_CinematicCamera.bCinematicCamera[idx])
 			{
-				GetScriptScopeVar(hPlayer, "cinema_camera")["disable"]();
+				VSLU.GetScriptScopeVar(hPlayer, "__cinema_camera")["disable"]();
 				EmitSoundOnClient("Buttons.snd11", hPlayer);
 			}
 			else
 			{
-				GetScriptScopeVar(hPlayer, "cinema_camera")["enable"]();
+				VSLU.GetScriptScopeVar(hPlayer, "__cinema_camera")["enable"]();
 				EmitSoundOnClient("EDIT_TOGGLE_PLACE_MODE", hPlayer);
 			}
 
@@ -312,17 +311,15 @@ g_CinematicCamera <-
 	{
 		if (g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()])
 		{
-			if (sValue != CMD_EMPTY_ARGUMENT)
+			if (sValue != null)
 			{
-				sValue = split(sValue, " ")[0];
-
 				try
 				{
-					sValue = sValue.tointeger();
-					if (sValue >= 1 && sValue <= 180)
-						NetProps.SetPropInt(hPlayer, "m_iFOV", sValue);
+					local iValue = sValue[0].tointeger();
+					if (iValue >= 1 && iValue <= 180)
+						NetProps.SetPropInt(hPlayer, "m_iFOV", iValue);
 				}
-				catch (error)
+				catch (e)
 				{
 				}
 			}
@@ -333,11 +330,11 @@ g_CinematicCamera <-
 		}
 	}
 
-	ResetRollAxis = function(hPlayer)
+	ResetRollAxis = function(hPlayer, sArgs)
 	{
 		if (g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()])
 		{
-			local tParams = GetScriptScopeVar(hPlayer, "cinema_camera");
+			local tParams = VSLU.GetScriptScopeVar(hPlayer, "__cinema_camera");
 			tParams["camera"].SetAngles(QAngle(tParams["camera"].GetAngles().x, tParams["camera"].GetAngles().y, 0));
 			tParams["angular_vel"].z = 0.0;
 		}
@@ -365,7 +362,7 @@ g_CinematicCamera <-
 	{
 		if (g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()])
 		{
-			local tParams = GetScriptScopeVar(hPlayer, "cinema_camera");
+			local tParams = VSLU.GetScriptScopeVar(hPlayer, "__cinema_camera");
 			local eAngles = tParams["camera"].GetAngles();
 			if (eAngles.z > -90) tParams["camera"].SetAngles(eAngles - QAngle(0, 0, 0.5));
 		}
@@ -375,7 +372,7 @@ g_CinematicCamera <-
 	{
 		if (g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()])
 		{
-			local tParams = GetScriptScopeVar(hPlayer, "cinema_camera");
+			local tParams =VSLU. GetScriptScopeVar(hPlayer, "__cinema_camera");
 			local eAngles = tParams["camera"].GetAngles();
 			if (eAngles.z < 90) tParams["camera"].SetAngles(eAngles + QAngle(0, 0, 0.5));
 		}
@@ -383,16 +380,16 @@ g_CinematicCamera <-
 
 	OnAttack3Press = function(hPlayer)
 	{
-		g_CinematicCamera.SwitchCamera(hPlayer);
+		g_CinematicCamera.SwitchCamera(hPlayer, null);
 	}
 
-	DecreaseSpeed = function(hPlayer)
+	DecreaseSpeed = function(hPlayer, sArgs)
 	{
 		if (g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()] && g_CC_iSpeedFactorIndex[hPlayer.GetEntityIndex()] > 0)
 			g_CC_iSpeedFactorIndex[hPlayer.GetEntityIndex()]--;
 	}
 
-	IncreaseSpeed = function(hPlayer)
+	IncreaseSpeed = function(hPlayer, sArgs)
 	{
 		if (g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()] && g_CC_iSpeedFactorIndex[hPlayer.GetEntityIndex()] < 6)
 			g_CC_iSpeedFactorIndex[hPlayer.GetEntityIndex()]++;
@@ -412,14 +409,14 @@ g_CinematicCamera <-
 
 	OnPlayerIncapacitatedStart = function(tParams)
 	{
-		if (g_CinematicCamera.bCinematicCamera[tParams["_player"].GetEntityIndex()] && KeyInScriptScope(tParams["_player"], "cinema_camera"))
-			GetScriptScopeVar(tParams["_player"], "cinema_camera")["disable"]();
+		if (g_CinematicCamera.bCinematicCamera[tParams["_player"].GetEntityIndex()] && VSLU.KeyInScriptScope(tParams["_player"], "__cinema_camera"))
+			VSLU.GetScriptScopeVar(tParams["_player"], "__cinema_camera")["disable"]();
 	}
 
 	OnPlayerLedgeGrab = function(tParams)
 	{
-		if (g_CinematicCamera.bCinematicCamera[tParams["_player"].GetEntityIndex()] && KeyInScriptScope(tParams["_player"], "cinema_camera"))
-			GetScriptScopeVar(tParams["_player"], "cinema_camera")["disable"]();
+		if (g_CinematicCamera.bCinematicCamera[tParams["_player"].GetEntityIndex()] && VSLU.KeyInScriptScope(tParams["_player"], "__cinema_camera"))
+			VSLU.GetScriptScopeVar(tParams["_player"], "__cinema_camera")["disable"]();
 	}
 
 	OnPlayerDisconnect = function(tParams)
@@ -452,4 +449,4 @@ function CinematicCamera_Think2()
 	}
 }
 
-g_ScriptPluginsHelper.AddScriptPlugin(g_PluginCinematicCamera);
+VSLU.ScriptPluginsHelper.AddScriptPlugin(g_PluginCinematicCamera);

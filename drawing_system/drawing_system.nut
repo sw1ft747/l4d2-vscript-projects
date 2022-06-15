@@ -1,54 +1,89 @@
 // Drawing System
 
-class CDrawingSystem extends IScriptPlugin
+class CPluginDrawingSystem extends VSLU.IScriptPlugin
 {
 	function Load()
 	{
-		RegisterOnTickFunction("g_DrawingSystem.Lines_Think");
+		g_DrawingSystem.Precache();
 
-		HookEvent("player_disconnect", g_DrawingSystem.OnPlayerDisconnect, g_DrawingSystem);
+		VSLU.RegisterOnTickFunction("g_DrawingSystem.Lines_Think");
 
-		printl("[Drawing System]\nAuthor: Sw1ft\nVersion: 1.0.2");
+		VSLU.HookEvent("player_disconnect", g_DrawingSystem.OnPlayerDisconnect, g_DrawingSystem);
+
+		VSLU.RegisterChatCommand("!ds_save", g_DrawingSystem.SaveLines);
+		VSLU.RegisterChatCommand("!ds_load", g_DrawingSystem.LoadLines);
+		VSLU.RegisterChatCommand("!ds_usage", g_DrawingSystem.SwitchUsage);
+		VSLU.RegisterChatCommand("!ds_point", g_DrawingSystem.SetLinePoint);
+		VSLU.RegisterChatCommand("!ds_determine", g_DrawingSystem.DetermineWallNormal);
+		VSLU.RegisterChatCommand("!ds_autostart", g_DrawingSystem.AutoLineStart);
+		VSLU.RegisterChatCommand("!ds_lremove", g_DrawingSystem.RemovePreviousLine);
+		VSLU.RegisterChatCommand("!ds_prst", g_DrawingSystem.ResetPreviousPoint);
+		VSLU.RegisterChatCommand("!ds_color", g_DrawingSystem.ChangeLineColor);
+		VSLU.RegisterChatCommand("!ds_width", g_DrawingSystem.ChangeWidth);
+		VSLU.RegisterChatCommand("!ds_scroll", g_DrawingSystem.ChangeScroll);
+		VSLU.RegisterChatCommand("!ds_amplitude", g_DrawingSystem.ChangeAmplitude);
+		VSLU.RegisterChatCommand("!ds_figure", g_DrawingSystem.DrawFigure_Cmd);
+		VSLU.RegisterChatCommand("!ds_clr", g_DrawingSystem.ClearLines);
+		VSLU.RegisterChatCommand("!ds_remove", g_DrawingSystem.RemoveLine);
+
+		VSLU.RegisterConsoleCommand("ds_save", g_DrawingSystem.SaveLines);
+		VSLU.RegisterConsoleCommand("ds_load", g_DrawingSystem.LoadLines);
+		VSLU.RegisterConsoleCommand("ds_usage", g_DrawingSystem.SwitchUsage);
+		VSLU.RegisterConsoleCommand("ds_point", g_DrawingSystem.SetLinePoint);
+		VSLU.RegisterConsoleCommand("ds_determine", g_DrawingSystem.DetermineWallNormal);
+		VSLU.RegisterConsoleCommand("ds_autostart", g_DrawingSystem.AutoLineStart);
+		VSLU.RegisterConsoleCommand("ds_lremove", g_DrawingSystem.RemovePreviousLine);
+		VSLU.RegisterConsoleCommand("ds_prst", g_DrawingSystem.ResetPreviousPoint);
+		VSLU.RegisterConsoleCommand("ds_color", g_DrawingSystem.ChangeLineColor);
+		VSLU.RegisterConsoleCommand("ds_width", g_DrawingSystem.ChangeWidth);
+		VSLU.RegisterConsoleCommand("ds_scroll", g_DrawingSystem.ChangeScroll);
+		VSLU.RegisterConsoleCommand("ds_amplitude", g_DrawingSystem.ChangeAmplitude);
+		VSLU.RegisterConsoleCommand("ds_figure", g_DrawingSystem.DrawFigure_Cmd);
+		VSLU.RegisterConsoleCommand("ds_clr", g_DrawingSystem.ClearLines);
+		VSLU.RegisterConsoleCommand("ds_remove", g_DrawingSystem.RemoveLine);
+		VSLU.RegisterConsoleCommand("ds_figure_radius", g_DrawingSystem.SetFigureRadius);
+
+		printl("[Drawing System]\nAuthor: Sw1ft\nVersion: 1.0.3");
 	}
 
 	function Unload()
 	{
-		RemoveOnTickFunction("g_DrawingSystem.Lines_Think");
+		VSLU.RemoveOnTickFunction("g_DrawingSystem.Lines_Think");
 
-		UnhookEvent("player_disconnect", g_DrawingSystem.OnPlayerDisconnect, g_DrawingSystem);
+		VSLU.UnhookEvent("player_disconnect", g_DrawingSystem.OnPlayerDisconnect, g_DrawingSystem);
 
-		RemoveChatCommand("!ds_save");
-		RemoveChatCommand("!ds_load");
-		RemoveChatCommand("!ds_usage");
-		RemoveChatCommand("!ds_point");
-		RemoveChatCommand("!ds_determine");
-		RemoveChatCommand("!ds_autostart");
-		RemoveChatCommand("!ds_lremove");
-		RemoveChatCommand("!ds_prst");
-		RemoveChatCommand("!ds_color");
-		RemoveChatCommand("!ds_width");
-		RemoveChatCommand("!ds_scroll");
-		RemoveChatCommand("!ds_amplitude");
-		RemoveChatCommand("!ds_figure");
-		RemoveChatCommand("!ds_clr");
-		RemoveChatCommand("!ds_remove");
+		VSLU.RemoveChatCommand("!ds_save");
+		VSLU.RemoveChatCommand("!ds_load");
+		VSLU.RemoveChatCommand("!ds_usage");
+		VSLU.RemoveChatCommand("!ds_point");
+		VSLU.RemoveChatCommand("!ds_determine");
+		VSLU.RemoveChatCommand("!ds_autostart");
+		VSLU.RemoveChatCommand("!ds_lremove");
+		VSLU.RemoveChatCommand("!ds_prst");
+		VSLU.RemoveChatCommand("!ds_color");
+		VSLU.RemoveChatCommand("!ds_width");
+		VSLU.RemoveChatCommand("!ds_scroll");
+		VSLU.RemoveChatCommand("!ds_amplitude");
+		VSLU.RemoveChatCommand("!ds_figure");
+		VSLU.RemoveChatCommand("!ds_clr");
+		VSLU.RemoveChatCommand("!ds_remove");
 
-		RemoveUserCommand("ds_save");
-		RemoveUserCommand("ds_load");
-		RemoveUserCommand("ds_usage");
-		RemoveUserCommand("ds_point");
-		RemoveUserCommand("ds_determine");
-		RemoveUserCommand("ds_autostart");
-		RemoveUserCommand("ds_lremove");
-		RemoveUserCommand("ds_prst");
-		RemoveUserCommand("ds_color");
-		RemoveUserCommand("ds_width");
-		RemoveUserCommand("ds_scroll");
-		RemoveUserCommand("ds_amplitude");
-		RemoveUserCommand("ds_figure");
-		RemoveUserCommand("ds_clr");
-		RemoveUserCommand("ds_remove");
-		RemoveUserCommand("ds_figure_radius");
+		VSLU.RemoveConsoleCommand("ds_save");
+		VSLU.RemoveConsoleCommand("ds_load");
+		VSLU.RemoveConsoleCommand("ds_usage");
+		VSLU.RemoveConsoleCommand("ds_point");
+		VSLU.RemoveConsoleCommand("ds_determine");
+		VSLU.RemoveConsoleCommand("ds_autostart");
+		VSLU.RemoveConsoleCommand("ds_lremove");
+		VSLU.RemoveConsoleCommand("ds_prst");
+		VSLU.RemoveConsoleCommand("ds_color");
+		VSLU.RemoveConsoleCommand("ds_width");
+		VSLU.RemoveConsoleCommand("ds_scroll");
+		VSLU.RemoveConsoleCommand("ds_amplitude");
+		VSLU.RemoveConsoleCommand("ds_figure");
+		VSLU.RemoveConsoleCommand("ds_clr");
+		VSLU.RemoveConsoleCommand("ds_remove");
+		VSLU.RemoveConsoleCommand("ds_figure_radius");
 	}
 
 	function OnRoundStartPost()
@@ -59,42 +94,6 @@ class CDrawingSystem extends IScriptPlugin
 	{
 	}
 
-	function OnExtendClassMethods()
-	{
-		RegisterChatCommand("!ds_save", g_DrawingSystem.SaveLines, true);
-		RegisterChatCommand("!ds_load", g_DrawingSystem.LoadLines, true);
-		RegisterChatCommand("!ds_usage", g_DrawingSystem.SwitchUsage, true);
-		RegisterChatCommand("!ds_point", g_DrawingSystem.SetLinePoint, true);
-		RegisterChatCommand("!ds_determine", g_DrawingSystem.DetermineWallNormal, true);
-		RegisterChatCommand("!ds_autostart", g_DrawingSystem.AutoLineStart, true);
-		RegisterChatCommand("!ds_lremove", g_DrawingSystem.RemovePreviousLine, true);
-		RegisterChatCommand("!ds_prst", g_DrawingSystem.ResetPreviousPoint, true);
-		RegisterChatCommand("!ds_color", g_DrawingSystem.ChangeLineColor, true, true);
-		RegisterChatCommand("!ds_width", g_DrawingSystem.ChangeWidth, true, true);
-		RegisterChatCommand("!ds_scroll", g_DrawingSystem.ChangeScroll, true, true);
-		RegisterChatCommand("!ds_amplitude", g_DrawingSystem.ChangeAmplitude, true, true);
-		RegisterChatCommand("!ds_figure", g_DrawingSystem.DrawFigure_Cmd, true, true);
-		RegisterChatCommand("!ds_clr", g_DrawingSystem.ClearLines, true, true);
-		RegisterChatCommand("!ds_remove", g_DrawingSystem.RemoveLine, true, true);
-
-		RegisterUserCommand("ds_save", g_DrawingSystem.SaveLines);
-		RegisterUserCommand("ds_load", g_DrawingSystem.LoadLines);
-		RegisterUserCommand("ds_usage", g_DrawingSystem.SwitchUsage);
-		RegisterUserCommand("ds_point", g_DrawingSystem.SetLinePoint);
-		RegisterUserCommand("ds_determine", g_DrawingSystem.DetermineWallNormal);
-		RegisterUserCommand("ds_autostart", g_DrawingSystem.AutoLineStart);
-		RegisterUserCommand("ds_lremove", g_DrawingSystem.RemovePreviousLine);
-		RegisterUserCommand("ds_prst", g_DrawingSystem.ResetPreviousPoint);
-		RegisterUserCommand("ds_color", g_DrawingSystem.ChangeLineColor, true);
-		RegisterUserCommand("ds_width", g_DrawingSystem.ChangeWidth, true);
-		RegisterUserCommand("ds_scroll", g_DrawingSystem.ChangeScroll, true);
-		RegisterUserCommand("ds_amplitude", g_DrawingSystem.ChangeAmplitude, true);
-		RegisterUserCommand("ds_figure", g_DrawingSystem.DrawFigure_Cmd, true);
-		RegisterUserCommand("ds_clr", g_DrawingSystem.ClearLines, true);
-		RegisterUserCommand("ds_remove", g_DrawingSystem.RemoveLine, true);
-		RegisterUserCommand("ds_figure_radius", g_DrawingSystem.SetFigureRadius, true);
-	}
-
 	function GetClassName() { return m_sClassName; }
 
 	function GetScriptPluginName() { return m_sScriptPluginName; }
@@ -102,11 +101,11 @@ class CDrawingSystem extends IScriptPlugin
 	function GetInterfaceVersion() { return m_InterfaceVersion; }
 
 	static m_InterfaceVersion = 1;
-	static m_sClassName = "CDrawingSystem";
+	static m_sClassName = "CPluginDrawingSystem";
 	static m_sScriptPluginName = "Drawing System";
 }
 
-g_PluginDrawingSystem <- CDrawingSystem();
+g_PluginDrawingSystem <- CPluginDrawingSystem();
 
 class CDSLine
 {
@@ -129,6 +128,8 @@ class CDSLine
 	m_hEntity = null;
 	m_vecEndPos = null;
 }
+
+// fucking mess
 
 if (!("g_bDSHostOnly" in this)) g_bDSHostOnly <- false;
 if (!("g_bDSDetermineWallNormal" in this)) g_bDSDetermineWallNormal <- true;
@@ -166,6 +167,7 @@ g_DrawingSystem <-
 		foreach (key, val in tObject)
 		{
 			keyType = typeof key;
+
 			if (keyType == "instance" || keyType == "class" || keyType == "function")
 				continue;
 
@@ -201,6 +203,11 @@ g_DrawingSystem <-
 		return sOutput;
 	}
 
+	Precache = function()
+	{
+		PrecacheEntityFromTable( { classname = "env_laser", texture = "sprites/laserbeam.spr" } );
+	}
+
 	CreateLine = function(idx, userid, vecStart, vecEnd, bSoundNotification, sColor = null, iScroll = null, flWidth = null, flAmplitude = null)
 	{
 		if (sColor == null) sColor = g_sDSLineColor[idx];
@@ -228,7 +235,7 @@ g_DrawingSystem <-
 
 	DrawFigure = function(hPlayer, flRadius = null, iPoints = null, flCorrectionAngle = null)
 	{
-		if (g_bDSHostOnly && !hPlayer.IsHost() || iPoints < 3)
+		if (g_bDSHostOnly && !VSLU.Player.IsHost(hPlayer) || iPoints < 3)
 			return;
 
 		local idx = hPlayer.GetEntityIndex();
@@ -242,17 +249,19 @@ g_DrawingSystem <-
 			else flCorrectionAngle = 0;
 		}
 
+		local tTraceResult = {};
+
+		VSLU.Player.TraceLine(hPlayer, tTraceResult, TRACE_MAX_DISTANCE, TRACE_MASK_SHOT, true);
+
 		local aPoints = [];
 		local eAngles, eAnglesDirection;
 		local flAngle = 360.0 / iPoints;
 		local userid = hPlayer.GetPlayerUserId();
-		local vecPos = hPlayer.DoTraceLine(eTrace.Type_Pos);
+		local vecPos = tTraceResult["pos"];
 
 		if (g_bDSDetermineWallNormal)
 		{
-			local vecPointA = DoTraceLine(hPlayer.EyePosition(), (hPlayer.EyeAngles() - QAngle(0.01, 0, 0)).Forward(), eTrace.Type_Pos, eTrace.Distance, eTrace.Mask_Shot, hPlayer);
-			local vecPointB = DoTraceLine(hPlayer.EyePosition(), (hPlayer.EyeAngles() - QAngle(0, 0.01, 0)).Forward(), eTrace.Type_Pos, eTrace.Distance, eTrace.Mask_Shot, hPlayer);
-			eAnglesDirection = VectorToQAngle((vecPointA - vecPos).Cross(vecPointB - vecPos));
+			eAnglesDirection = VSLU.Math.VectorToQAngle( tTraceResult["planenormal"] );
 		}
 		else
 		{
@@ -275,10 +284,9 @@ g_DrawingSystem <-
 
 	DrawFigure_Cmd = function(hPlayer, sValue)
 	{
-		if (sValue != CMD_EMPTY_ARGUMENT)
+		if (sValue != null)
 		{
 			local flRadius, iPoints, flCorrectionAngle;
-			sValue = split(sValue, " ");
 
 			if (sValue.len() == 2)
 			{
@@ -330,34 +338,41 @@ g_DrawingSystem <-
 		}
 	}
 
-	SetLinePoint = function(hPlayer)
+	SetLinePoint = function(hPlayer, sArgs)
 	{
-		if (g_bDSHostOnly && !hPlayer.IsHost())
+		if (g_bDSHostOnly && !VSLU.Player.IsHost(hPlayer))
 			return;
 		
 		local vecEnd;
+		local tTraceResult = {};
 		local idx = hPlayer.GetEntityIndex();
+
+		VSLU.Player.TraceLine(hPlayer, tTraceResult);
 
 		if (g_vecDSPreviousPoint[idx])
 		{
-			g_DrawingSystem.CreateLine(idx, hPlayer.GetPlayerUserId(), g_vecDSPreviousPoint[idx], vecEnd = hPlayer.DoTraceLine(eTrace.Type_Pos), true);
+			g_DrawingSystem.CreateLine(idx, hPlayer.GetPlayerUserId(), g_vecDSPreviousPoint[idx], vecEnd = tTraceResult["pos"], true);
 			g_vecDSPreviousPoint[idx] = g_bDSAutoLineStart[idx] ? vecEnd : null;
 			return;
 		}
 
-		g_vecDSPreviousPoint[idx] = hPlayer.DoTraceLine(eTrace.Type_Pos);
+		g_vecDSPreviousPoint[idx] = tTraceResult["pos"];
 		EmitSoundOnClient("Buttons.snd37", hPlayer);
 	}
 
 	RemoveLine = function(hPlayer, sValue)
 	{
+		local tTraceResult = {};
+
+		VSLU.Player.TraceLine(hPlayer, tTraceResult);
+
 		local hEntity, flRadius;
 		local sName = "line_owner_" + hPlayer.GetPlayerUserId();
-		local vecPos = hPlayer.DoTraceLine(eTrace.Type_Pos);
+		local vecPos = tTraceResult["pos"];
 
-		if (sValue != CMD_EMPTY_ARGUMENT)
+		if (sValue != null)
 		{
-			flRadius = split(sValue, " ")[0];
+			flRadius = sValue[0];
 			try {flRadius = flRadius.tofloat()}
 			catch (error) return;
 			if (flRadius <= 0)
@@ -374,7 +389,7 @@ g_DrawingSystem <-
 		EmitSoundOnClient("EDIT_TOGGLE_PLACE_MODE", hPlayer);
 	}
 
-	RemovePreviousLine = function(hPlayer)
+	RemovePreviousLine = function(hPlayer, sArgs)
 	{
 		local idx = hPlayer.GetEntityIndex();
 		if (g_aDSPreviousLines[idx].len() > 0)
@@ -387,7 +402,7 @@ g_DrawingSystem <-
 				EmitSoundOnClient("EDIT_TOGGLE_PLACE_MODE", hPlayer);
 				return;
 			}
-			g_DrawingSystem.RemovePreviousLine(hPlayer);
+			g_DrawingSystem.RemovePreviousLine(hPlayer, null);
 		}
 		else
 		{
@@ -396,7 +411,7 @@ g_DrawingSystem <-
 		}
 	}
 
-	ResetPreviousPoint = function(hPlayer)
+	ResetPreviousPoint = function(hPlayer, sArgs)
 	{
 		g_vecDSPreviousPoint[hPlayer.GetEntityIndex()] = null;
 		EmitSoundOnClient("Buttons.snd37", hPlayer);
@@ -404,9 +419,9 @@ g_DrawingSystem <-
 
 	SetFigureRadius = function(hPlayer, sValue)
 	{
-		if (sValue != CMD_EMPTY_ARGUMENT)
+		if (sValue != null)
 		{
-			try {sValue = sValue.tofloat()}
+			try {sValue = sValue[0].tofloat()}
 			catch (error) return;
 
 			g_flDSFigureRadius[hPlayer.GetEntityIndex()] = sValue;
@@ -416,8 +431,10 @@ g_DrawingSystem <-
 
 	ClearLines = function(hPlayer, sValue)
 	{
-		if (sValue != CMD_EMPTY_ARGUMENT && hPlayer.IsHost())
+		if (sValue != null && VSLU.Player.IsHost(hPlayer))
 		{
+			sValue = sValue[0];
+
 			if (sValue == "all")
 			{
 				foreach (line in g_aDSLines)
@@ -463,9 +480,9 @@ g_DrawingSystem <-
 
 	ChangeLineColor = function(hPlayer, sValue)
 	{
-		if (sValue != CMD_EMPTY_ARGUMENT)
+		if (sValue != null)
 		{
-			local sColor = split(sValue, " ");
+			local sColor = sValue;
 			if (sColor.len() == 1)
 			{
 				switch (sColor[0])
@@ -506,7 +523,7 @@ g_DrawingSystem <-
 				return;
 			}
 
-			ClientPrint(hPlayer, HUD_PRINTTALK, format("\x04[Drawing System] Now your color is\x03 %s", sColor));
+			VSLU.SendMessage(hPlayer, format("\x04[Drawing System] Now your color is\x03 %s", sColor));
 		}
 		else
 		{
@@ -518,9 +535,9 @@ g_DrawingSystem <-
 
 	ChangeWidth = function(hPlayer, sValue)
 	{
-		if (sValue != CMD_EMPTY_ARGUMENT)
+		if (sValue != null)
 		{
-			local flWidth = split(sValue, " ")[0];
+			local flWidth = sValue[0];
 
 			try {flWidth = flWidth.tofloat()}
 			catch (error) return;
@@ -538,9 +555,9 @@ g_DrawingSystem <-
 
 	ChangeScroll = function(hPlayer, sValue)
 	{
-		if (sValue != CMD_EMPTY_ARGUMENT)
+		if (sValue != null)
 		{
-			local iScroll = split(sValue, " ")[0];
+			local iScroll = sValue[0];
 
 			try {iScroll = iScroll.tointeger()}
 			catch (error) return;
@@ -558,9 +575,9 @@ g_DrawingSystem <-
 
 	ChangeAmplitude = function(hPlayer, sValue)
 	{
-		if (sValue != CMD_EMPTY_ARGUMENT)
+		if (sValue != null)
 		{
-			local flAmplitude = split(sValue, " ")[0];
+			local flAmplitude = sValue[0];
 
 			try {flAmplitude = flAmplitude.tofloat()}
 			catch (error) return;
@@ -576,18 +593,18 @@ g_DrawingSystem <-
 		EmitSoundOnClient("EDIT_TOGGLE_PLACE_MODE", hPlayer);
 	}
 
-	AutoLineStart = function(hPlayer)
+	AutoLineStart = function(hPlayer, sArgs)
 	{
 		local idx = hPlayer.GetEntityIndex();
 
 		if (g_bDSAutoLineStart[idx])
 		{
-			ClientPrint(hPlayer, HUD_PRINTTALK, "\x04[Drawing System]\x03 Auto-Line Start\x04 has been disabled");
+			VSLU.SendMessage(hPlayer, "\x04[Drawing System]\x03 Auto-Line Start\x04 has been disabled");
 			EmitSoundOnClient("Buttons.snd11", hPlayer);
 		}
 		else
 		{
-			ClientPrint(hPlayer, HUD_PRINTTALK, "\x04[Drawing System]\x03 Auto-Line Start\x04 has been enabled")
+			VSLU.SendMessage(hPlayer, "\x04[Drawing System]\x03 Auto-Line Start\x04 has been enabled")
 			EmitSoundOnClient("EDIT_TOGGLE_PLACE_MODE", hPlayer);
 		}
 
@@ -595,45 +612,45 @@ g_DrawingSystem <-
 		g_vecDSPreviousPoint[idx] = null;
 	}
 
-	DetermineWallNormal = function(hPlayer)
+	DetermineWallNormal = function(hPlayer, sArgs)
 	{
-		if (hPlayer.IsHost())
+		if (VSLU.Player.IsHost(hPlayer))
 		{
 			if (g_bDSDetermineWallNormal)
 			{
-				ClientPrint(null, HUD_PRINTTALK, "\x04[Drawing System]\x03 Determine Wall Normal\x04 has been disabled");
+				VSLU.SendMessageAll("\x04[Drawing System]\x03 Determine Wall Normal\x04 has been disabled");
 				EmitSoundOnClient("Buttons.snd11", hPlayer);
 			}
 			else
 			{
-				ClientPrint(null, HUD_PRINTTALK, "\x04[Drawing System]\x03 Determine Wall Normal\x04 has been enabled");
+				VSLU.SendMessageAll("\x04[Drawing System]\x03 Determine Wall Normal\x04 has been enabled");
 				EmitSoundOnClient("EDIT_TOGGLE_PLACE_MODE", hPlayer);
 			}
 			g_bDSDetermineWallNormal = !g_bDSDetermineWallNormal;
 		}
 	}
 
-	SwitchUsage = function(hPlayer)
+	SwitchUsage = function(hPlayer, sArgs)
 	{
-		if (hPlayer.IsHost())
+		if (VSLU.Player.IsHost(hPlayer))
 		{
 			if (g_bDSHostOnly)
 			{
-				ClientPrint(null, HUD_PRINTTALK, "\x04[Drawing System]\x03 Allowed\x04 to use by clients");
+				VSLU.SendMessageAll("\x04[Drawing System]\x03 Allowed\x04 to use by clients");
 				EmitSoundOnClient("Buttons.snd11", hPlayer);
 			}
 			else
 			{
-				ClientPrint(null, HUD_PRINTTALK, "\x04[Drawing System]\x03 Forbidden\x04 to use by clients");
+				VSLU.SendMessageAll("\x04[Drawing System]\x03 Forbidden\x04 to use by clients");
 				EmitSoundOnClient("EDIT_TOGGLE_PLACE_MODE", hPlayer);
 			}
 			g_bDSHostOnly = !g_bDSHostOnly;
 		}
 	}
 
-	SaveLines = function(hPlayer)
+	SaveLines = function(hPlayer, sArgs)
 	{
-		if (hPlayer.IsHost())
+		if (VSLU.Player.IsHost(hPlayer))
 		{
 			local sInput;
 			local idx = 0;
@@ -660,14 +677,14 @@ g_DrawingSystem <-
 			if (sInput = FileToString(sPath + ".nut")) StringToFile(sPath + "_autosave.nut", sInput);
 
 			StringToFile(sPath + ".nut", g_DrawingSystem.SerializeObject(aLinesToProcess, "[\n", "]\n", false));
-			ClientPrint(hPlayer, HUD_PRINTTALK, format("\x04[Drawing System] Saved\x03 %d\x04 lines", aLinesToProcess.len()));
+			VSLU.SendMessage(hPlayer, format("\x04[Drawing System] Saved\x03 %d\x04 lines", aLinesToProcess.len()));
 			EmitSoundOnClient("Buttons.snd4", hPlayer);
 		}
 	}
 
-	LoadLines = function(hPlayer)
+	LoadLines = function(hPlayer, sArgs)
 	{
-		if (hPlayer.IsHost())
+		if (VSLU.Player.IsHost(hPlayer))
 		{
 			local sInput;
 			if (sInput = FileToString("drawing_system/" + Director.GetMapName() + ".nut"))
@@ -692,15 +709,15 @@ g_DrawingSystem <-
 					}
 				}
 				catch (error) {
-					ClientPrint(hPlayer, HUD_PRINTTALK, "\x04[Drawing System] Couldn't compile the saved file");
+					VSLU.SendMessage(hPlayer, "\x04[Drawing System] Couldn't compile the saved file");
 					return;
 				}
 
-				ClientPrint(hPlayer, HUD_PRINTTALK, format("\x04[Drawing System] Loaded\x03 %d\x04 lines", iCount));
+				VSLU.SendMessage(hPlayer, format("\x04[Drawing System] Loaded\x03 %d\x04 lines", iCount));
 				EmitSoundOnClient("Buttons.snd4", hPlayer);
 				return;
 			}
-			ClientPrint(hPlayer, HUD_PRINTTALK, "\x04[Drawing System] Couldn't find a saved file");
+			VSLU.SendMessage(hPlayer, "\x04[Drawing System] Couldn't find a saved file");
 		}
 	}
 
@@ -737,6 +754,4 @@ g_DrawingSystem <-
 	}
 };
 
-PrecacheEntityFromTable({classname = "env_laser", texture = "sprites/laserbeam.spr"});
-
-g_ScriptPluginsHelper.AddScriptPlugin(g_PluginDrawingSystem);
+VSLU.ScriptPluginsHelper.AddScriptPlugin(g_PluginDrawingSystem);

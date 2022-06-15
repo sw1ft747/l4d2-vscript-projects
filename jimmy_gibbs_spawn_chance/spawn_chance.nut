@@ -33,7 +33,7 @@ __tSpawnChance <-
 
 	IsLeapYear = function(nYear)
 	{
-		return nYear % 4 == 0 && nYear % 100 != 0 && nYear % 400 != 0;
+		return (nYear % 4 == 0 && (nYear % 100 != 0 || nYear % 400 == 0));
 	}
 
 	DateToDays = function(tDate)

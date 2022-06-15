@@ -1,3 +1,6 @@
 [submodule "lib_utils"]
 	path = lib_utils
 	url = https://github.com/r47t/Library-of-Utils.git
+[submodule "vslu"]
+	path = vslu
+	url = https://github.com/sw1ft747/Library-of-Utils.git

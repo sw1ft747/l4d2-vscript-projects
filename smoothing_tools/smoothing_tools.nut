@@ -11,68 +11,120 @@ const SMOOTH_INTERP_CUBIC_SPLINE_NORM = 6;
 const SMOOTH_INTERP_BSPLINE = 7;
 const SMOOTH_INTERP_PARABOLIC_SPLINE = 8;
 
-class CSmoothingTools extends IScriptPlugin
+class CPluginSmoothingTools extends VSLU.IScriptPlugin
 {
 	function Load()
 	{
-		::g_SmoothMaster <- CSmoothMaster(); // exposing the singleton object
+		::g_STSmoothMaster <- CSTSmoothMaster(); // exposing the singleton object
 
-        printl("[Smoothing Tools]\nAuthor: Sw1ft\nVersion: 1.0.1");
+        VSLU.RegisterChatCommand("!s_load", g_SmoothingTools.LoadSmooth);
+        VSLU.RegisterChatCommand("!s_save", g_SmoothingTools.SaveSmooth);
+        VSLU.RegisterChatCommand("!s_play", g_SmoothingTools.PlaySmooth);
+        VSLU.RegisterChatCommand("!s_stop", g_SmoothingTools.StopSmooth);
+        VSLU.RegisterChatCommand("!s_add", g_SmoothingTools.AddSample);
+        VSLU.RegisterChatCommand("!s_remove", g_SmoothingTools.RemoveSample);
+        VSLU.RegisterChatCommand("!s_remove_all", g_SmoothingTools.RemoveAllSamples);
+        VSLU.RegisterChatCommand("!s_sremove", g_SmoothingTools.RemoveSelectedSample);
+        VSLU.RegisterChatCommand("!s_replace", g_SmoothingTools.ReplaceSelectedSample);
+        VSLU.RegisterChatCommand("!s_add_before", g_SmoothingTools.AddSampleBeforeSelected);
+        VSLU.RegisterChatCommand("!s_add_after", g_SmoothingTools.AddSampleAfterSelected);
+        VSLU.RegisterChatCommand("!s_add_tick", g_SmoothingTools.AddTicksToSelectedSample);
+        VSLU.RegisterChatCommand("!s_tick", g_SmoothingTools.GetTick);
+        VSLU.RegisterChatCommand("!s_static", g_SmoothingTools.MakeStaticSample);
+        VSLU.RegisterChatCommand("!s_nonstatic", g_SmoothingTools.MakeNonStaticSample);
+        VSLU.RegisterChatCommand("!s_next", g_SmoothingTools.SelectNextSample);
+        VSLU.RegisterChatCommand("!s_prev", g_SmoothingTools.SelectPreviousSample);
+        VSLU.RegisterChatCommand("!s_toggle_unialloc", g_SmoothingTools.ToggleUniformAllocation);
+        VSLU.RegisterChatCommand("!s_toggle_process", g_SmoothingTools.ToggleAutoProcess);
+        VSLU.RegisterChatCommand("!s_toggle_preview", g_SmoothingTools.TogglePreview);
+        VSLU.RegisterChatCommand("!s_preview", g_SmoothingTools.DrawPreview);
+        VSLU.RegisterChatCommand("!s_process_origin", g_SmoothingTools.InterpSampleOrigin);
+        VSLU.RegisterChatCommand("!s_process_angles", g_SmoothingTools.InterpSampleAngles);
+        VSLU.RegisterChatCommand("!s_set_interp", g_SmoothingTools.SetInterpType);
+        VSLU.RegisterChatCommand("!s_kb_params", g_SmoothingTools.SetKBParams);
+
+        VSLU.RegisterConsoleCommand("s_load", g_SmoothingTools.LoadSmooth);
+        VSLU.RegisterConsoleCommand("s_save", g_SmoothingTools.SaveSmooth);
+        VSLU.RegisterConsoleCommand("s_play", g_SmoothingTools.PlaySmooth);
+        VSLU.RegisterConsoleCommand("s_stop", g_SmoothingTools.StopSmooth);
+        VSLU.RegisterConsoleCommand("s_add", g_SmoothingTools.AddSample);
+        VSLU.RegisterConsoleCommand("s_remove", g_SmoothingTools.RemoveSample);
+        VSLU.RegisterConsoleCommand("s_remove_all", g_SmoothingTools.RemoveAllSamples);
+        VSLU.RegisterConsoleCommand("s_sremove", g_SmoothingTools.RemoveSelectedSample);
+        VSLU.RegisterConsoleCommand("s_replace", g_SmoothingTools.ReplaceSelectedSample);
+        VSLU.RegisterConsoleCommand("s_add_before", g_SmoothingTools.AddSampleBeforeSelected);
+        VSLU.RegisterConsoleCommand("s_add_after", g_SmoothingTools.AddSampleAfterSelected);
+        VSLU.RegisterConsoleCommand("s_add_tick", g_SmoothingTools.AddTicksToSelectedSample);
+        VSLU.RegisterConsoleCommand("s_tick", g_SmoothingTools.GetTick);
+        VSLU.RegisterConsoleCommand("s_static", g_SmoothingTools.MakeStaticSample);
+        VSLU.RegisterConsoleCommand("s_nonstatic", g_SmoothingTools.MakeNonStaticSample);
+        VSLU.RegisterConsoleCommand("s_next", g_SmoothingTools.SelectNextSample);
+        VSLU.RegisterConsoleCommand("s_prev", g_SmoothingTools.SelectPreviousSample);
+        VSLU.RegisterConsoleCommand("s_toggle_unialloc", g_SmoothingTools.ToggleUniformAllocation);
+        VSLU.RegisterConsoleCommand("s_toggle_process", g_SmoothingTools.ToggleAutoProcess);
+        VSLU.RegisterConsoleCommand("s_toggle_preview", g_SmoothingTools.TogglePreview);
+        VSLU.RegisterConsoleCommand("s_preview", g_SmoothingTools.DrawPreview);
+        VSLU.RegisterConsoleCommand("s_process_origin", g_SmoothingTools.InterpSampleOrigin);
+        VSLU.RegisterConsoleCommand("s_process_angles", g_SmoothingTools.InterpSampleAngles);
+        VSLU.RegisterConsoleCommand("s_set_interp", g_SmoothingTools.SetInterpType);
+        VSLU.RegisterConsoleCommand("s_kb_params", g_SmoothingTools.SetKBParams);
+
+        printl("[Smoothing Tools]\nAuthor: Sw1ft\nVersion: 1.0.2");
 	}
 
 	function Unload()
 	{
-        RemoveChatCommand("!s_load");
-        RemoveChatCommand("!s_save");
-        RemoveChatCommand("!s_play");
-        RemoveChatCommand("!s_stop");
-        RemoveChatCommand("!s_add");
-        RemoveChatCommand("!s_remove");
-        RemoveChatCommand("!s_remove_all");
-        RemoveChatCommand("!s_sremove");
-        RemoveChatCommand("!s_replace");
-        RemoveChatCommand("!s_add_before");
-        RemoveChatCommand("!s_add_after");
-        RemoveChatCommand("!s_add_tick");
-        RemoveChatCommand("!s_tick");
-        RemoveChatCommand("!s_static");
-        RemoveChatCommand("!s_nonstatic");
-        RemoveChatCommand("!s_next");
-        RemoveChatCommand("!s_prev");
-        RemoveChatCommand("!s_toggle_unialloc");
-        RemoveChatCommand("!s_toggle_process");
-        RemoveChatCommand("!s_toggle_preview");
-        RemoveChatCommand("!s_preview");
-        RemoveChatCommand("!s_process_origin");
-        RemoveChatCommand("!s_process_angles");
-        RemoveChatCommand("!s_set_interp");
-        RemoveChatCommand("!s_kb_params");
+        VSLU.RemoveChatCommand("!s_load");
+        VSLU.RemoveChatCommand("!s_save");
+        VSLU.RemoveChatCommand("!s_play");
+        VSLU.RemoveChatCommand("!s_stop");
+        VSLU.RemoveChatCommand("!s_add");
+        VSLU.RemoveChatCommand("!s_remove");
+        VSLU.RemoveChatCommand("!s_remove_all");
+        VSLU.RemoveChatCommand("!s_sremove");
+        VSLU.RemoveChatCommand("!s_replace");
+        VSLU.RemoveChatCommand("!s_add_before");
+        VSLU.RemoveChatCommand("!s_add_after");
+        VSLU.RemoveChatCommand("!s_add_tick");
+        VSLU.RemoveChatCommand("!s_tick");
+        VSLU.RemoveChatCommand("!s_static");
+        VSLU.RemoveChatCommand("!s_nonstatic");
+        VSLU.RemoveChatCommand("!s_next");
+        VSLU.RemoveChatCommand("!s_prev");
+        VSLU.RemoveChatCommand("!s_toggle_unialloc");
+        VSLU.RemoveChatCommand("!s_toggle_process");
+        VSLU.RemoveChatCommand("!s_toggle_preview");
+        VSLU.RemoveChatCommand("!s_preview");
+        VSLU.RemoveChatCommand("!s_process_origin");
+        VSLU.RemoveChatCommand("!s_process_angles");
+        VSLU.RemoveChatCommand("!s_set_interp");
+        VSLU.RemoveChatCommand("!s_kb_params");
 
-        RemoveUserCommand("s_load");
-        RemoveUserCommand("s_save");
-        RemoveUserCommand("s_play");
-        RemoveUserCommand("s_stop");
-        RemoveUserCommand("s_add");
-        RemoveUserCommand("s_remove");
-        RemoveUserCommand("s_remove_all");
-        RemoveUserCommand("s_sremove");
-        RemoveUserCommand("s_replace");
-        RemoveUserCommand("s_add_before");
-        RemoveUserCommand("s_add_after");
-        RemoveUserCommand("s_add_tick");
-        RemoveUserCommand("s_tick");
-        RemoveUserCommand("s_static");
-        RemoveUserCommand("s_nonstatic");
-        RemoveUserCommand("s_next");
-        RemoveUserCommand("s_prev");
-        RemoveUserCommand("s_toggle_unialloc");
-        RemoveUserCommand("s_toggle_process");
-        RemoveUserCommand("s_toggle_preview");
-        RemoveUserCommand("s_preview");
-        RemoveUserCommand("s_process_origin");
-        RemoveUserCommand("s_process_angles");
-        RemoveUserCommand("s_set_interp");
-        RemoveUserCommand("s_kb_params");
+        VSLU.RemoveConsoleCommand("s_load");
+        VSLU.RemoveConsoleCommand("s_save");
+        VSLU.RemoveConsoleCommand("s_play");
+        VSLU.RemoveConsoleCommand("s_stop");
+        VSLU.RemoveConsoleCommand("s_add");
+        VSLU.RemoveConsoleCommand("s_remove");
+        VSLU.RemoveConsoleCommand("s_remove_all");
+        VSLU.RemoveConsoleCommand("s_sremove");
+        VSLU.RemoveConsoleCommand("s_replace");
+        VSLU.RemoveConsoleCommand("s_add_before");
+        VSLU.RemoveConsoleCommand("s_add_after");
+        VSLU.RemoveConsoleCommand("s_add_tick");
+        VSLU.RemoveConsoleCommand("s_tick");
+        VSLU.RemoveConsoleCommand("s_static");
+        VSLU.RemoveConsoleCommand("s_nonstatic");
+        VSLU.RemoveConsoleCommand("s_next");
+        VSLU.RemoveConsoleCommand("s_prev");
+        VSLU.RemoveConsoleCommand("s_toggle_unialloc");
+        VSLU.RemoveConsoleCommand("s_toggle_process");
+        VSLU.RemoveConsoleCommand("s_toggle_preview");
+        VSLU.RemoveConsoleCommand("s_preview");
+        VSLU.RemoveConsoleCommand("s_process_origin");
+        VSLU.RemoveConsoleCommand("s_process_angles");
+        VSLU.RemoveConsoleCommand("s_set_interp");
+        VSLU.RemoveConsoleCommand("s_kb_params");
 	}
 
 	function OnRoundStartPost()
@@ -83,61 +135,6 @@ class CSmoothingTools extends IScriptPlugin
 	{
 	}
 
-	function OnExtendClassMethods()
-	{
-        RegisterChatCommand("!s_load", g_SmoothingTools.LoadSmooth, true, true);
-        RegisterChatCommand("!s_save", g_SmoothingTools.SaveSmooth, true, true);
-        RegisterChatCommand("!s_play", g_SmoothingTools.PlaySmooth, true, false);
-        RegisterChatCommand("!s_stop", g_SmoothingTools.StopSmooth, true, false);
-        RegisterChatCommand("!s_add", g_SmoothingTools.AddSample, true, true);
-        RegisterChatCommand("!s_remove", g_SmoothingTools.RemoveSample, true, false);
-        RegisterChatCommand("!s_remove_all", g_SmoothingTools.RemoveAllSamples, true, false);
-        RegisterChatCommand("!s_sremove", g_SmoothingTools.RemoveSelectedSample, true, false);
-        RegisterChatCommand("!s_replace", g_SmoothingTools.ReplaceSelectedSample, true, false);
-        RegisterChatCommand("!s_add_before", g_SmoothingTools.AddSampleBeforeSelected, true, true);
-        RegisterChatCommand("!s_add_after", g_SmoothingTools.AddSampleAfterSelected, true, true);
-        RegisterChatCommand("!s_add_tick", g_SmoothingTools.AddTicksToSelectedSample, true, true);
-        RegisterChatCommand("!s_tick", g_SmoothingTools.GetTick, true, false);
-        RegisterChatCommand("!s_static", g_SmoothingTools.MakeStaticSample, true, false);
-        RegisterChatCommand("!s_nonstatic", g_SmoothingTools.MakeNonStaticSample, true, false);
-        RegisterChatCommand("!s_next", g_SmoothingTools.SelectNextSample, true, false);
-        RegisterChatCommand("!s_prev", g_SmoothingTools.SelectPreviousSample, true, false);
-        RegisterChatCommand("!s_toggle_unialloc", g_SmoothingTools.ToggleUniformAllocation, true, false);
-        RegisterChatCommand("!s_toggle_process", g_SmoothingTools.ToggleAutoProcess, true, false);
-        RegisterChatCommand("!s_toggle_preview", g_SmoothingTools.TogglePreview, true, false);
-        RegisterChatCommand("!s_preview", g_SmoothingTools.DrawPreview, true, false);
-        RegisterChatCommand("!s_process_origin", g_SmoothingTools.InterpSampleOrigin, true, true);
-        RegisterChatCommand("!s_process_angles", g_SmoothingTools.InterpSampleAngles, true, true);
-        RegisterChatCommand("!s_set_interp", g_SmoothingTools.SetInterpType, true, true);
-        RegisterChatCommand("!s_kb_params", g_SmoothingTools.SetKBParams, true, true);
-
-        RegisterUserCommand("s_load", g_SmoothingTools.LoadSmooth, true, true);
-        RegisterUserCommand("s_save", g_SmoothingTools.SaveSmooth, true, true);
-        RegisterUserCommand("s_play", g_SmoothingTools.PlaySmooth, false, true);
-        RegisterUserCommand("s_stop", g_SmoothingTools.StopSmooth, false, true);
-        RegisterUserCommand("s_add", g_SmoothingTools.AddSample, true, true);
-        RegisterUserCommand("s_remove", g_SmoothingTools.RemoveSample, false, true);
-        RegisterUserCommand("s_remove_all", g_SmoothingTools.RemoveAllSamples, false, true);
-        RegisterUserCommand("s_sremove", g_SmoothingTools.RemoveSelectedSample, false, true);
-        RegisterUserCommand("s_replace", g_SmoothingTools.ReplaceSelectedSample, false, true);
-        RegisterUserCommand("s_add_before", g_SmoothingTools.AddSampleBeforeSelected, true, true);
-        RegisterUserCommand("s_add_after", g_SmoothingTools.AddSampleAfterSelected, true, true);
-        RegisterUserCommand("s_add_tick", g_SmoothingTools.AddTicksToSelectedSample, true, true);
-        RegisterUserCommand("s_tick", g_SmoothingTools.GetTick, false, true);
-        RegisterUserCommand("s_static", g_SmoothingTools.MakeStaticSample, false, true);
-        RegisterUserCommand("s_nonstatic", g_SmoothingTools.MakeNonStaticSample, false, true);
-        RegisterUserCommand("s_next", g_SmoothingTools.SelectNextSample, false, true);
-        RegisterUserCommand("s_prev", g_SmoothingTools.SelectPreviousSample, false, true);
-        RegisterUserCommand("s_toggle_unialloc", g_SmoothingTools.ToggleUniformAllocation, false, true);
-        RegisterUserCommand("s_toggle_process", g_SmoothingTools.ToggleAutoProcess, false, true);
-        RegisterUserCommand("s_toggle_preview", g_SmoothingTools.TogglePreview, false, true);
-        RegisterUserCommand("s_preview", g_SmoothingTools.DrawPreview, false, true);
-        RegisterUserCommand("s_process_origin", g_SmoothingTools.InterpSampleOrigin, true, true);
-        RegisterUserCommand("s_process_angles", g_SmoothingTools.InterpSampleAngles, true, true);
-        RegisterUserCommand("s_set_interp", g_SmoothingTools.SetInterpType, true, true);
-        RegisterUserCommand("s_kb_params", g_SmoothingTools.SetKBParams, true, true);
-	}
-
 	function GetClassName() { return m_sClassName; }
 
 	function GetScriptPluginName() { return m_sScriptPluginName; }
@@ -145,11 +142,11 @@ class CSmoothingTools extends IScriptPlugin
 	function GetInterfaceVersion() { return m_InterfaceVersion; }
 
 	static m_InterfaceVersion = 1;
-	static m_sClassName = "CSmoothingTools";
+	static m_sClassName = "CPluginSmoothingTools";
 	static m_sScriptPluginName = "Smoothing Tools";
 }
 
-class CSmoothMaster
+class CSTSmoothMaster
 {
 // public:
     constructor()
@@ -168,7 +165,7 @@ class CSmoothMaster
     {
         if (m_bPlayingSmooth)
         {
-            SayMsg("Playing smooth right now");
+            SendMessageAll("Playing smooth right now");
             return;
         }
         
@@ -176,7 +173,7 @@ class CSmoothMaster
 
         if (forbiddenSymbols.match(sFileName))
         {
-            SayMsg("Invalid file name, remove forbidden symbols and try again");
+            SendMessageAll("Invalid file name, remove forbidden symbols and try again");
             return;
         }
 
@@ -189,7 +186,7 @@ class CSmoothMaster
 
         if (sInput == null)
         {
-            sayf("Smooth file '%s.nut' doesn't exist", sFileName);
+            VSLU.SendMessageAll(format("Smooth file '%s.nut' doesn't exist", sFileName));
             return;
         }
 
@@ -225,7 +222,7 @@ class CSmoothMaster
                     {
                         if (!(key in aCommonData))
                         {
-                            sayf("Failed to get key '%s' of last table", key);
+                            VSLU.SendMessageAll(format("Failed to get key '%s' of last table", key));
                             throw "missing important keys";
                         }
                     }
@@ -237,7 +234,7 @@ class CSmoothMaster
                 {
                     if (!(key in aSmoothData[i]))
                     {
-                        sayf("Failed to get key '%s' of table #%d", key, i);
+                        VSLU.SendMessageAll(format("Failed to get key '%s' of table #%d", key, i));
                         throw "missing important keys";
                     }
                 }
@@ -264,15 +261,15 @@ class CSmoothMaster
                     throw "key 'interp_type': unknown interpolation type";
 
                 // clamp Kochanek-Bartels Spline parameters
-                params[0] = Math.Clamp(params[0], -1.0, 1.0);
-                params[1] = Math.Clamp(params[1], -1.0, 1.0);
-                params[2] = Math.Clamp(params[2], -1.0, 1.0);
+                params[0] = VSLU.Math.Clamp(params[0], -1.0, 1.0);
+                params[1] = VSLU.Math.Clamp(params[1], -1.0, 1.0);
+                params[2] = VSLU.Math.Clamp(params[2], -1.0, 1.0);
             }
 
-            if (aCommonData["mapname"] != g_sMapName)
+            if (aCommonData["mapname"] != VSLU.sMapName)
             {
-                SayMsg("WARNING: Current map's different from the one in the smooth!");
-                SayMsg("WARNING: Defined map in the smooth is '%s'", aCommonData["mapname"]);
+                VSLU.SendMessageAll("WARNING: Current map's different from the one in the smooth!");
+                VSLU.SendMessageAll("WARNING: Defined map in the smooth is '%s'", aCommonData["mapname"]);
             }
 
             nOriginInterpType = aCommonData["origin_interp"];
@@ -309,18 +306,18 @@ class CSmoothMaster
                 aSamplePoints[m_nSelectedSample].Select();
             }
         }
-        catch (exception)
+        catch (e)
         {
-            SayMsg("Failed to parse the smooth file");
+            VSLU.SendMessageAll("Failed to parse the smooth file");
 
-            if (exception == "verybad")
+            if (e == "verybad")
             {
-                SayMsg("The smooth file is corrupted");
+                VSLU.SendMessageAll("The smooth file is corrupted");
                 return;
             }
 
-            SayMsg("Error Log: " + exception);
-            SayMsg("Error Log: last iterated sample #" + nIterations);
+            VSLU.SendMessageAll("Error Log: " + e);
+            VSLU.SendMessageAll("Error Log: last iterated sample #" + nIterations);
 
             return;
         }
@@ -348,7 +345,7 @@ class CSmoothMaster
     {
         if (m_aSamplePoints.len() < 2)
         {
-            SayMsg("Not enough sample points to save smooth");
+            VSLU.SendMessageAll("Not enough sample points to save smooth");
             return;
         }
 
@@ -356,7 +353,7 @@ class CSmoothMaster
 
         if (forbiddenSymbols.match(sFileName))
         {
-            SayMsg("Invalid file name, remove forbidden symbols and try again");
+            VSLU.SendMessageAll("Invalid file name, remove forbidden symbols and try again");
             return;
         }
 
@@ -386,7 +383,7 @@ class CSmoothMaster
         }
 
         aSmoothData.push({
-            mapname = g_sMapName
+            mapname = VSLU.sMapName
             origin_interp = m_nLastOriginInterp
             angles_interp = m_nLastAnglesInterp
             version = 1 // in case I update smoother and it will affect I/O system
@@ -395,7 +392,7 @@ class CSmoothMaster
         sOutput = g_SmoothingTools.SerializeObject(aSmoothData, "[\n", "]\n", false);
         StringToFile("smoothing_tools/smooth/" + sFileName + ".nut", sOutput);
 
-        sayf("Smooth saved to file 'left4dead2/ems/smoothing_tools/smooth/%s.nut'", sFileName);
+        VSLU.SendMessageAll(format("Smooth saved to file 'left4dead2/ems/smoothing_tools/smooth/%s.nut'", sFileName));
     }
 
     /** Play processed smooth
@@ -404,13 +401,13 @@ class CSmoothMaster
 
     function PlaySmooth(hPlayer)
     {
-        if (KeyInScriptScope(hPlayer, "selfie_camera"))
+        if (VSLU.KeyInScriptScope(hPlayer, "__selfie_camera"))
         {
             if (g_SelfieCamera.bSelfieCamera[hPlayer.GetEntityIndex()])
                 return;
         }
 
-		if (KeyInScriptScope(hPlayer, "cinema_camera"))
+		if (VSLU.KeyInScriptScope(hPlayer, "__cinema_camera"))
 		{
 			if (g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()])
 				return;
@@ -419,20 +416,20 @@ class CSmoothMaster
         if (m_bPlayingSmooth)
         {
             Assert(m_hTargetPlayer.IsValid());
-            sayf("Already playing smooth for %s", m_hTargetPlayer.GetPlayerName());
+            VSLU.SendMessageAll(format("Already playing smooth for %s", m_hTargetPlayer.GetPlayerName()));
             return;
         }
 
         if (!m_bSampleOriginProcessed || !m_bSampleAnglesProcessed)
         {
-            SayMsg("Sample points haven't been processed");
+            VSLU.SendMessageAll("Sample points haven't been processed");
             return;
         }
 
         Assert(m_aSamplePoints.len() >= 2);
 
         m_hTargetPlayer = hPlayer;
-        m_hTargetPlayer.HideHUD(HIDE_HUD_WEAPON_SELECTION | HIDE_HUD_FLASHLIGHT | HIDE_HUD_HEALTH | HIDE_HUD_MISC | HIDE_HUD_CROSSHAIR);
+        VSLU.Player.HideHUD(m_hTargetPlayer, HIDE_HUD_WEAPON_SELECTION | HIDE_HUD_FLASHLIGHT | HIDE_HUD_HEALTH | HIDE_HUD_MISC | HIDE_HUD_CROSSHAIR);
 
         ::__smooth_target__ <- m_hTargetPlayer;
 
@@ -444,8 +441,8 @@ class CSmoothMaster
         ArrangeCamera(start_point.GetViewOrigin() + (start_point.GetViewOrigin() - m_aProcessedPoints[1].GetViewOrigin()).Normalize() * 24.0, start_point.GetViewAngles(), false);
         EnableCamera();
 
-        m_SmoothStartTimer = CreateTimer(1.0, function(SmoothMaster){
-            RegisterOnTickFunction("g_SmoothingTools.CameraSmooth_Think", SmoothMaster);
+        m_SmoothStartTimer = VSLU.CreateTimer(1.0, function(SmoothMaster){
+            VSLU.RegisterOnTickFunction("g_SmoothingTools.CameraSmooth_Think", SmoothMaster);
             SmoothMaster.m_SmoothStartTimer = null;
         }, this);
     }
@@ -458,13 +455,13 @@ class CSmoothMaster
     {
         if (m_bPlayingSmooth)
         {
-            if (IsOnTickFunctionRegistered("g_SmoothingTools.CameraSmooth_Think", this))
+            if (VSLU.IsOnTickFunctionRegistered("g_SmoothingTools.CameraSmooth_Think", this))
             {
-                RemoveOnTickFunction("g_SmoothingTools.CameraSmooth_Think");
+                VSLU.RemoveOnTickFunction("g_SmoothingTools.CameraSmooth_Think");
             }
             else
             {
-                Assert(m_SmoothStartTimer || m_SmoothEndTimer, "Where's the timers??");
+                Assert(m_SmoothStartTimer || m_SmoothEndTimer, "Where are the timers??");
 
                 local sIdentifier;
 
@@ -473,18 +470,18 @@ class CSmoothMaster
                 else if (m_SmoothEndTimer != null)
                     sIdentifier = m_SmoothEndTimer.GetIdentifier();
 
-                foreach (idx, timer in g_aTimers)
+                foreach (idx, timer in VSLU.aTimers)
                 {
                     if (timer.GetIdentifier() == sIdentifier)
                     {
-                        g_aTimers.remove(idx);
+                        VSLU.aTimers.remove(idx);
                         break;
                     }
                 }
             }
 
             DisableCamera();
-            m_hTargetPlayer.HideHUD(0);
+            VSLU.Player.HideHUD(m_hTargetPlayer, 0);
             
             m_bPlayingSmooth = false;
             m_hTargetPlayer = __smooth_target__ = null;
@@ -554,7 +551,7 @@ class CSmoothMaster
         }
         else
         {
-            m_nSelectedSample = Math.Clamp(m_nSelectedSample, 0, m_aSamplePoints.len() - 1);
+            m_nSelectedSample = VSLU.Math.Clamp(m_nSelectedSample, 0, m_aSamplePoints.len() - 1);
             m_aSamplePoints[m_nSelectedSample].Select();
         }
 
@@ -580,7 +577,7 @@ class CSmoothMaster
         }
         else
         {
-            m_nSelectedSample = Math.Clamp(m_nSelectedSample, 0, m_aSamplePoints.len() - 1);
+            m_nSelectedSample = VSLU.Math.Clamp(m_nSelectedSample, 0, m_aSamplePoints.len() - 1);
             m_aSamplePoints[m_nSelectedSample].Select();
         }
 
@@ -691,7 +688,7 @@ class CSmoothMaster
 
         m_nSelectedSample++;
         
-        m_nSelectedSample = Math.Clamp(m_nSelectedSample, 0, length -1);
+        m_nSelectedSample = VSLU.Math.Clamp(m_nSelectedSample, 0, length -1);
         m_aSamplePoints[m_nSelectedSample].Select();
 
         DrawPreview();
@@ -714,7 +711,7 @@ class CSmoothMaster
 
         m_nSelectedSample--;
         
-        m_nSelectedSample = Math.Clamp(m_nSelectedSample, 0, length -1);
+        m_nSelectedSample = VSLU.Math.Clamp(m_nSelectedSample, 0, length -1);
         m_aSamplePoints[m_nSelectedSample].Select();
 
         DrawPreview();
@@ -784,7 +781,7 @@ class CSmoothMaster
 
     function TogglePreview()
     {
-        SayMsg("Drawing preview " + (m_bDrawPreview ? "disabled" : "enabled"));
+        VSLU.SendMessageAll("Drawing preview " + (m_bDrawPreview ? "disabled" : "enabled"));
         m_bDrawPreview = !m_bDrawPreview;
 
         DrawPreview();
@@ -796,7 +793,7 @@ class CSmoothMaster
 
     function ToggleAutoProcess()
     {
-        SayMsg("Auto processing " + (m_bAutoProcess ? "disabled" : "enabled"));
+        VSLU.SendMessageAll("Auto processing " + (m_bAutoProcess ? "disabled" : "enabled"));
         m_bAutoProcess = !m_bAutoProcess;
     }
 
@@ -806,7 +803,7 @@ class CSmoothMaster
 
     function ToggleUniformAllocation()
     {
-        SayMsg("Uniform allocation " + (m_bUniformAllocation ? "disabled" : "enabled"));
+        VSLU.SendMessageAll("Uniform allocation " + (m_bUniformAllocation ? "disabled" : "enabled"));
         m_bUniformAllocation = !m_bUniformAllocation;
     }
 
@@ -818,13 +815,13 @@ class CSmoothMaster
     {
         if (m_bPlayingSmooth)
         {
-            SayMsg("Playing smooth right now");
+            VSLU.SendMessageAll("Playing smooth right now");
             return;
         }
 
         if (m_aSamplePoints.len() < 2)
         {
-            SayMsg("Not enough sample points");
+            VSLU.SendMessageAll("Not enough sample points");
             return;
         }
         
@@ -877,12 +874,12 @@ class CSmoothMaster
                     m_aProcessedPoints[idx].MakeNonInterp();
                 }
 
-                local frac = Math.Clamp((j - start_tick) / dt, 0.0, 1.0);
+                local frac = VSLU.Math.Clamp((j - start_tick) / dt, 0.0, 1.0);
 
                 switch (_interpType)
                 {
                 case SMOOTH_INTERP_LINEAR:
-                    result = VectorLerp(current.GetViewOrigin(), next.GetViewOrigin(), frac);
+                    result = VSLU.Math.VectorLerp(current.GetViewOrigin(), next.GetViewOrigin(), frac);
                     break;
                 
                 case SMOOTH_INTERP_SPLINE:
@@ -972,13 +969,13 @@ class CSmoothMaster
     {
         if (m_bPlayingSmooth)
         {
-            SayMsg("Playing smooth right now");
+            VSLU.SendMessageAll("Playing smooth right now");
             return;
         }
 
         if (m_aSamplePoints.len() < 2)
         {
-            SayMsg("Not enough sample points");
+            VSLU.SendMessageAll("Not enough sample points");
             return;
         }
         
@@ -1022,7 +1019,7 @@ class CSmoothMaster
                     m_aProcessedPoints[idx].MakeNonInterp();
                 }
 
-                local frac = Math.Clamp((j - start_tick) / dt, 0.0, 1.0);
+                local frac = VSLU.Math.Clamp((j - start_tick) / dt, 0.0, 1.0);
 
                 switch (interpType)
                 {
@@ -1080,28 +1077,28 @@ class CSmoothMaster
             if (sample.IsSelected())
             {
                 // highlight selected point (faded blue)
-                Mark(sample.GetViewOrigin(), 1e6, Vector(2, 2, 2), Vector(-2, -2, -2), 50, 100, 250, 92);
-                Line(sample.GetViewOrigin(), sample.GetViewOrigin() + sample.GetViewAngles().Forward() * 64.0, 1e6, 255, 0, 0);
+                VSLU.Debug.Mark(sample.GetViewOrigin(), 1e6, Vector(2, 2, 2), Vector(-2, -2, -2), 50, 100, 250, 92);
+                VSLU.Debug.Line(sample.GetViewOrigin(), sample.GetViewOrigin() + sample.GetViewAngles().Forward() * 64.0, 1e6, 255, 0, 0);
             }
             else
             {
                 if (sample.IsStatic())
                 {
                     // static point (red)
-                    Mark(sample.GetViewOrigin(), 1e6, Vector(2, 2, 2), Vector(-2, -2, -2), 255, 0, 0, 127);
-                    Line(sample.GetViewOrigin(), sample.GetViewOrigin() + sample.GetViewAngles().Forward() * 16.0, 1e6, 0, 255, 0);
+                    VSLU.Debug.Mark(sample.GetViewOrigin(), 1e6, Vector(2, 2, 2), Vector(-2, -2, -2), 255, 0, 0, 127);
+                    VSLU.Debug.Line(sample.GetViewOrigin(), sample.GetViewOrigin() + sample.GetViewAngles().Forward() * 16.0, 1e6, 0, 255, 0);
                 }
                 else if (last_point)
                 {
                     // last point (turquoise)
-                    Mark(sample.GetViewOrigin(), 1e6, Vector(2, 2, 2), Vector(-2, -2, -2), 0, 255, 255, 127);
-                    Line(sample.GetViewOrigin(), sample.GetViewOrigin() + sample.GetViewAngles().Forward() * 64.0, 1e6, 200, 100, 255);
+                    VSLU.Debug.Mark(sample.GetViewOrigin(), 1e6, Vector(2, 2, 2), Vector(-2, -2, -2), 0, 255, 255, 127);
+                    VSLU.Debug.Line(sample.GetViewOrigin(), sample.GetViewOrigin() + sample.GetViewAngles().Forward() * 64.0, 1e6, 200, 100, 255);
                 }
                 else
                 {
                     // non-selected/last point (green)
-                    Mark(sample.GetViewOrigin(), 1e6, Vector(2, 2, 2), Vector(-2, -2, -2), 0, 255, 0, 127);
-                    Line(sample.GetViewOrigin(), sample.GetViewOrigin() + sample.GetViewAngles().Forward() * 16.0, 1e6, 0, 255, 0);
+                    VSLU.Debug.Mark(sample.GetViewOrigin(), 1e6, Vector(2, 2, 2), Vector(-2, -2, -2), 0, 255, 0, 127);
+                    VSLU.Debug.Line(sample.GetViewOrigin(), sample.GetViewOrigin() + sample.GetViewAngles().Forward() * 16.0, 1e6, 0, 255, 0);
                 }
             }
             
@@ -1117,7 +1114,7 @@ class CSmoothMaster
                     local point = m_aSamplePoints[i];
 
                     // connect adjacent points
-                    Line(point.GetViewOrigin(), m_aSamplePoints[i + 1].GetViewOrigin(), 1e6, point.IsStatic() ? 232 : 0, 232, 0);
+                    VSLU.Debug.Line(point.GetViewOrigin(), m_aSamplePoints[i + 1].GetViewOrigin(), 1e6, point.IsStatic() ? 232 : 0, 232, 0);
                 }
             }
         }
@@ -1130,13 +1127,13 @@ class CSmoothMaster
 
                 // show point's angle
                 if (m_bSampleAnglesProcessed && aSampleTicks.find(point.GetTick()) == null)
-                    Line(point.GetViewOrigin(), point.GetViewOrigin() + point.GetViewAngles().Forward() * 16.0, 1e6, 180, 180, 180); // 200, 100, 255
+                    VSLU.Debug.Line(point.GetViewOrigin(), point.GetViewOrigin() + point.GetViewAngles().Forward() * 16.0, 1e6, 180, 180, 180); // 200, 100, 255
 
                 if (i == border)
                     break;
 
                 // connect adjacent points
-                Line(point.GetViewOrigin(), m_aProcessedPoints[i + 1].GetViewOrigin(), 1e6, point.IsInterp() ? 0 : 232, 232, 0);
+                VSLU.Debug.Line(point.GetViewOrigin(), m_aProcessedPoints[i + 1].GetViewOrigin(), 1e6, point.IsInterp() ? 0 : 232, 232, 0);
             }
         }
     }
@@ -1290,9 +1287,9 @@ class CSmoothMaster
 
     function OnSmoothEnd()
     {
-        m_SmoothEndTimer = CreateTimer(1.0, function(SmoothMaster){
+        m_SmoothEndTimer = VSLU.CreateTimer(1.0, function(SmoothMaster){
             SmoothMaster.DisableCamera();
-            SmoothMaster.m_hTargetPlayer.HideHUD(0);
+            VSLU.Player.HideHUD(SmoothMaster.m_hTargetPlayer, 0);
 
             SmoothMaster.m_bPlayingSmooth = false;
             SmoothMaster.m_SmoothEndTimer = null;
@@ -1313,7 +1310,7 @@ class CSmoothMaster
         Assert(!m_bSmoothCameraEnabled);
 
         m_bSmoothCameraEnabled = true;
-        AcceptEntityInput(m_hSmoothCamera, "Enable", "", 0.0, m_hTargetPlayer);
+        VSLU.AcceptEntityInput(m_hSmoothCamera, "Enable", "", 0.0, m_hTargetPlayer);
     }
 
     /** Disable smooth camera
@@ -1328,7 +1325,7 @@ class CSmoothMaster
         Assert(m_bSmoothCameraEnabled);
 
         m_bSmoothCameraEnabled = false;
-        AcceptEntityInput(m_hSmoothCamera, "Disable", "", 0.0, m_hTargetPlayer);
+        VSLU.AcceptEntityInput(m_hSmoothCamera, "Disable", "", 0.0, m_hTargetPlayer);
     }
 
     /** Initialize smooth camera
@@ -1470,10 +1467,10 @@ g_SmoothingTools <-
         if (dt != 0.0)
         {
             if (p1.x != p2.x)
-                output_list[0] = VectorLerp(p2, p1, dt / (p2.x - p1.x));
+                output_list[0] = VSLU.Math.VectorLerp(p2, p1, dt / (p2.x - p1.x));
 
             if (p4.x != p3.x)
-                output_list[1] = VectorLerp(p3, p4, dt / (p4.x - p3.x));
+                output_list[1] = VSLU.Math.VectorLerp(p3, p4, dt / (p4.x - p3.x));
         }
     }
 
@@ -1681,7 +1678,7 @@ g_SmoothingTools <-
 
     InterpolateAngles = function(start, end, frac)
     {
-        return ::OrientationLerp(start, end, frac, true, true);
+        return ::VSLU.Math.OrientationLerp(start, end, frac, true, true);
     }
 
 	SerializeObject = function(tObject, sStart = "{\n", sEnd = "}\n", bIndice = true, nTabs = 0)
@@ -1752,19 +1749,19 @@ g_SmoothingTools <-
 
     TeleportToSample = function(hPlayer)
     {
-        local point = g_SmoothMaster.GetSelectedSample();
+        local point = g_STSmoothMaster.GetSelectedSample();
 
         if (point)
         {
-            if (KeyInScriptScope(hPlayer, "cinema_camera") && g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()])
+            if (VSLU.KeyInScriptScope(hPlayer, "__cinema_camera") && g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()])
             {
-                local hCamera = GetScriptScopeVar(hPlayer, "cinema_camera")["camera"];
+                local hCamera = VSLU.GetScriptScopeVar(hPlayer, "__cinema_camera")["camera"];
                 hCamera.SetOrigin(point.GetViewOrigin());
                 hCamera.SetAngles(point.GetViewAngles());
             }
             else if (NetProps.GetPropInt(hPlayer, "m_MoveType") == MOVETYPE_NOCLIP)
             {
-                TP(hPlayer, point.GetViewOrigin() - NetProps.GetPropVector(hPlayer, "m_vecViewOffset"), point.GetViewAngles());
+                VSLU.TeleportEntity(hPlayer, point.GetViewOrigin() - NetProps.GetPropVector(hPlayer, "m_vecViewOffset"), point.GetViewAngles());
             }
         }
     }
@@ -1775,7 +1772,7 @@ g_SmoothingTools <-
 
         if (SmoothMaster.m_aProcessedPoints.len() - 1 <= tick)
         {
-            RemoveOnTickFunction("g_SmoothingTools.CameraSmooth_Think");
+            VSLU.RemoveOnTickFunction("g_SmoothingTools.CameraSmooth_Think");
             SmoothMaster.OnSmoothEnd();
             return;
         }
@@ -1790,51 +1787,44 @@ g_SmoothingTools <-
 
     LoadSmooth = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost() || sArgs == CMD_EMPTY_ARGUMENT)
+        if (!VSLU.Player.IsHost(hPlayer) || sArgs == null)
             return;
         
-        sArgs = split(sArgs, " ");
-        g_SmoothMaster.LoadSmooth(sArgs[0]);
+        g_STSmoothMaster.LoadSmooth(sArgs[0]);
     }
 
     SaveSmooth = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost() || sArgs == CMD_EMPTY_ARGUMENT)
+        if (!VSLU.Player.IsHost(hPlayer) || sArgs == null)
             return;
         
-        sArgs = split(sArgs, " ");
-        g_SmoothMaster.SaveSmooth(sArgs[0]);
+        g_STSmoothMaster.SaveSmooth(sArgs[0]);
     }
 
-    PlaySmooth = function(hPlayer)
+    PlaySmooth = function(hPlayer, sArgs)
     {
-        g_SmoothMaster.PlaySmooth(hPlayer);
+        g_STSmoothMaster.PlaySmooth(hPlayer);
     }
 
-    StopSmooth = function(hPlayer)
+    StopSmooth = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost())
+        if (!VSLU.Player.IsHost(hPlayer))
             return;
         
-        g_SmoothMaster.StopSmooth();
+        g_STSmoothMaster.StopSmooth();
     }
 
     AddSample = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost() || sArgs == CMD_EMPTY_ARGUMENT)
-            return;
-        
-        sArgs = split(sArgs, " ");
-
-        if (sArgs.len() < 1)
+        if (!VSLU.Player.IsHost(hPlayer) || sArgs == null)
             return;
         
         local vecOrigin, eAngles;
         local nTick = str_to_int(sArgs[0]);
 
-        if (KeyInScriptScope(hPlayer, "cinema_camera") && g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()])
+        if (VSLU.KeyInScriptScope(hPlayer, "__cinema_camera") && g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()])
         {
-            local hCamera = GetScriptScopeVar(hPlayer, "cinema_camera")["camera"];
+            local hCamera = VSLU.GetScriptScopeVar(hPlayer, "__cinema_camera")["camera"];
             vecOrigin = hCamera.GetOrigin();
             eAngles = hCamera.GetAngles();
         }
@@ -1844,45 +1834,45 @@ g_SmoothingTools <-
             eAngles = hPlayer.EyeAngles();
         }
 
-        g_SmoothMaster.AddSample(vecOrigin, eAngles, nTick);
+        g_STSmoothMaster.AddSample(vecOrigin, eAngles, nTick);
     }
 
-    RemoveAllSamples = function(hPlayer)
+    RemoveAllSamples = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost())
+        if (!VSLU.Player.IsHost(hPlayer))
             return;
 
-        g_SmoothMaster.RemoveAllSamples();
+        g_STSmoothMaster.RemoveAllSamples();
     }
 
-    RemoveSample = function(hPlayer)
+    RemoveSample = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost())
+        if (!VSLU.Player.IsHost(hPlayer))
             return;
         
-        g_SmoothMaster.RemoveSample();
+        g_STSmoothMaster.RemoveSample();
         g_SmoothingTools.TeleportToSample(hPlayer);
     }
 
-    RemoveSelectedSample = function(hPlayer)
+    RemoveSelectedSample = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost())
+        if (!VSLU.Player.IsHost(hPlayer))
             return;
         
-        g_SmoothMaster.RemoveSelectedSample();
+        g_STSmoothMaster.RemoveSelectedSample();
         g_SmoothingTools.TeleportToSample(hPlayer);
     }
 
-    ReplaceSelectedSample = function(hPlayer)
+    ReplaceSelectedSample = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost())
+        if (!VSLU.Player.IsHost(hPlayer))
             return;
         
         local vecOrigin, eAngles;
 
-        if (KeyInScriptScope(hPlayer, "cinema_camera") && g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()])
+        if (VSLU.KeyInScriptScope(hPlayer, "__cinema_camera") && g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()])
         {
-            local hCamera = GetScriptScopeVar(hPlayer, "cinema_camera")["camera"];
+            local hCamera = VSLU.GetScriptScopeVar(hPlayer, "__cinema_camera")["camera"];
             vecOrigin = hCamera.GetOrigin();
             eAngles = hCamera.GetAngles();
         }
@@ -1892,25 +1882,20 @@ g_SmoothingTools <-
             eAngles = hPlayer.EyeAngles();
         }
 
-        g_SmoothMaster.ReplaceSelectedSample(vecOrigin, eAngles);
+        g_STSmoothMaster.ReplaceSelectedSample(vecOrigin, eAngles);
     }
 
     AddSampleAfterSelected = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost() || sArgs == CMD_EMPTY_ARGUMENT)
-            return;
-        
-        sArgs = split(sArgs, " ");
-
-        if (sArgs.len() < 1)
+        if (!VSLU.Player.IsHost(hPlayer) || sArgs == null)
             return;
         
         local vecOrigin, eAngles;
         local nTick = str_to_int(sArgs[0]);
 
-        if (KeyInScriptScope(hPlayer, "cinema_camera") && g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()])
+        if (VSLU.KeyInScriptScope(hPlayer, "__cinema_camera") && g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()])
         {
-            local hCamera = GetScriptScopeVar(hPlayer, "cinema_camera")["camera"];
+            local hCamera = VSLU.GetScriptScopeVar(hPlayer, "__cinema_camera")["camera"];
             vecOrigin = hCamera.GetOrigin();
             eAngles = hCamera.GetAngles();
         }
@@ -1920,25 +1905,20 @@ g_SmoothingTools <-
             eAngles = hPlayer.EyeAngles();
         }
 
-        g_SmoothMaster.AddSampleAfterSelected(vecOrigin, eAngles, nTick);
+        g_STSmoothMaster.AddSampleAfterSelected(vecOrigin, eAngles, nTick);
     }
 
     AddSampleBeforeSelected = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost() || sArgs == CMD_EMPTY_ARGUMENT)
-            return;
-        
-        sArgs = split(sArgs, " ");
-
-        if (sArgs.len() < 1)
+        if (!VSLU.Player.IsHost(hPlayer) || sArgs == null)
             return;
         
         local vecOrigin, eAngles;
         local nTick = str_to_int(sArgs[0]);
 
-        if (KeyInScriptScope(hPlayer, "cinema_camera") && g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()])
+        if (VSLU.KeyInScriptScope(hPlayer, "__cinema_camera") && g_CinematicCamera.bCinematicCamera[hPlayer.GetEntityIndex()])
         {
-            local hCamera = GetScriptScopeVar(hPlayer, "cinema_camera")["camera"];
+            local hCamera = VSLU.GetScriptScopeVar(hPlayer, "__cinema_camera")["camera"];
             vecOrigin = hCamera.GetOrigin();
             eAngles = hCamera.GetAngles();
         }
@@ -1948,172 +1928,150 @@ g_SmoothingTools <-
             eAngles = hPlayer.EyeAngles();
         }
 
-        g_SmoothMaster.AddSampleBeforeSelected(vecOrigin, eAngles, nTick);
+        g_STSmoothMaster.AddSampleBeforeSelected(vecOrigin, eAngles, nTick);
     }
 
     AddTicksToSelectedSample = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost() || sArgs == CMD_EMPTY_ARGUMENT)
-            return;
-        
-        sArgs = split(sArgs, " ");
-
-        if (sArgs.len() < 1)
+        if (!VSLU.Player.IsHost(hPlayer) || sArgs == null)
             return;
         
         local nTick = str_to_int(sArgs[0]);
-        g_SmoothMaster.AddTicksToSelectedSample(nTick);
+        g_STSmoothMaster.AddTicksToSelectedSample(nTick);
     }
 
-    GetTick = function(hPlayer)
+    GetTick = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost())
+        if (!VSLU.Player.IsHost(hPlayer))
             return;
         
-        local point = g_SmoothMaster.GetSelectedSample();
-        if (point) sayf("Sample #%d: %d ticks", (g_SmoothMaster.m_nSelectedSample + 1), point.GetTick());
+        local point = g_STSmoothMaster.GetSelectedSample();
+        if (point) VSLU.SendMessageAll(format("Sample #%d: %d ticks", (g_STSmoothMaster.m_nSelectedSample + 1), point.GetTick()));
     }
 
-    MakeStaticSample = function(hPlayer)
+    MakeStaticSample = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost())
+        if (!VSLU.Player.IsHost(hPlayer))
             return;
         
-        g_SmoothMaster.MakeSelectedSampleStatic();
+        g_STSmoothMaster.MakeSelectedSampleStatic();
     }
 
-    MakeNonStaticSample = function(hPlayer)
+    MakeNonStaticSample = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost())
+        if (!VSLU.Player.IsHost(hPlayer))
             return;
         
-        g_SmoothMaster.MakeSelectedSampleNonStatic();
+        g_STSmoothMaster.MakeSelectedSampleNonStatic();
     }
 
-    SelectNextSample = function(hPlayer)
+    SelectNextSample = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost())
+        if (!VSLU.Player.IsHost(hPlayer))
             return;
         
-        g_SmoothMaster.SelectNextSample();
+        g_STSmoothMaster.SelectNextSample();
         g_SmoothingTools.TeleportToSample(hPlayer);
     }
 
-    SelectPreviousSample = function(hPlayer)
+    SelectPreviousSample = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost())
+        if (!VSLU.Player.IsHost(hPlayer))
             return;
         
-        g_SmoothMaster.SelectPreviousSample();
+        g_STSmoothMaster.SelectPreviousSample();
         g_SmoothingTools.TeleportToSample(hPlayer);
     }
 
-    ToggleUniformAllocation = function(hPlayer)
+    ToggleUniformAllocation = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost())
+        if (!VSLU.Player.IsHost(hPlayer))
             return;
         
-        g_SmoothMaster.ToggleUniformAllocation();
+        g_STSmoothMaster.ToggleUniformAllocation();
     }
 
-    ToggleAutoProcess = function(hPlayer)
+    ToggleAutoProcess = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost())
+        if (!VSLU.Player.IsHost(hPlayer))
             return;
         
-        g_SmoothMaster.ToggleAutoProcess();
+        g_STSmoothMaster.ToggleAutoProcess();
     }
 
-    TogglePreview = function(hPlayer)
+    TogglePreview = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost())
+        if (!VSLU.Player.IsHost(hPlayer))
             return;
         
-        g_SmoothMaster.TogglePreview();
+        g_STSmoothMaster.TogglePreview();
     }
 
-    DrawPreview = function(hPlayer)
+    DrawPreview = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost())
+        if (!VSLU.Player.IsHost(hPlayer))
             return;
 
-        g_SmoothMaster.DrawPreview();
+        g_STSmoothMaster.DrawPreview();
     }
 
     InterpSampleOrigin = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost() || sArgs == CMD_EMPTY_ARGUMENT)
-            return;
-        
-        sArgs = split(sArgs, " ");
-
-        if (sArgs.len() < 1)
+        if (!VSLU.Player.IsHost(hPlayer) || sArgs == null)
             return;
         
         local nInterpType = str_to_int(sArgs[0]);
 
         if (nInterpType < SMOOTH_INTERP_LINEAR || nInterpType > SMOOTH_INTERP_PARABOLIC_SPLINE)
         {
-            SayMsg("No such interpolation type!");
+            VSLU.SendMessageAll("No such interpolation type!");
             return;
         }
 
-        g_SmoothMaster.InterpSampleOrigin(nInterpType);
+        g_STSmoothMaster.InterpSampleOrigin(nInterpType);
     }
 
     InterpSampleAngles = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost() || sArgs == CMD_EMPTY_ARGUMENT)
-            return;
-        
-        sArgs = split(sArgs, " ");
-
-        if (sArgs.len() < 1)
+        if (!VSLU.Player.IsHost(hPlayer) || sArgs == null)
             return;
         
         local nInterpType = str_to_int(sArgs[0]);
 
         if (nInterpType < SMOOTH_INTERP_LINEAR || nInterpType > SMOOTH_INTERP_SPLINE)
         {
-            SayMsg("No such interpolation type!");
+            VSLU.SendMessageAll("No such interpolation type!");
             return;
         }
 
-        g_SmoothMaster.InterpSampleAngles(nInterpType);
+        g_STSmoothMaster.InterpSampleAngles(nInterpType);
     }
 
     SetInterpType = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost() || sArgs == CMD_EMPTY_ARGUMENT)
-            return;
-        
-        sArgs = split(sArgs, " ");
-
-        if (sArgs.len() < 1)
+        if (!VSLU.Player.IsHost(hPlayer) || sArgs == null)
             return;
         
         local nInterpType = str_to_int(sArgs[0]);
 
         if (nInterpType < SMOOTH_INTERP_NONE || nInterpType > SMOOTH_INTERP_PARABOLIC_SPLINE)
         {
-            SayMsg("No such interpolation type!");
+            VSLU.SendMessageAll("No such interpolation type!");
             return;
         }
 
-        g_SmoothMaster.SetInterpType(nInterpType);
+        g_STSmoothMaster.SetInterpType(nInterpType);
     }
 
     SetKBParams = function(hPlayer, sArgs)
     {
-        if (!hPlayer.IsHost() || sArgs == CMD_EMPTY_ARGUMENT)
+        if (!VSLU.Player.IsHost(hPlayer) || sArgs == null)
             return;
         
-        sArgs = split(sArgs, " ");
-
         local length = sArgs.len();
-        local p = g_SmoothMaster.GetSelectedSample();
+        local p = g_STSmoothMaster.GetSelectedSample();
 
-        if (length < 1 || !p)
+        if (!p)
             return;
         
         local bias, tension, continuity;
@@ -2121,26 +2079,26 @@ g_SmoothingTools <-
 
         if (length == 1)
         {
-            bias = ( sArgs[0] == 'n' ? params[0] : Math.Clamp(str_to_float(sArgs[0]), -1.0, 1.0) );
+            bias = ( sArgs[0] == 'n' ? params[0] : VSLU.Math.Clamp(str_to_float(sArgs[0]), -1.0, 1.0) );
             tension = params[1];
             continuity = params[2];
         }
         else if (length == 2)
         {
-            bias = ( sArgs[0] == 'n' ? params[0] : Math.Clamp(str_to_float(sArgs[0]), -1.0, 1.0) );
-            tension = ( sArgs[1] == 'n' ? params[1] : Math.Clamp(str_to_float(sArgs[1]), -1.0, 1.0) );
+            bias = ( sArgs[0] == 'n' ? params[0] : VSLU.Math.Clamp(str_to_float(sArgs[0]), -1.0, 1.0) );
+            tension = ( sArgs[1] == 'n' ? params[1] : VSLU.Math.Clamp(str_to_float(sArgs[1]), -1.0, 1.0) );
             continuity = params[2];
         }
         else
         {
-            bias = ( sArgs[0] == 'n' ? params[0] : Math.Clamp(str_to_float(sArgs[0]), -1.0, 1.0) );
-            tension = ( sArgs[1] == 'n' ? params[1] : Math.Clamp(str_to_float(sArgs[1]), -1.0, 1.0) );
-            continuity = ( sArgs[2] == 'n' ? params[2] : Math.Clamp(str_to_float(sArgs[2]), -1.0, 1.0) );
+            bias = ( sArgs[0] == 'n' ? params[0] : VSLU.Math.Clamp(str_to_float(sArgs[0]), -1.0, 1.0) );
+            tension = ( sArgs[1] == 'n' ? params[1] : VSLU.Math.Clamp(str_to_float(sArgs[1]), -1.0, 1.0) );
+            continuity = ( sArgs[2] == 'n' ? params[2] : VSLU.Math.Clamp(str_to_float(sArgs[2]), -1.0, 1.0) );
         }
 
-        g_SmoothMaster.SetKochanekBartelsParams(bias, tension, continuity);
+        g_STSmoothMaster.SetKochanekBartelsParams(bias, tension, continuity);
     }
 };
 
-g_PluginSmoothingTools <- CSmoothingTools();
-g_ScriptPluginsHelper.AddScriptPlugin(g_PluginSmoothingTools);
+g_PluginSmoothingTools <- CPluginSmoothingTools();
+VSLU.ScriptPluginsHelper.AddScriptPlugin(g_PluginSmoothingTools);

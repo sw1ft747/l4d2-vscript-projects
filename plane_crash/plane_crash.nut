@@ -1,28 +1,38 @@
 // Plane Crash
 
-class CScriptPluginPlaneCrash extends IScriptPlugin
+class CPluginPlaneCrash extends VSLU.IScriptPlugin
 {
 	function Load()
 	{
-		RegisterOnTickFunction("g_PlaneCrash.PlaneCrash_Think");
+		VSLU.RegisterOnTickFunction("g_PlaneCrash.PlaneCrash_Think");
 
-		HookEvent("finale_escape_start", g_PlaneCrash.OnFinaleEscapeStarted, g_PlaneCrash);
+		VSLU.HookEvent("finale_escape_start", g_PlaneCrash.OnFinaleEscapeStarted, g_PlaneCrash);
+		
+		g_PlaneCrash.Precache();
+		g_PlaneCrash.ParseConfigFile();
 
-		printl("[Plane Crash]\nAuthor: Sw1ft\nVersion: 2.1.3");
+		VSLU.RegisterChatCommand("!pc_mode", g_PlaneCrash.SwitchMode);
+		VSLU.RegisterChatCommand("!pc_clear", g_PlaneCrash.Clear);
+		VSLU.RegisterChatCommand("!plane", g_PlaneCrash.Forward);
+		VSLU.RegisterChatCommand("!bplane", g_PlaneCrash.Behind);
+		VSLU.RegisterChatCommand("!lplane", g_PlaneCrash.Left);
+		VSLU.RegisterChatCommand("!rplane", g_PlaneCrash.Right);
+
+		printl("[Plane Crash]\nAuthor: Sw1ft\nVersion: 2.1.6");
 	}
 
 	function Unload()
 	{
-		RemoveOnTickFunction("g_PlaneCrash.PlaneCrash_Think");
+		VSLU.RemoveOnTickFunction("g_PlaneCrash.PlaneCrash_Think");
 
-		UnhokEvent("finale_escape_start", g_PlaneCrash.OnFinaleEscapeStarted, g_PlaneCrash);
+		VSLU.UnhookEvent("finale_escape_start", g_PlaneCrash.OnFinaleEscapeStarted, g_PlaneCrash);
 
-		RemoveChatCommand("!pc_mode");
-		RemoveChatCommand("!pc_clear");
-		RemoveChatCommand("!plane");
-		RemoveChatCommand("!bplane");
-		RemoveChatCommand("!lplane");
-		RemoveChatCommand("!rplane");
+		VSLU.RemoveChatCommand("!pc_mode");
+		VSLU.RemoveChatCommand("!pc_clear");
+		VSLU.RemoveChatCommand("!plane");
+		VSLU.RemoveChatCommand("!bplane");
+		VSLU.RemoveChatCommand("!lplane");
+		VSLU.RemoveChatCommand("!rplane");
 	}
 
 	function OnRoundStartPost()
@@ -33,12 +43,12 @@ class CScriptPluginPlaneCrash extends IScriptPlugin
 		{
 			foreach (map, tbl in g_PlaneCrash.PlaneCrashParams)
 			{
-				if (g_sMapName == map)
+				if (VSLU.sMapName == map)
 				{
 					if (RandomInt(1, 100) <= chance)
 					{
 						hEntity = SpawnEntityFromTable("trigger_multiple", {
-							targetname = "plane_crash_" + g_sMapName
+							targetname = "plane_crash_" + VSLU.sMapName
 							origin = tbl["trigger_origin"]
 							spawnflags = TR_CLIENTS
 						});
@@ -60,16 +70,6 @@ class CScriptPluginPlaneCrash extends IScriptPlugin
 	{
 	}
 
-	function OnExtendClassMethods()
-	{
-		RegisterChatCommand("!pc_mode", g_PlaneCrash.SwitchMode, true);
-		RegisterChatCommand("!pc_clear", g_PlaneCrash.Clear, true);
-		RegisterChatCommand("!plane", g_PlaneCrash.Forward, true);
-		RegisterChatCommand("!bplane", g_PlaneCrash.Behind, true);
-		RegisterChatCommand("!lplane", g_PlaneCrash.Left, true);
-		RegisterChatCommand("!rplane", g_PlaneCrash.Right, true);
-	}
-
 	function GetClassName() { return m_sClassName; }
 
 	function GetScriptPluginName() { return m_sScriptPluginName; }
@@ -77,7 +77,7 @@ class CScriptPluginPlaneCrash extends IScriptPlugin
 	function GetInterfaceVersion() { return m_InterfaceVersion; }
 
 	static m_InterfaceVersion = 1;
-	static m_sClassName = "CScriptPluginPlaneCrash";
+	static m_sClassName = "CPluginPlaneCrash";
 	static m_sScriptPluginName = "Plane Crash";
 }
 
@@ -108,7 +108,7 @@ class CPlaneCrash
 			pitch = 100
 			message = "airport.planecrash"
 		});
-		TP(hEntity, vecOrigin, null, null);
+		VSLU.TeleportEntity(hEntity, vecOrigin, null, null);
 		m_hPlaneCrashSound = hEntity;
 
 		hEntity = SpawnEntityFromTable("env_shake", {
@@ -118,7 +118,7 @@ class CPlaneCrash
 			frequency = 180
 			radius = 3117
 		});
-		TP(hEntity, vecOrigin, null, null);
+		VSLU.TeleportEntity(hEntity, vecOrigin, null, null);
 		m_hPlaneCrashShake = hEntity;
 
 		hEntity = SpawnEntityFromTable("prop_dynamic", {
@@ -127,7 +127,7 @@ class CPlaneCrash
 			disableshadows = 1
 			model = g_PlaneCrash.sPlaneModel[1]
 		});
-		TP(hEntity, vecOrigin, eAngles, null);
+		VSLU.TeleportEntity(hEntity, vecOrigin, eAngles, null);
 		m_hPlanePreCrash = hEntity;
 
 		hEntity = SpawnEntityFromTable("prop_dynamic", {
@@ -137,7 +137,7 @@ class CPlaneCrash
 			disableshadows = 1
 			model = g_PlaneCrash.sPlaneModel[11]
 		});
-		TP(hEntity, vecOrigin, eAngles, null);
+		VSLU.TeleportEntity(hEntity, vecOrigin, eAngles, null);
 		m_hPlaneCrashTail = hEntity;
 
 		hEntity = SpawnEntityFromTable("prop_dynamic", {
@@ -146,7 +146,7 @@ class CPlaneCrash
 			StartDisabled = 1
 			model = g_PlaneCrash.sPlaneModel[12]
 		});
-		TP(hEntity, vecOrigin, eAngles, null);
+		VSLU.TeleportEntity(hEntity, vecOrigin, eAngles, null);
 		m_hPlaneCrashEngine = hEntity;
 
 		hEntity = SpawnEntityFromTable("prop_dynamic", {
@@ -156,7 +156,7 @@ class CPlaneCrash
 			disableshadows = 1
 			model = g_PlaneCrash.sPlaneModel[13]
 		});
-		TP(hEntity, vecOrigin, eAngles, null);
+		VSLU.TeleportEntity(hEntity, vecOrigin, eAngles, null);
 		m_hPlaneCrashWing = hEntity;
 
 		hEntity = SpawnEntityFromTable("prop_dynamic", {
@@ -166,7 +166,7 @@ class CPlaneCrash
 			RandomAnimation = 0
 			model = g_PlaneCrash.sPlaneModel[17]
 		});
-		TP(hEntity, vecOrigin + Vector(0, 0, 9999.9), eAngles, null);
+		VSLU.TeleportEntity(hEntity, vecOrigin + Vector(0, 0, 9999.9), eAngles, null);
 		m_hPlaneCrashCollision = hEntity;
 
 		for (local i = 0; i < 9; i++)
@@ -178,7 +178,7 @@ class CPlaneCrash
 				disableshadows = 1
 				model = g_PlaneCrash.sPlaneModel[2 + i]
 			});
-			TP(hEntity, vecOrigin, eAngles, null);
+			VSLU.TeleportEntity(hEntity, vecOrigin, eAngles, null);
 			m_aPlaneCrash.push(hEntity);
 		}
 
@@ -190,7 +190,7 @@ class CPlaneCrash
 				StartDisabled = 1
 				model = g_PlaneCrash.sPlaneModel[14 + j]
 			});
-			TP(hEntity, vecOrigin, eAngles, null);
+			VSLU.TeleportEntity(hEntity, vecOrigin, eAngles, null);
 			m_aPlaneCrashEmitters.push(hEntity);
 		}
 
@@ -201,12 +201,12 @@ class CPlaneCrash
 				damagetype = 1
 				damage = g_PlaneCrash.Settings.DamageAmount
 			});
-			AcceptEntityInput(hEntity, "Disable");
-			AttachEntity(m_hPlaneCrashTail, hEntity, "HullDebris1");
+			VSLU.AcceptEntityInput(hEntity, "Disable");
+			VSLU.AttachEntity(m_hPlaneCrashTail, hEntity, "HullDebris1");
 			hEntity.__KeyValueFromVector("maxs", Vector(300, 300, 300));
 			hEntity.__KeyValueFromVector("mins", Vector(-300, -300, -300));
 			hEntity.__KeyValueFromInt("solid", 2);
-			TP(hEntity, vecOrigin, eAngles, null);
+			VSLU.TeleportEntity(hEntity, vecOrigin, eAngles, null);
 			m_aHurtTriggers.push(hEntity);
 
 			hEntity = SpawnEntityFromTable("trigger_hurt", {
@@ -214,12 +214,12 @@ class CPlaneCrash
 				damagetype = 1
 				damage = g_PlaneCrash.Settings.DamageAmount
 			});
-			AcceptEntityInput(hEntity, "Disable");
-			AttachEntity(m_hPlaneCrashEngine, hEntity, "particleEmitter2");
+			VSLU.AcceptEntityInput(hEntity, "Disable");
+			VSLU.AttachEntity(m_hPlaneCrashEngine, hEntity, "particleEmitter2");
 			hEntity.__KeyValueFromVector("maxs", Vector(300, 300, 300));
 			hEntity.__KeyValueFromVector("mins", Vector(-300, -300, -300));
 			hEntity.__KeyValueFromInt("solid", 2);
-			TP(hEntity, vecOrigin, eAngles, null);
+			VSLU.TeleportEntity(hEntity, vecOrigin, eAngles, null);
 			m_aHurtTriggers.push(hEntity);
 
 			hEntity = SpawnEntityFromTable("trigger_hurt", {
@@ -227,12 +227,12 @@ class CPlaneCrash
 				damagetype = 1
 				damage = g_PlaneCrash.Settings.DamageAmount
 			});
-			AcceptEntityInput(hEntity, "Disable");
-			AttachEntity(m_hPlaneCrashWing, hEntity, "new_spark_joint_1");
+			VSLU.AcceptEntityInput(hEntity, "Disable");
+			VSLU.AttachEntity(m_hPlaneCrashWing, hEntity, "new_spark_joint_1");
 			hEntity.__KeyValueFromVector("maxs", Vector(300, 300, 300));
 			hEntity.__KeyValueFromVector("mins", Vector(-300, -300, -300));
 			hEntity.__KeyValueFromInt("solid", 2);
-			TP(hEntity, vecOrigin, eAngles, null);
+			VSLU.TeleportEntity(hEntity, vecOrigin, eAngles, null);
 			m_aHurtTriggers.push(hEntity);
 		}
 
@@ -246,29 +246,29 @@ class CPlaneCrash
 	{
 		if (IsAllEntitiesValid())
 		{
-			AcceptEntityInput(m_hPlaneCrashSound, "PlaySound");
+			VSLU.AcceptEntityInput(m_hPlaneCrashSound, "PlaySound");
 
-			AcceptEntityInput(m_hPlaneCrashShake, "StartShake", "", 20.5);
-			AcceptEntityInput(m_hPlaneCrashShake, "StartShake", "", 23.0);
-			AcceptEntityInput(m_hPlaneCrashShake, "StartShake", "", 24.0);
-			AcceptEntityInput(m_hPlaneCrashShake, "StartShake", "", 26.0);
-			AcceptEntityInput(m_hPlaneCrashShake, "Kill", "", 30.0);
+			VSLU.AcceptEntityInput(m_hPlaneCrashShake, "StartShake", "", 20.5);
+			VSLU.AcceptEntityInput(m_hPlaneCrashShake, "StartShake", "", 23.0);
+			VSLU.AcceptEntityInput(m_hPlaneCrashShake, "StartShake", "", 24.0);
+			VSLU.AcceptEntityInput(m_hPlaneCrashShake, "StartShake", "", 26.0);
+			VSLU.AcceptEntityInput(m_hPlaneCrashShake, "Kill", "", 30.0);
 
-			AcceptEntityInput(m_hPlanePreCrash, "SetAnimation", "approach");
-			AcceptEntityInput(m_hPlanePreCrash, "TurnOn");
-			AcceptEntityInput(m_hPlanePreCrash, "Kill", "", 15.0);
+			VSLU.AcceptEntityInput(m_hPlanePreCrash, "SetAnimation", "approach");
+			VSLU.AcceptEntityInput(m_hPlanePreCrash, "TurnOn");
+			VSLU.AcceptEntityInput(m_hPlanePreCrash, "Kill", "", 15.0);
 
-			AcceptEntityInput(m_hPlaneCrashTail, "SetAnimation", "idleOuttaMap");
-			AcceptEntityInput(m_hPlaneCrashTail, "TurnOn", "", 14.0);
-			AcceptEntityInput(m_hPlaneCrashTail, "SetAnimation", "boom", 14.95);
+			VSLU.AcceptEntityInput(m_hPlaneCrashTail, "SetAnimation", "idleOuttaMap");
+			VSLU.AcceptEntityInput(m_hPlaneCrashTail, "TurnOn", "", 14.0);
+			VSLU.AcceptEntityInput(m_hPlaneCrashTail, "SetAnimation", "boom", 14.95);
 
-			AcceptEntityInput(m_hPlaneCrashEngine, "SetAnimation", "idleOuttaMap");
-			AcceptEntityInput(m_hPlaneCrashEngine, "TurnOn", "", 14.0);
-			AcceptEntityInput(m_hPlaneCrashEngine, "SetAnimation", "boom", 14.95);
+			VSLU.AcceptEntityInput(m_hPlaneCrashEngine, "SetAnimation", "idleOuttaMap");
+			VSLU.AcceptEntityInput(m_hPlaneCrashEngine, "TurnOn", "", 14.0);
+			VSLU.AcceptEntityInput(m_hPlaneCrashEngine, "SetAnimation", "boom", 14.95);
 
-			AcceptEntityInput(m_hPlaneCrashWing, "SetAnimation", "idleOuttaMap");
-			AcceptEntityInput(m_hPlaneCrashWing, "TurnOn", "", 14.0);
-			AcceptEntityInput(m_hPlaneCrashWing, "SetAnimation", "boom", 14.95);
+			VSLU.AcceptEntityInput(m_hPlaneCrashWing, "SetAnimation", "idleOuttaMap");
+			VSLU.AcceptEntityInput(m_hPlaneCrashWing, "TurnOn", "", 14.0);
+			VSLU.AcceptEntityInput(m_hPlaneCrashWing, "SetAnimation", "boom", 14.95);
 
 			if (g_PlaneCrash.Settings.HordeDelay > 0)
 			{
@@ -277,7 +277,7 @@ class CPlaneCrash
 					SpawnEntityFromTable("info_director", {targetname = "director"});
 				}
 
-				m_PanicEventTimer = CreateTimer(g_PlaneCrash.Settings.HordeDelay, function(){
+				m_PanicEventTimer = VSLU.CreateTimer(g_PlaneCrash.Settings.HordeDelay, function(){
 					EntFire("director", "ForcePanicEvent", "1");
 					EntFire("@director", "ForcePanicEvent", "1");
 				});
@@ -285,30 +285,30 @@ class CPlaneCrash
 
 			foreach (ent in m_aHurtTriggers)
 			{
-				AcceptEntityInput(ent, "Enable", "", 15.0);
-				AcceptEntityInput(ent, "Kill", "", 27.0);
+				VSLU.AcceptEntityInput(ent, "Enable", "", 15.0);
+				VSLU.AcceptEntityInput(ent, "Kill", "", 27.0);
 			}
 
 			foreach (ent in m_aPlaneCrash)
 			{
-				AcceptEntityInput(ent, "SetAnimation", "idleOuttaMap");
-				AcceptEntityInput(ent, "TurnOn", "", 14.0);
-				AcceptEntityInput(ent, "SetAnimation", "boom", 14.95);
+				VSLU.AcceptEntityInput(ent, "SetAnimation", "idleOuttaMap");
+				VSLU.AcceptEntityInput(ent, "TurnOn", "", 14.0);
+				VSLU.AcceptEntityInput(ent, "SetAnimation", "boom", 14.95);
 			}
 
 			foreach (ent in m_aPlaneCrashEmitters)
 			{
-				AcceptEntityInput(ent, "SetAnimation", "boom", 14.95);
+				VSLU.AcceptEntityInput(ent, "SetAnimation", "boom", 14.95);
 			}
 
-			CreateTimer(27.0, function(hPlaneCrashCollision){
+			VSLU.CreateTimer(27.0, function(hPlaneCrashCollision){
 				if (hPlaneCrashCollision.IsValid())
 				{
-					TP(hPlaneCrashCollision, hPlaneCrashCollision.GetOrigin() - Vector(0, 0, 9999.9), null, null);
+					VSLU.TeleportEntity(hPlaneCrashCollision, hPlaneCrashCollision.GetOrigin() - Vector(0, 0, 9999.9), null, null);
 				}
 			}, m_hPlaneCrashCollision);
 
-			m_SurvivorsReactionTimer = CreateTimer(30.0, function(){
+			m_SurvivorsReactionTimer = VSLU.CreateTimer(30.0, function(){
 				if (__fun_shit_last_survivors_reaction__ + 10.0 < Time())
 				{
 					local hPlayer;
@@ -319,10 +319,9 @@ class CPlaneCrash
 					
 					for (local i = 0; i < aL4D1SurvivorsNames.len(); i++)
 					{
-						hPlayer = Entities.FindByName(null, "!" + aL4D1SurvivorsNames[i]);
-						if (hPlayer)
+						if ( hPlayer = Entities.FindByName(null, "!" + aL4D1SurvivorsNames[i]) )
 						{
-							if (hPlayer.IsSurvivor() && hPlayer.IsAlive() && !hPlayer.IsIncapacitated())
+							if (hPlayer.IsSurvivor() && VSLU.IsEntityAlive(hPlayer) && !hPlayer.IsIncapacitated())
 							{
 								aL4D1Survivors.push(hPlayer);
 							}
@@ -331,10 +330,9 @@ class CPlaneCrash
 
 					for (local j = 0; j < aL4D2SurvivorsNames.len(); j++)
 					{
-						hPlayer = Entities.FindByName(null, "!" + aL4D2SurvivorsNames[j]);
-						if (hPlayer)
+						if ( hPlayer = Entities.FindByName(null, "!" + aL4D2SurvivorsNames[j]) )
 						{
-							if (hPlayer.IsSurvivor() && hPlayer.IsAlive() && !hPlayer.IsIncapacitated())
+							if (hPlayer.IsSurvivor() && VSLU.IsEntityAlive(hPlayer) && !hPlayer.IsIncapacitated())
 							{
 								if (GetCharacterDisplayName(hPlayer).tolower() == aL4D2SurvivorsNames[j])
 								{
@@ -351,9 +349,9 @@ class CPlaneCrash
 							disableshadows = 1
 							spawnflags = 1
 						});
-						NetProps.SetPropInt(hEntity, "m_fEffects", (1 << 5));
-						AcceptEntityInput(hEntity, "SpeakResponseConcept", "PlaneCrash");
-						AcceptEntityInput(hEntity, "Kill", "", 0.01);
+						NetProps.SetNetPropInt(hEntity, "m_fEffects", (1 << 5));
+						VSLU.AcceptEntityInput(hEntity, "SpeakResponseConcept", "PlaneCrash");
+						VSLU.AcceptEntityInput(hEntity, "Kill", "", 0.01);
 					}
 
 					if (aL4D2Survivors.len() > 0)
@@ -371,7 +369,7 @@ class CPlaneCrash
 
 						for (local k = 0; k < arr.len(); k++)
 						{
-							AcceptEntityInput(arr[k], "SpeakResponseConcept", "C2M1Falling", flTime);
+							VSLU.AcceptEntityInput(arr[k], "SpeakResponseConcept", "C2M1Falling", flTime);
 							flTime += 0.25;
 						}
 					}
@@ -396,8 +394,8 @@ class CPlaneCrash
 				{
 					if (ent == m_hPlaneCrashSound)
 					{
-						AcceptEntityInput(m_hPlaneCrashSound, "Volume", "0");
-						AcceptEntityInput(m_hPlaneCrashSound, "Kill", "", 0.01);
+						VSLU.AcceptEntityInput(m_hPlaneCrashSound, "Volume", "0");
+						VSLU.AcceptEntityInput(m_hPlaneCrashSound, "Kill", "", 0.01);
 					}
 					else ent.Kill();
 				}
@@ -406,11 +404,11 @@ class CPlaneCrash
 
 		if (m_SurvivorsReactionTimer)
 		{
-			foreach (idx, timer in g_aTimers)
+			foreach (idx, timer in VSLU.aTimers)
 			{
 				if (m_SurvivorsReactionTimer.GetIdentifier() == timer.GetIdentifier())
 				{
-					g_aTimers.remove(idx);
+					VSLU.aTimers.remove(idx);
 					break;
 				}
 			}
@@ -418,11 +416,11 @@ class CPlaneCrash
 
 		if (m_PanicEventTimer)
 		{
-			foreach (idx, timer in g_aTimers)
+			foreach (idx, timer in VSLU.aTimers)
 			{
 				if (m_PanicEventTimer.GetIdentifier() == timer.GetIdentifier())
 				{
-					g_aTimers.remove(idx);
+					VSLU.aTimers.remove(idx);
 					break;
 				}
 			}
@@ -463,7 +461,7 @@ enum ePlaneCrashType
 	Right
 }
 
-g_PluginPlaneCrash <- CScriptPluginPlaneCrash();
+g_PluginPlaneCrash <- CPluginPlaneCrash();
 
 __pc_fun_shit_mode__ <- true;
 __fun_shit_last_survivors_reaction__ <- 0.0;
@@ -659,7 +657,7 @@ g_PlaneCrash <-
 					if (tData.rawin(key))
 					{
 						if (key == "Chance")
-							Settings[key] = Math.Clamp(0, 100);
+							Settings[key] = VSLU.Math.Clamp(tData[key], 0, 100);
 						else if (key == "Limit" && tData[key] < 1)
 							Settings[key] = 1;
 						else
@@ -667,31 +665,35 @@ g_PlaneCrash <-
 					}
 				}
 			}
-			catch (error)
+			catch (exception)
             {
 				SerializeSettings();
+
+				error("[Plane Crash] " + exception + "\n");
+				error("[Plane Crash] Failed to parse the config file\n");
 			}
 		}
 		else
 		{
 			SerializeSettings();
+
+			error("[Plane Crash] Missing the config file, created a new one\n");
 		}
     }
 
-	OnConVarChange = function(ConVar, LastValue, NewValue)
+	Precache = function()
 	{
-		this = ::g_PlaneCrash;
+		PrecacheEntityFromTable( { classname = "ambient_generic", message = "airport.planecrash" } );
 
-		while (aPlanes.len() > NewValue)
+		for (local i = 0; i < g_PlaneCrash.sPlaneModel.len(); ++i)
 		{
-			aPlanes[0].ClearCrash();
-			aPlanes.remove(0);
+			PrecacheEntityFromTable( { classname = "prop_dynamic", model = g_PlaneCrash.sPlaneModel[i] } );
 		}
 	}
 
 	OnFinaleEscapeStarted = function(tParams)
 	{
-		if (g_sMapName == "c4m5_milltown_escape")
+		if (VSLU.sMapName == "c4m5_milltown_escape")
 		{
 			local chance = g_PlaneCrash.Settings.Chance;
 			if (chance > 0)
@@ -706,21 +708,20 @@ g_PlaneCrash <-
 
 	OnTriggerTouch = function()
 	{
-		if (!activator) return;
-		if (activator.IsSurvivor())
+		if (activator && activator.IsSurvivor())
 		{
 			if (caller.GetName().find("plane_crash_") != null)
 			{
 				if (g_PlaneCrash.Settings.Allow)
 				{
-					if (g_sMapName == caller.GetName().slice(12))
+					if (VSLU.sMapName == caller.GetName().slice(12))
 					{
 						if (g_PlaneCrash.aPlanes.len() > 0 && g_PlaneCrash.aPlanes.len() + 1 > g_PlaneCrash.Settings.Limit)
 						{
 							g_PlaneCrash.aPlanes[0].ClearCrash();
 							g_PlaneCrash.aPlanes.remove(0);
 						}
-						g_PlaneCrash.Start(g_PlaneCrash.PlaneCrashParams[g_sMapName]["origin"], g_PlaneCrash.PlaneCrashParams[g_sMapName]["angles"]);
+						g_PlaneCrash.Start(g_PlaneCrash.PlaneCrashParams[VSLU.sMapName]["origin"], g_PlaneCrash.PlaneCrashParams[VSLU.sMapName]["angles"]);
 						caller.Kill();
 					}
 				}
@@ -769,24 +770,39 @@ g_PlaneCrash <-
 
 	Initialize = function(hPlayer, iCrashType)
 	{
-		if (hPlayer.IsHost() && g_PlaneCrash.Settings.Allow)
+		if (VSLU.Player.IsHost(hPlayer) && g_PlaneCrash.Settings.Allow)
 		{
 			local vecOrigin;
 			local eAngles = hPlayer.EyeAngles();
-			if (__pc_fun_shit_mode__) vecOrigin = GetPositionToGround(hPlayer);
-			else vecOrigin = hPlayer.DoTraceLine(eTrace.Type_Pos, eTrace.Distance, eTrace.Mask_Shot);
-			if (iCrashType == ePlaneCrashType.Behind) eAngles += QAngle(0, 180, 0);
-			else if (iCrashType == ePlaneCrashType.Left) eAngles += QAngle(0, 90, 0);
-			else if (iCrashType == ePlaneCrashType.Right) eAngles -= QAngle(0, 90, 0);
+			
+			if (__pc_fun_shit_mode__)
+			{
+				vecOrigin = VSLU.GetPositionToGround(hPlayer);
+			}
+			else
+			{
+				local tTraceResult = {};
+				VSLU.Player.TraceLine(hPlayer, tTraceResult);
+
+				vecOrigin = tTraceResult["pos"];
+			}
+
+			if (iCrashType == ePlaneCrashType.Behind)
+				eAngles += QAngle(0, 180, 0);
+			else if (iCrashType == ePlaneCrashType.Left)
+				eAngles += QAngle(0, 90, 0);
+			else if (iCrashType == ePlaneCrashType.Right)
+				eAngles -= QAngle(0, 90, 0);
+
 			g_PlaneCrash.Start(vecOrigin, eAngles);
 		}
 	}
 
-	Clear = function(hPlayer)
+	Clear = function(hPlayer, sArgs)
 	{
 		this = ::g_PlaneCrash;
 
-		if (hPlayer.IsHost())
+		if (VSLU.Player.IsHost(hPlayer))
 		{
 			for (local i = 0; i < aPlanes.len(); i++)
 			{
@@ -797,29 +813,22 @@ g_PlaneCrash <-
 		}
 	}
 
-	SwitchMode = function(hPlayer)
+	SwitchMode = function(hPlayer, sArgs)
 	{
-		if (hPlayer.IsHost())
+		if (VSLU.Player.IsHost(hPlayer))
 		{
-			sayf("[Plane Crash] Crash mode: %s", __pc_fun_shit_mode__ ? "camera direction" : "near the player");
+			VSLU.SendMessage(hPlayer, "[Plane Crash] Crash mode: %s", __pc_fun_shit_mode__ ? "camera direction" : "near the player");
 			__pc_fun_shit_mode__ = !__pc_fun_shit_mode__;
 		}
 	}
 
-	Forward = function(hPlayer) { g_PlaneCrash.Initialize(hPlayer, ePlaneCrashType.Forward); }
+	Forward = function(hPlayer, sArgs) { g_PlaneCrash.Initialize(hPlayer, ePlaneCrashType.Forward); }
 
-	Behind = function(hPlayer) { g_PlaneCrash.Initialize(hPlayer, ePlaneCrashType.Behind); }
+	Behind = function(hPlayer, sArgs) { g_PlaneCrash.Initialize(hPlayer, ePlaneCrashType.Behind); }
 
-	Left = function(hPlayer) { g_PlaneCrash.Initialize(hPlayer, ePlaneCrashType.Left); }
+	Left = function(hPlayer, sArgs) { g_PlaneCrash.Initialize(hPlayer, ePlaneCrashType.Left); }
 
-	Right = function(hPlayer) { g_PlaneCrash.Initialize(hPlayer, ePlaneCrashType.Right); }
+	Right = function(hPlayer, sArgs) { g_PlaneCrash.Initialize(hPlayer, ePlaneCrashType.Right); }
 };
 
-PrecacheEntityFromTable({classname = "ambient_generic", message = "airport.planecrash"});
-
-for (local i = 0; i < g_PlaneCrash.sPlaneModel.len(); i++)
-{
-	PrecacheEntityFromTable({classname = "prop_dynamic", model = g_PlaneCrash.sPlaneModel[i]});
-}
-
-g_ScriptPluginsHelper.AddScriptPlugin(g_PluginPlaneCrash);
+VSLU.ScriptPluginsHelper.AddScriptPlugin(g_PluginPlaneCrash);
